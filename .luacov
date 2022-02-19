@@ -1,0 +1,10 @@
+codefromstrings = false
+runreport = true
+deletestats = false
+modules = {
+    ['reflex'] = 'lib/reflex.lua',
+    ['reflex.global'] = 'lib/global.lua',
+    ['reflex.fs'] = 'lib/fs.lua',
+    ['reflex.readcfg'] = 'lib/readcfg.lua',
+    ['reflex.requirements'] = 'lib/requirements.lua',
+}
