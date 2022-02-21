@@ -20,8 +20,7 @@
 -- THE SOFTWARE.
 --
 -- module
-require('reflex.global')
-local print = print
+local assert = assert
 local concat = table.concat
 local format = string.format
 local gsub = string.gsub
@@ -29,7 +28,7 @@ local match = string.match
 local sub = string.sub
 local open = io.open
 local remove = os.remove
-local exec = require('reflex.fs').exec
+local exec = require('reflex.exec')
 -- constants
 local ROCKSPEC_TMPL = [[
 package = $PACKAGE
@@ -80,7 +79,6 @@ local function install(pathname)
         --
         -- TODO: install modules from the non-default repositories
         --
-        print.info('install dependencies')
         f = assert(open(pathname, 'w'))
         assert(f:write(content))
         f:close()
@@ -88,7 +86,6 @@ local function install(pathname)
             'make',
         }, 'tmp'))
 
-        print.info('remove app package')
         assert(exec('luarocks', {
             'remove',
             pkgname,
