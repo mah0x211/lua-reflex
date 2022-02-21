@@ -32,5 +32,6 @@ build = {
         ['reflex.global'] = 'lib/global.lua',
         ['reflex.install'] = 'lib/install.lua',
         ['reflex.readcfg'] = 'lib/readcfg.lua',
+        ['reflex.status'] = 'lib/status.lua',
     },
 }
