@@ -28,6 +28,7 @@ build = {
     type = 'builtin',
     modules = {
         ['reflex.fs'] = 'lib/fs.lua',
+        ['reflex.exec'] = 'lib/exec.lua',
         ['reflex.global'] = 'lib/global.lua',
         ['reflex.install'] = 'lib/install.lua',
         ['reflex.readcfg'] = 'lib/readcfg.lua',

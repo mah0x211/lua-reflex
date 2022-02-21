@@ -20,13 +20,10 @@
 -- THE SOFTWARE.
 --
 require('reflex.global')
-local unpack = unpack
-local print = print
 local assert = assert
-local concat = table.concat
 local basedir = require('basedir')
-local execvp = require('exec').execvp
 local getcwd = require('getcwd')
+local exec = require('reflex.exec')
 -- constants
 local CWD = assert(getcwd())
 local RootDir = assert(basedir.new(CWD))
@@ -111,38 +108,6 @@ local function getpwd()
     return CWD
 end
 
---- exec
---- @param pathname string
---- @param argv string[]
---- @param pwd string
---- @return boolean ok
---- @return error err
-local function exec(pathname, argv, pwd)
-    print.info('>', pathname, unpack(argv))
-    local p, err = execvp(pathname, argv, pwd)
-    if err then
-        return false, err
-    end
-
-    for line in p.stdout:lines() do
-        print.info('>', line)
-    end
-
-    local res, werr = p:waitpid()
-    if werr then
-        return false, werr
-    elseif not res.exit or res.exit ~= 0 then
-        local lines = {}
-        for line in p.stdout:lines() do
-            lines[#lines + 1] = line
-            print.info('>>', line)
-        end
-
-        return false, concat(lines)
-    end
-    return true, p.stdout:read('*a')
-end
-
 local function chdir(pathname)
     pathname = realpath(pathname)
     return exec('chdir', {
@@ -165,7 +130,6 @@ return {
     write = write,
     write_if_not_exist = write_if_not_exist,
     getpwd = getpwd,
-    exec = exec,
     chdir = chdir,
     mkdir = mkdir,
     unlink = unlink,
