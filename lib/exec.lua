@@ -19,7 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local unpack = unpack or table.unpack
+local unpack = require('unpack')
 local error = error
 local concat = table.concat
 local type = type
