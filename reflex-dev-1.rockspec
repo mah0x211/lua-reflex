@@ -22,6 +22,7 @@ dependencies = {
     'loadchunk >= 0.1.2',
     'print >= 0.1.0',
     'stringex >= 0.2.1',
+    'unpack >= 0.1.0',
     'url >= 1.3.1',
 }
 build = {

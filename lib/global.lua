@@ -19,8 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local unpack = unpack or table.unpack
-_G.unpack = unpack
+_G.unpack = require('unpack')
 
 local assert = require('assert')
 _G.assert = assert
@@ -48,5 +47,4 @@ local function errorf(fmt, ...)
     error(format(fmt, ...), 2)
 end
 _G.errorf = errorf
-
 
