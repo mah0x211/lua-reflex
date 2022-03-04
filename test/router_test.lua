@@ -98,6 +98,9 @@ function testcase.new()
                     },
                 },
             },
+            ['/signout'] = {
+                handlers = {},
+            },
             ['/:user'] = {
                 handlers = {
                     {
