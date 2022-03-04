@@ -32,6 +32,8 @@ jobs:
           - "5.2"
           - "5.3"
           - "5.4"
+          - "luajit-2.0.5"
+          - "luajit-openresty"
     steps:
     -
       name: Checkout
