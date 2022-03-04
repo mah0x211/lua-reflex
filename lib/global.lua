@@ -19,6 +19,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
+local type = type
+for k, v in pairs(require('isa')) do
+    if type(v) == 'function' then
+        _G['is_' .. string.lower(k)] = v
+    end
+end
+
 _G.unpack = require('unpack')
 
 local assert = require('assert')
@@ -30,8 +37,7 @@ _G.dump = dump
 local error = require('error')
 _G.error = error
 
-local print = require('print')
-_G.print = print
+_G.print = require('print')
 
 local format = print.format
 _G.format = format
@@ -43,8 +49,12 @@ local function printv(...)
 end
 _G.printv = printv
 
-local function errorf(fmt, ...)
-    error(format(fmt, ...), 2)
+local function errorf(...)
+    local lv = ...
+    if type(lv) == 'number' then
+        error(format(select(2, ...)), lv)
+    end
+    error(format(...), 2)
 end
 _G.errorf = errorf
 
