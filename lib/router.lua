@@ -107,7 +107,7 @@ local function new(rootdir, opts)
     end
 
     local router, err, routes = new_fsrouter(rootdir, {
-        follow_symlinks = opts.follow_symlinks == true,
+        follow_symlink = opts.follow_symlink == true,
         trim_extentions = opts.trim_extentions,
         mimetypes = opts.mimetypes,
         ignore = opts.ignore,
