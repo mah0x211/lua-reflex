@@ -121,6 +121,16 @@ local function new(rootdir, opts)
     -- build the routing table for print
     local route_list = {}
     for _, route in ipairs(routes) do
+        -- static file
+        if not next(route.methods) then
+            route_list[#route_list + 1] = {
+                method = 'get',
+                rpath = route.rpath,
+                file = route.file,
+                handlers = {},
+            }
+        end
+
         for method, handlers in pairs(route.methods) do
             local hlist = {}
 
