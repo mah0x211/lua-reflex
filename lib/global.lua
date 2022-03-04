@@ -19,6 +19,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
+local type = type
+for k, v in pairs(require('isa')) do
+    if type(v) == 'function' then
+        _G['is_' .. string.lower(k)] = v
+    end
+end
+
 _G.unpack = require('unpack')
 
 local assert = require('assert')
