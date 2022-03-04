@@ -107,7 +107,7 @@ local function new(rootdir, opts)
     end
 
     local router, err, routes = new_fsrouter(rootdir, {
-        follow_symlinks = opts.follow_symlinks == true,
+        follow_symlink = opts.follow_symlink == true,
         trim_extentions = opts.trim_extentions,
         mimetypes = opts.mimetypes,
         ignore = opts.ignore,
@@ -121,6 +121,16 @@ local function new(rootdir, opts)
     -- build the routing table for print
     local route_list = {}
     for _, route in ipairs(routes) do
+        -- static file
+        if not next(route.methods) then
+            route_list[#route_list + 1] = {
+                method = 'get',
+                rpath = route.rpath,
+                file = route.file,
+                handlers = {},
+            }
+        end
+
         for method, handlers in pairs(route.methods) do
             local hlist = {}
 
