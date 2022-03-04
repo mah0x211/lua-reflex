@@ -1,0 +1,14 @@
+codefromstrings = false
+runreport = true
+deletestats = false
+modules = {
+    ['reflex'] = 'lib/reflex.lua',
+    ['reflex.exec'] = 'lib/exec.lua',
+    ['reflex.fs'] = 'lib/fs.lua',
+    ['reflex.global'] = 'lib/global.lua',
+    ['reflex.install'] = 'lib/install.lua',
+    ['reflex.readcfg'] = 'lib/readcfg.lua',
+    ['reflex.renderer'] = 'lib/renderer.lua',
+    ['reflex.router'] = 'lib/router.lua',
+    ['reflex.status'] = 'lib/status.lua',
+}
