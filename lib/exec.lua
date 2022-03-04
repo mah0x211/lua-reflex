@@ -36,7 +36,7 @@ end
 --- @param stdout function
 --- @param stderr function
 --- @return boolean ok
---- @return error err
+--- @return string res
 local function exec(pathname, argv, pwd, stdout, stderr)
     stdout = stdout or noop
     stderr = stderr or noop
@@ -56,8 +56,12 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     end
 
     -- print stdout
+    local outlines = {}
     for line in p.stdout:lines() do
         stdout(line)
+        if stdout == noop then
+            outlines[#outlines + 1] = line
+        end
     end
 
     -- print stderr
@@ -71,9 +75,10 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     if werr then
         return false, werr
     elseif not res.exit or res.exit ~= 0 then
-        return false, concat(errlines)
+        return false, #errlines > 0 and concat(errlines, '\n') or nil
     end
-    return true, p.stdout:read('*a')
+
+    return true, #outlines > 0 and concat(outlines, '\n') or nil
 end
 
 return exec
