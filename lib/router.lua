@@ -52,7 +52,7 @@ Router.__index = Router
 --- @param data table
 --- @return integer status
 --- @return string err
-function Router:resolve(method, pathname, req, data)
+function Router:serve(method, pathname, req, data)
     if type(method) ~= 'string' then
         error('method must be string', 2)
     elseif type(pathname) ~= 'string' then
