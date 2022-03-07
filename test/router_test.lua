@@ -286,9 +286,10 @@ function testcase.serve()
         for rpath, cmp in pairs(v) do
             local req = {}
             local data = {}
-            local rc, err = r:serve(method, rpath, req, data)
+            local rc, err, file = r:serve(method, rpath, req, data)
             assert.equal(rc, status.OK)
             assert.is_nil(err)
+            assert.is_table(file)
             assert.equal(data, cmp)
         end
     end
@@ -302,6 +303,17 @@ function testcase.serve()
     rc, err = r:serve('get', '/api/unknown', {}, {})
     assert.equal(rc, status.NOT_FOUND)
     assert.is_nil(err)
+
+    for _, pathname in ipairs({
+        '/api/unknown',
+        '/foobar/*',
+        '/foobar/^',
+        '/foobar/#',
+    }) do
+        rc, err = r:serve('get', pathname, {}, {})
+        assert.equal(rc, status.NOT_FOUND)
+        assert.is_nil(err)
+    end
 
     -- test that returns INTERNAL_SERVER_ERROR
     rc, err = r:serve('get', '/api', {}, {})
