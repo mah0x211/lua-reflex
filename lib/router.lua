@@ -50,10 +50,11 @@ Router.__index = Router
 --- @param pathname string
 --- @param req table
 --- @param data table
+--- @param header table
 --- @return integer status
 --- @return string err
 --- @return table file
-function Router:serve(method, pathname, req, data)
+function Router:serve(method, pathname, req, data, header)
     if type(method) ~= 'string' then
         error('method must be string', 2)
     elseif type(pathname) ~= 'string' then
@@ -62,6 +63,8 @@ function Router:serve(method, pathname, req, data)
         error('req must be table', 2)
     elseif type(data) ~= 'table' then
         error('data must be table', 2)
+    elseif type(header) ~= 'table' then
+        error('header must be table', 2)
     end
 
     local route, err, glob = self.router:lookup(pathname)
@@ -78,7 +81,7 @@ function Router:serve(method, pathname, req, data)
 
     local ok, res = pcall(function()
         for i, imp in ipairs(mlist) do
-            local code = imp.fn(req, glob, data)
+            local code = imp.fn(req, glob, data, header)
             if code then
                 if status[code] then
                     return code
