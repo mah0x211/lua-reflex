@@ -216,10 +216,10 @@ function testcase.new()
     assert.match(err, 'unknown_rootdir.+ directory', false)
 end
 
-function testcase.resolve()
+function testcase.serve()
     local r = assert(new_router('./testdir/html'))
 
-    -- test that resolve request
+    -- test that serve request
     for method, v in pairs({
         any = {
             ['/foobar/posts/1234'] = {
@@ -286,46 +286,74 @@ function testcase.resolve()
         for rpath, cmp in pairs(v) do
             local req = {}
             local data = {}
-            local rc, err = r:resolve(method, rpath, req, data)
+            local rc, err, file = r:serve(method, rpath, req, data, {})
             assert.equal(rc, status.OK)
             assert.is_nil(err)
+            assert.is_table(file)
             assert.equal(data, cmp)
         end
     end
 
     -- test that returns METHOD_NOT_ALLOWED
-    local rc, err = r:resolve('put', '/api', {}, {})
+    local rc, err = r:serve('put', '/api', {}, {}, {})
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
     assert.is_nil(err)
 
     -- test that returns NOT_FOUND
-    rc, err = r:resolve('get', '/api/unknown', {}, {})
+    rc, err = r:serve('get', '/api/unknown', {}, {}, {})
     assert.equal(rc, status.NOT_FOUND)
     assert.is_nil(err)
 
-    -- test that returns INTERNAL_SERVER_ERROR
-    rc, err = r:resolve('get', '/api', {}, {})
+    for _, pathname in ipairs({
+        '/api/unknown',
+        '/foobar/*',
+        '/foobar/^',
+        '/foobar/#',
+    }) do
+        rc, err = r:serve('get', pathname, {}, {}, {})
+        assert.equal(rc, status.NOT_FOUND)
+        assert.is_nil(err)
+    end
+
+    -- test that returns INTERNAL_SERVER_ERROR if router returns an error
+    local router = r.router
+    r.router = {
+        lookup = function()
+            return nil, 'router error'
+        end,
+    }
+    rc, err = r:serve('get', '/api', {}, {}, {})
+    r.router = router
+    assert.equal(rc, status.INTERNAL_SERVER_ERROR)
+    assert.match(err, 'router error')
+
+    -- test that returns INTERNAL_SERVER_ERROR if invalid hander
+    rc, err = r:serve('get', '/api', {}, {}, {})
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
     assert.match(err, 'attempt to concatenate')
 
-    -- test that returns INTERNAL_SERVER_ERROR
-    rc, err = r:resolve('post', '/api', {}, {})
+    -- test that returns INTERNAL_SERVER_ERROR if handler returns a invalid status
+    rc, err = r:serve('post', '/api', {}, {}, {})
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
     assert.match(err, 'invalid status code')
 
     -- test that throw an error if method is invalid
-    err = assert.throws(r.resolve, r, {})
+    err = assert.throws(r.serve, r, {})
     assert.match(err, 'method must be string')
 
     -- test that throw an error if pathname is invalid
-    err = assert.throws(r.resolve, r, 'get', {})
+    err = assert.throws(r.serve, r, 'get', {})
     assert.match(err, 'pathname must be string')
 
     -- test that throw an error if req is invalid
-    err = assert.throws(r.resolve, r, 'get', '/', 'foo')
+    err = assert.throws(r.serve, r, 'get', '/', 'foo')
     assert.match(err, 'req must be table')
 
     -- test that throw an error if data is invalid
-    err = assert.throws(r.resolve, r, 'get', '/', {}, 'bar')
+    err = assert.throws(r.serve, r, 'get', '/', {}, 'bar')
     assert.match(err, 'data must be table')
+
+    -- test that throw an error if header is invalid
+    err = assert.throws(r.serve, r, 'get', '/', {}, {}, 'baz')
+    assert.match(err, 'header must be table')
 end
