@@ -24,6 +24,7 @@ local assert = assert
 local error = error
 local ipairs = ipairs
 local lower = string.lower
+local next = next
 local pairs = pairs
 local pcall = pcall
 local setmetatable = setmetatable
@@ -92,6 +93,11 @@ function Router:serve(method, pathname, req, data, header)
         return INTERNAL_SERVER_ERROR, err
     elseif not route then
         return NOT_FOUND
+    elseif not next(route.methods) then
+        if lower(method) == 'get' then
+            return OK, nil, route.file
+        end
+        return METHOD_NOT_ALLOWED
     end
 
     local mlist = route.methods[lower(method)] or route.methods.any
