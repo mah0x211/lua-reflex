@@ -29,7 +29,7 @@ local escape_html = require('rez.escape').html
 --- @class Renderer
 --- @field rootdir userdata
 --- @field rez userdata
---- @field files table<string, boolean>
+--- @field cache boolean
 local Renderer = {}
 Renderer.__index = Renderer
 
@@ -48,7 +48,13 @@ function Renderer:render(data, pathname)
         error('pathname must be string', 2)
     end
 
-    return self.rez:render(pathname, data)
+    local res, err = self.rez:render(pathname, data)
+    -- remove compiled templates
+    if not self.cache then
+        self.rez:clear()
+    end
+
+    return res, err
 end
 
 --- exists
@@ -58,7 +64,7 @@ function Renderer:exists(pathname)
     if type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     end
-    return self.files[pathname] == true
+    return self.rez:exists(pathname)
 end
 
 --- del
@@ -68,12 +74,7 @@ function Renderer:del(pathname)
     if type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     end
-
-    local ok = self.rez:del(pathname)
-    if ok then
-        self.files[pathname] = nil
-    end
-    return ok
+    return self.rez:del(pathname)
 end
 
 --- add
@@ -90,29 +91,27 @@ function Renderer:add(pathname)
         return false, err
     end
 
-    local ok
-    ok, err = self.rez:add(pathname, content)
-    if not ok then
-        return false, err
-    end
-    self.files[pathname] = true
-    return true
+    return self.rez:add(pathname, content)
 end
 
 --- new
---- @param rootdir
+--- @param rootdir string
+--- @param follow_symlink boolean
+--- @param cache boolean
 --- @return Renderer
 --- @return string err
-local function new(rootdir, follow_symlink)
+local function new(rootdir, follow_symlink, cache)
     if type(rootdir) ~= 'string' then
         error('rootdir must be string', 2)
     elseif follow_symlink ~= nil and type(follow_symlink) ~= 'boolean' then
         error('follow_symlink must be boolean', 2)
+    elseif cache ~= nil and type(cache) ~= 'boolean' then
+        error('cache must be boolean', 2)
     end
 
     local renderer = setmetatable({
         rootdir = new_basedir(rootdir, follow_symlink),
-        files = {},
+        cache = cache == true,
     }, Renderer)
     renderer.rez = new_rez({
         escape = escape_html,
