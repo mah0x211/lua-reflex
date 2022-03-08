@@ -294,8 +294,20 @@ function testcase.serve()
         end
     end
 
+    -- test that returns OK and file
+    local rc, err, file = r:serve('get', '/signout', {}, {}, {})
+    assert.equal(rc, status.OK)
+    assert.is_nil(err)
+    assert.is_table(file)
+
+    -- test that returns METHOD_NOT_ALLOWED if method is not a GET method
+    rc, err, file = r:serve('post', '/signout', {}, {}, {})
+    assert.equal(rc, status.METHOD_NOT_ALLOWED)
+    assert.is_nil(err)
+    assert.is_nil(file)
+
     -- test that returns METHOD_NOT_ALLOWED
-    local rc, err = r:serve('put', '/api', {}, {}, {})
+    rc, err = r:serve('put', '/api', {}, {}, {})
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
     assert.is_nil(err)
 
