@@ -10,12 +10,16 @@ function testcase.new()
     local err = assert.throws(new_renderer, true)
     assert.match(err, 'rootdir must be string')
 
+    err = assert.throws(new_renderer, 'unknown-dir')
+    assert.match(err, 'failed to .+ directory', false)
+
     -- test that throws an error if invalid follow_symlink argument
     err = assert.throws(new_renderer, 'unknown-dir', {})
     assert.match(err, 'follow_symlink must be boolean')
 
-    err = assert.throws(new_renderer, 'unknown-dir')
-    assert.match(err, 'failed to .+ directory', false)
+    -- test that throws an error if invalid cache argument
+    err = assert.throws(new_renderer, 'unknown-dir', nil, {})
+    assert.match(err, 'cache must be boolean')
 end
 
 function testcase.add()
@@ -79,6 +83,9 @@ function testcase.render()
         hello = 'hello world',
     }, '/index.html'))
     assert.equal(s, 'header\nhello world\nfooter\n')
+
+    -- test that templates has been deleted after rendered
+    assert.is_false(r:exists('/index.html'))
 
     -- test that returns a JSON encoded string
     s = assert(r:render({
