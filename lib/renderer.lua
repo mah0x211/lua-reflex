@@ -29,6 +29,7 @@ local escape_html = require('rez.escape').html
 --- @class Renderer
 --- @field rootdir userdata
 --- @field rez userdata
+--- @field cache boolean
 local Renderer = {}
 Renderer.__index = Renderer
 
@@ -47,7 +48,13 @@ function Renderer:render(data, pathname)
         error('pathname must be string', 2)
     end
 
-    return self.rez:render(pathname, data)
+    local res, err = self.rez:render(pathname, data)
+    -- remove compiled templates
+    if not self.cache then
+        self.rez:clear()
+    end
+
+    return res, err
 end
 
 --- exists
@@ -88,18 +95,23 @@ function Renderer:add(pathname)
 end
 
 --- new
---- @param rootdir
+--- @param rootdir string
+--- @param follow_symlink boolean
+--- @param cache boolean
 --- @return Renderer
 --- @return string err
-local function new(rootdir, follow_symlink)
+local function new(rootdir, follow_symlink, cache)
     if type(rootdir) ~= 'string' then
         error('rootdir must be string', 2)
     elseif follow_symlink ~= nil and type(follow_symlink) ~= 'boolean' then
         error('follow_symlink must be boolean', 2)
+    elseif cache ~= nil and type(cache) ~= 'boolean' then
+        error('cache must be boolean', 2)
     end
 
     local renderer = setmetatable({
         rootdir = new_basedir(rootdir, follow_symlink),
+        cache = cache == true,
     }, Renderer)
     renderer.rez = new_rez({
         escape = escape_html,
