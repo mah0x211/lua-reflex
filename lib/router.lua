@@ -24,6 +24,7 @@ local assert = assert
 local error = error
 local ipairs = ipairs
 local lower = string.lower
+local next = next
 local pairs = pairs
 local pcall = pcall
 local setmetatable = setmetatable
@@ -37,6 +38,26 @@ local OK = status.OK
 local NOT_FOUND = status.NOT_FOUND
 local METHOD_NOT_ALLOWED = status.METHOD_NOT_ALLOWED
 local INTERNAL_SERVER_ERROR = status.INTERNAL_SERVER_ERROR
+
+--- invoke_handlers
+--- @param mlist table[]
+--- @param req Request
+--- @param glob table
+--- @param data table
+--- @param header table
+--- @return integer status_code
+local function invoke_handlers(mlist, req, glob, data, header)
+    for i, imp in ipairs(mlist) do
+        local code = imp.fn(req, glob, data, header)
+        if code then
+            if status[code] then
+                return code
+            end
+            errorf('#%d: %s returns an invalid status code %q', i, imp.name,
+                   tostring(code))
+        end
+    end
+end
 
 --- @alias fsrouter userdata
 
@@ -72,6 +93,11 @@ function Router:serve(method, pathname, req, data, header)
         return INTERNAL_SERVER_ERROR, err
     elseif not route then
         return NOT_FOUND
+    elseif not next(route.methods) then
+        if lower(method) == 'get' then
+            return OK, nil, route.file
+        end
+        return METHOD_NOT_ALLOWED
     end
 
     local mlist = route.methods[lower(method)] or route.methods.any
@@ -79,19 +105,7 @@ function Router:serve(method, pathname, req, data, header)
         return METHOD_NOT_ALLOWED
     end
 
-    local ok, res = pcall(function()
-        for i, imp in ipairs(mlist) do
-            local code = imp.fn(req, glob, data, header)
-            if code then
-                if status[code] then
-                    return code
-                end
-                errorf('#%d: %s returns an invalid status code %q', i, imp.name,
-                       tostring(code))
-            end
-        end
-    end)
-
+    local ok, res = pcall(invoke_handlers, mlist, req, glob, data, header)
     if not ok then
         return INTERNAL_SERVER_ERROR, res
     end
