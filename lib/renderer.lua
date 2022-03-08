@@ -29,7 +29,6 @@ local escape_html = require('rez.escape').html
 --- @class Renderer
 --- @field rootdir userdata
 --- @field rez userdata
---- @field files table<string, boolean>
 local Renderer = {}
 Renderer.__index = Renderer
 
@@ -58,7 +57,7 @@ function Renderer:exists(pathname)
     if type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     end
-    return self.files[pathname] == true
+    return self.rez:exists(pathname)
 end
 
 --- del
@@ -68,12 +67,7 @@ function Renderer:del(pathname)
     if type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     end
-
-    local ok = self.rez:del(pathname)
-    if ok then
-        self.files[pathname] = nil
-    end
-    return ok
+    return self.rez:del(pathname)
 end
 
 --- add
@@ -90,13 +84,7 @@ function Renderer:add(pathname)
         return false, err
     end
 
-    local ok
-    ok, err = self.rez:add(pathname, content)
-    if not ok then
-        return false, err
-    end
-    self.files[pathname] = true
-    return true
+    return self.rez:add(pathname, content)
 end
 
 --- new
@@ -112,7 +100,6 @@ local function new(rootdir, follow_symlink)
 
     local renderer = setmetatable({
         rootdir = new_basedir(rootdir, follow_symlink),
-        files = {},
     }, Renderer)
     renderer.rez = new_rez({
         escape = escape_html,
