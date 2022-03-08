@@ -32,8 +32,6 @@ local is_table = is_table
 local is_string = is_string
 
 local function print_pair_opt(opts, fmt)
-    print('print pair opt')
-
     local list = {}
     for k, v in pairs(opts) do
         if is_string(k) and is_string(v.pair) then
@@ -53,7 +51,6 @@ local function print_pair_opt(opts, fmt)
 end
 
 local function print_single_opt(opts, fmt)
-    print('print single opt')
     local list = {}
     for k, v in pairs(opts) do
         if is_string(k) and not is_string(v.pair) then
@@ -68,7 +65,6 @@ local function print_single_opt(opts, fmt)
         return a.key < b.key
     end)
     for _, v in ipairs(list) do
-        print('print single opt desc')
         print(v.desc)
     end
 end
