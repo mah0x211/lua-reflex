@@ -31,6 +31,7 @@ dependencies = {
 build = {
     type = 'builtin',
     modules = {
+        ['reflex.cache'] = 'lib/cache.lua',
         ['reflex.exec'] = 'lib/exec.lua',
         ['reflex.fs'] = 'lib/fs.lua',
         ['reflex.getopts'] = 'lib/getopts.lua',
