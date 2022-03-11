@@ -24,7 +24,6 @@ local require = require
 local new_basedir = require('basedir').new
 local yyjson_encode = require('yyjson').encode
 local new_rez = require('rez').new
-local escape_html = require('rez.escape').html
 
 --- @class Renderer
 --- @field rootdir userdata
@@ -114,7 +113,6 @@ local function new(rootdir, follow_symlink, cache)
         cache = cache == true,
     }, Renderer)
     renderer.rez = new_rez({
-        escape = escape_html,
         loader = function(_, pathname)
             return renderer:add(pathname)
         end,
