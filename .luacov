@@ -13,5 +13,6 @@ modules = {
     ['reflex.readcfg'] = 'lib/readcfg.lua',
     ['reflex.renderer'] = 'lib/renderer.lua',
     ['reflex.router'] = 'lib/router.lua',
+    ['reflex.session'] = 'lib/session.lua',
     ['reflex.status'] = 'lib/status.lua',
 }
