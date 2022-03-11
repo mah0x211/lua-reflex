@@ -14,6 +14,7 @@ dependencies = {
     'assert >= 0.3.4',
     'base64mix >= 1.0.0',
     'basedir >= 0.3.0',
+    'cookie >= 1.3.0',
     'dump >= 0.1.1',
     'error >= 0.6.2',
     'exec >= 0.2.0',
@@ -21,6 +22,7 @@ dependencies = {
     'getcwd >= 0.1.0',
     'getenv >= 0.2.1',
     'loadchunk >= 0.1.2',
+    'ossp-uuid >= 1.6.2',
     'print >= 0.1.0',
     'rez >= 0.5.0',
     'stringex >= 0.2.1',
@@ -41,6 +43,7 @@ build = {
         ['reflex.readcfg'] = 'lib/readcfg.lua',
         ['reflex.renderer'] = 'lib/renderer.lua',
         ['reflex.router'] = 'lib/router.lua',
+        ['reflex.session'] = 'lib/session.lua',
         ['reflex.status'] = 'lib/status.lua',
     },
 }
