@@ -53,6 +53,12 @@ end
 --- session-cookie name
 local NAME = 'sid'
 
+-- get_name
+--- @return string name
+local function get_name()
+    return NAME
+end
+
 --- set_name
 --- @param name string
 local function set_name(name)
@@ -65,8 +71,14 @@ end
 --- session lifetime, default 30min
 local MAXAGE = 60 * 30
 
+--- get_maxage
+--- @return integer maxage
+local function get_maxage()
+    return MAXAGE
+end
+
 --- set_maxage
---- @param maxage any
+--- @param maxage integer
 local function set_maxage(maxage)
     if not is_finite(maxage) or maxage <= 0 then
         error('maxage must be integer greater than 0', 2)
@@ -211,7 +223,9 @@ end
 return {
     new = new,
     set_store = set_store,
+    get_name = get_name,
     set_name = set_name,
+    get_maxage = get_maxage,
     set_maxage = set_maxage,
 }
 
