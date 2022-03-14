@@ -112,7 +112,7 @@ function Cache:del(key)
 end
 
 --- new
---- @return Session
+--- @return Cache
 --- @return string err
 local function new()
     return setmetatable({
