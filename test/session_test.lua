@@ -31,13 +31,27 @@ function testcase.set_store()
     assert.match(err, 'store must have .+ methods', false)
 end
 
-function testcase.set_name()
+function testcase.get_set_name()
+    -- test that returns a current name
+    assert.equal(session.get_name(), 'sid')
+
+    -- test that set a name
+    session.set_name('foo')
+    assert.equal(session.get_name(), 'foo')
+
     -- test that throws an error
     local err = assert.throws(session.set_name, 'foo-bar')
     assert.match(err, 'name must be string of')
 end
 
-function testcase.set_maxage()
+function testcase.get_set_maxage()
+    -- test that returns a current maxage
+    assert.equal(session.get_maxage(), 60 * 30)
+
+    -- test that returns a current maxage
+    session.set_maxage(30)
+    assert.equal(session.get_maxage(), 30)
+
     -- test that throws an error
     for _, v in ipairs({
         {},
@@ -180,6 +194,17 @@ function testcase.restore()
         },
     })
 
+    -- test that restore session by new function
+    s = assert(session.new(sid))
+    assert.equal(s.id, sid)
+    assert.equal(s:get('foo'), {
+        [-1] = yyjson.AS_OBJECT,
+        bar = {
+            [-1] = yyjson.AS_OBJECT,
+            baz = 'qux',
+        },
+    })
+
     -- test that cannot restore with unknown(or expired) session-id
     local ok, err = s:restore('foo')
     assert.is_false(ok)
@@ -190,6 +215,10 @@ function testcase.restore()
     ok, err = s:restore('foo')
     assert.is_false(ok)
     assert.equal(err, 'test-get-error')
+
+    local _, nerr = session.new('foo')
+    assert.is_nil(_)
+    assert.equal(nerr, 'test-get-error')
 
     -- test that throws an error
     err = assert.throws(s.restore, s, true)

@@ -26,7 +26,7 @@ local is_table = is_table
 local is_function = is_function
 local find = string.find
 local getmetatable = debug.getmetatable
-local cookie = require('cookie')
+local bake_cookie = require('cookie').bake
 local yyjson = require('yyjson')
 local uuid4str = require('ossp-uuid').gen4str
 
@@ -53,6 +53,12 @@ end
 --- session-cookie name
 local NAME = 'sid'
 
+-- get_name
+--- @return string name
+local function get_name()
+    return NAME
+end
+
 --- set_name
 --- @param name string
 local function set_name(name)
@@ -65,8 +71,14 @@ end
 --- session lifetime, default 30min
 local MAXAGE = 60 * 30
 
+--- get_maxage
+--- @return integer maxage
+local function get_maxage()
+    return MAXAGE
+end
+
 --- set_maxage
---- @param maxage any
+--- @param maxage integer
 local function set_maxage(maxage)
     if not is_finite(maxage) or maxage <= 0 then
         error('maxage must be integer greater than 0', 2)
@@ -122,7 +134,7 @@ function Session:save(attr)
         return false, serr
     end
 
-    return true, nil, cookie.bake(NAME, self.id, {
+    return true, nil, bake_cookie(NAME, self.id, {
         maxage = MAXAGE,
         domain = attr.domain,
         path = attr.path,
@@ -134,27 +146,41 @@ end
 
 --- restore
 --- @param id string
+--- @return table value
+--- @return string err
+local function restore(id)
+    if not is_string(id) then
+        error('id must be string', 3)
+    end
+
+    local data, err = Store:get(id, true)
+    if not data then
+        return nil, err
+    end
+
+    local value = yyjson.decode(data)
+    if not value then
+        -- remove corrupt data
+        Store.del(id)
+    end
+
+    return value
+end
+
+--- restore
+--- @param id string
 --- @return boolean ok
 --- @return string err
 function Session:restore(id)
-    if not is_string(id) then
-        error('id must be string', 2)
+    local value, err = restore(id)
+
+    if value then
+        self.id = id
+        self.value = value
+        return true
     end
 
-    local data, serr = Store:get(id, true)
-    if not data then
-        return false, serr
-    end
-
-    local value, err = yyjson.decode(data)
-    if err then
-        return false, err
-    end
-
-    self.id = id
-    self.value = value
-
-    return true
+    return false, err
 end
 
 --- destroy
@@ -183,7 +209,7 @@ function Session:destroy(attr)
     -- clear
     self.id = id
     self.value = {}
-    return ok, nil, cookie.bake(NAME, 'void', {
+    return ok, nil, bake_cookie(NAME, 'void', {
         maxage = -60,
         domain = attr.domain,
         path = attr.path,
@@ -194,16 +220,31 @@ function Session:destroy(attr)
 end
 
 --- new
+--- @param id string
 --- @return Session ses
 --- @return string err
-local function new()
-    local id, err = uuid4str()
-    if not id then
+local function new(id)
+    if id ~= nil then
+        local value, err = restore(id)
+        if err then
+            return nil, err
+        elseif value then
+            return setmetatable({
+                id = id,
+                value = value,
+            }, Session)
+        end
+    elseif id ~= nil then
+        error('id must be string', 2)
+    end
+
+    local newid, err = uuid4str()
+    if not newid then
         return nil, err
     end
 
     return setmetatable({
-        id = id,
+        id = newid,
         value = {},
     }, Session)
 end
@@ -211,7 +252,9 @@ end
 return {
     new = new,
     set_store = set_store,
+    get_name = get_name,
     set_name = set_name,
+    get_maxage = get_maxage,
     set_maxage = set_maxage,
 }
 

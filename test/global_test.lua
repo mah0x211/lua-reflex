@@ -49,7 +49,9 @@ function testcase.errorf()
     assert.equal(err, 'hello')
 
     -- test that change the error level witg the first argument
-    err = assert.throws(errorf, 1, 'hello')
-    assert.match(err, 'global.lua.+ hello', false)
+    err = assert.throws(function()
+        errorf(1, 'hello')
+    end)
+    assert.match(err, 'global_test.lua.+ hello', false)
 end
 
