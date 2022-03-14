@@ -72,7 +72,7 @@ _G.printv = printv
 local function errorf(...)
     local lv = ...
     if type(lv) == 'number' then
-        error(format(select(2, ...)), lv)
+        error(format(select(2, ...)), lv + 1)
     end
     error(format(...), 2)
 end
