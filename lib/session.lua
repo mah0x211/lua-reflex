@@ -26,7 +26,7 @@ local is_table = is_table
 local is_function = is_function
 local find = string.find
 local getmetatable = debug.getmetatable
-local cookie = require('cookie')
+local bake_cookie = require('cookie').bake
 local yyjson = require('yyjson')
 local uuid4str = require('ossp-uuid').gen4str
 
@@ -134,7 +134,7 @@ function Session:save(attr)
         return false, serr
     end
 
-    return true, nil, cookie.bake(NAME, self.id, {
+    return true, nil, bake_cookie(NAME, self.id, {
         maxage = MAXAGE,
         domain = attr.domain,
         path = attr.path,
@@ -146,27 +146,41 @@ end
 
 --- restore
 --- @param id string
+--- @return table value
+--- @return string err
+local function restore(id)
+    if not is_string(id) then
+        error('id must be string', 3)
+    end
+
+    local data, err = Store:get(id, true)
+    if not data then
+        return nil, err
+    end
+
+    local value = yyjson.decode(data)
+    if not value then
+        -- remove corrupt data
+        Store.del(id)
+    end
+
+    return value
+end
+
+--- restore
+--- @param id string
 --- @return boolean ok
 --- @return string err
 function Session:restore(id)
-    if not is_string(id) then
-        error('id must be string', 2)
+    local value, err = restore(id)
+
+    if value then
+        self.id = id
+        self.value = value
+        return true
     end
 
-    local data, serr = Store:get(id, true)
-    if not data then
-        return false, serr
-    end
-
-    local value, err = yyjson.decode(data)
-    if err then
-        return false, err
-    end
-
-    self.id = id
-    self.value = value
-
-    return true
+    return false, err
 end
 
 --- destroy
@@ -195,7 +209,7 @@ function Session:destroy(attr)
     -- clear
     self.id = id
     self.value = {}
-    return ok, nil, cookie.bake(NAME, 'void', {
+    return ok, nil, bake_cookie(NAME, 'void', {
         maxage = -60,
         domain = attr.domain,
         path = attr.path,
@@ -206,16 +220,31 @@ function Session:destroy(attr)
 end
 
 --- new
+--- @param id string
 --- @return Session ses
 --- @return string err
-local function new()
-    local id, err = uuid4str()
-    if not id then
+local function new(id)
+    if id ~= nil then
+        local value, err = restore(id)
+        if err then
+            return nil, err
+        elseif value then
+            return setmetatable({
+                id = id,
+                value = value,
+            }, Session)
+        end
+    elseif id ~= nil then
+        error('id must be string', 2)
+    end
+
+    local newid, err = uuid4str()
+    if not newid then
         return nil, err
     end
 
     return setmetatable({
-        id = id,
+        id = newid,
         value = {},
     }, Session)
 end
