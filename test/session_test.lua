@@ -194,6 +194,17 @@ function testcase.restore()
         },
     })
 
+    -- test that restore session by new function
+    s = assert(session.new(sid))
+    assert.equal(s.id, sid)
+    assert.equal(s:get('foo'), {
+        [-1] = yyjson.AS_OBJECT,
+        bar = {
+            [-1] = yyjson.AS_OBJECT,
+            baz = 'qux',
+        },
+    })
+
     -- test that cannot restore with unknown(or expired) session-id
     local ok, err = s:restore('foo')
     assert.is_false(ok)
@@ -204,6 +215,10 @@ function testcase.restore()
     ok, err = s:restore('foo')
     assert.is_false(ok)
     assert.equal(err, 'test-get-error')
+
+    local _, nerr = session.new('foo')
+    assert.is_nil(_)
+    assert.equal(nerr, 'test-get-error')
 
     -- test that throws an error
     err = assert.throws(s.restore, s, true)
