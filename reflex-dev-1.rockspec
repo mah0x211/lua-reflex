@@ -22,6 +22,7 @@ dependencies = {
     'getcwd >= 0.1.0',
     'getenv >= 0.2.1',
     'loadchunk >= 0.1.2',
+    'openssl >= 0.8.2',
     'ossp-uuid >= 1.6.2',
     'print >= 0.1.0',
     'rez >= 0.5.1',
@@ -45,5 +46,6 @@ build = {
         ['reflex.router'] = 'lib/router.lua',
         ['reflex.session'] = 'lib/session.lua',
         ['reflex.status'] = 'lib/status.lua',
+        ['reflex.token'] = 'lib/token.lua',
     },
 }
