@@ -132,8 +132,8 @@ function Session:save(attr)
         maxage = MAXAGE,
         domain = attr.domain,
         path = attr.path,
-        secure = attr.secure or true,
-        httponly = attr.httponly or true,
+        secure = attr.secure == nil or attr.secure,
+        httponly = attr.httponly == nil or attr.httponly,
         samesite = attr.samesite or 'lax',
     })
 end
@@ -201,8 +201,8 @@ function Session:destroy(attr)
         maxage = -60,
         domain = attr.domain,
         path = attr.path,
-        secure = attr.secure or true,
-        httponly = attr.httponly or true,
+        secure = attr.secure == nil or attr.secure,
+        httponly = attr.httponly == nil or attr.httponly,
         samesite = attr.samesite or 'lax',
     })
 end
