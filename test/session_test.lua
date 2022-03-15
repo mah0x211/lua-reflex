@@ -2,7 +2,6 @@ require('luacov')
 local testcase = require('testcase')
 local cache = require('reflex.cache')
 local session = require('reflex.session')
-local yyjson = require('yyjson')
 local parse_baked_cookie = require('cookie').parse_baked_cookie
 
 local CACHE
@@ -118,8 +117,6 @@ function testcase.save()
                     'quux',
                 },
             },
-            baa = function()
-            end,
         },
     })
     local ok, err, cookie = s:save({
@@ -139,18 +136,12 @@ function testcase.save()
         value = s.id,
     })
     -- confirm store
-    local json = assert(CACHE:get(s.id))
-    local data = assert(yyjson.decode(json))
+    local data = assert(CACHE:get(s.id))
     assert.equal(data, {
-        [-1] = yyjson.AS_OBJECT,
         foo = {
-            [-1] = yyjson.AS_OBJECT,
             bar = {
-                [-1] = yyjson.AS_OBJECT,
                 baz = {
-                    [-1] = yyjson.AS_OBJECT,
                     qux = {
-                        [-1] = yyjson.AS_ARRAY,
                         'quux',
                     },
                 },
@@ -187,9 +178,7 @@ function testcase.restore()
     assert(s:restore(sid))
     assert.equal(s.id, sid)
     assert.equal(s:get('foo'), {
-        [-1] = yyjson.AS_OBJECT,
         bar = {
-            [-1] = yyjson.AS_OBJECT,
             baz = 'qux',
         },
     })
@@ -198,9 +187,7 @@ function testcase.restore()
     s = assert(session.new(sid))
     assert.equal(s.id, sid)
     assert.equal(s:get('foo'), {
-        [-1] = yyjson.AS_OBJECT,
         bar = {
-            [-1] = yyjson.AS_OBJECT,
             baz = 'qux',
         },
     })

@@ -27,7 +27,6 @@ local is_function = is_function
 local find = string.find
 local getmetatable = debug.getmetatable
 local bake_cookie = require('cookie').bake
-local yyjson = require('yyjson')
 local uuid4str = require('ossp-uuid').gen4str
 
 -- use reflex.cache module as default session store
@@ -124,12 +123,7 @@ function Session:save(attr)
         error('attr must be table', 2)
     end
 
-    local data, err = yyjson.encode(self.value)
-    if err then
-        return false, err
-    end
-
-    local ok, serr = Store:set(self.id, data, MAXAGE)
+    local ok, serr = Store:set(self.id, self.value, MAXAGE)
     if not ok then
         return false, serr
     end
@@ -158,13 +152,7 @@ local function restore(id)
         return nil, err
     end
 
-    local value = yyjson.decode(data)
-    if not value then
-        -- remove corrupt data
-        Store.del(id)
-    end
-
-    return value
+    return data
 end
 
 --- restore

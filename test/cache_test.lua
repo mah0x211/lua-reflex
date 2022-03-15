@@ -32,13 +32,6 @@ function testcase.set()
         {
             args = {
                 'foo',
-                true,
-            },
-            exp = 'val must be string',
-        },
-        {
-            args = {
-                'foo',
                 'bar',
                 true,
             },
