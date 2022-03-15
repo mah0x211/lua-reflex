@@ -15,4 +15,5 @@ modules = {
     ['reflex.router'] = 'lib/router.lua',
     ['reflex.session'] = 'lib/session.lua',
     ['reflex.status'] = 'lib/status.lua',
+    ['reflex.token'] = 'lib/token.lua',
 }
