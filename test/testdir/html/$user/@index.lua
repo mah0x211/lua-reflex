@@ -1,5 +1,5 @@
-function handler.get(req, glob, data)
-    data.glob = glob
-    data.user = 'get'
+function handler.get(req, rsp)
+    rsp.body.params = req.params
+    rsp.body.user = 'get'
 end
 
