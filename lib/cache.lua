@@ -45,7 +45,7 @@ Cache.__index = Cache
 
 --- set
 --- @param key string
---- @param val string
+--- @param val any
 --- @param ttl integer
 --- @return boolean ok
 --- @return string err
@@ -53,8 +53,8 @@ function Cache:set(key, val, ttl)
     local ok, err = is_valid_key(key)
     if not ok then
         return false, err
-    elseif not is_string(val) then
-        return false, format('val must be string')
+    elseif val == nil then
+        return false, format('val must not be nil')
     elseif ttl ~= nil and (not is_uint(ttl) or ttl < 1) then
         return false, format('ttl must be integer greater than 0')
     end
