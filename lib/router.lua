@@ -42,13 +42,11 @@ local INTERNAL_SERVER_ERROR = status.INTERNAL_SERVER_ERROR
 --- invoke_handlers
 --- @param mlist table[]
 --- @param req Request
---- @param glob table
---- @param data table
---- @param header table
+--- @param rsp table
 --- @return integer status_code
-local function invoke_handlers(mlist, req, glob, data, header)
+local function invoke_handlers(mlist, req, rsp)
     for i, imp in ipairs(mlist) do
-        local code = imp.fn(req, glob, data, header)
+        local code = imp.fn(req, rsp)
         if code then
             if status[code] then
                 return code
@@ -70,30 +68,37 @@ Router.__index = Router
 --- @param method string
 --- @param pathname string
 --- @param req table
---- @param data table
---- @param header table
+--- @param rsp table
 --- @return integer status
 --- @return string err
 --- @return table file
-function Router:serve(method, pathname, req, data, header)
+function Router:serve(method, pathname, req, rsp)
     if type(method) ~= 'string' then
         error('method must be string', 2)
     elseif type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     elseif type(req) ~= 'table' then
         error('req must be table', 2)
-    elseif type(data) ~= 'table' then
-        error('data must be table', 2)
-    elseif type(header) ~= 'table' then
-        error('header must be table', 2)
+    elseif type(rsp) ~= 'table' then
+        error('rsp must be table', 2)
+    elseif type(rsp.header) ~= 'table' then
+        error('rsp.header must be table', 2)
+    elseif type(rsp.body) ~= 'table' then
+        error('rsp.body must be table', 2)
     end
 
+    -- get route
     local route, err, glob = self.router:lookup(pathname)
     if err then
         return INTERNAL_SERVER_ERROR, err
     elseif not route then
         return NOT_FOUND
-    elseif not next(route.methods) then
+    end
+    req.params = glob
+
+    -- no method in route
+    if not next(route.methods) then
+        -- allow only the GET method
         if lower(method) == 'get' then
             return OK, nil, route.file
         end
@@ -105,7 +110,7 @@ function Router:serve(method, pathname, req, data, header)
         return METHOD_NOT_ALLOWED
     end
 
-    local ok, res = pcall(invoke_handlers, mlist, req, glob, data, header)
+    local ok, res = pcall(invoke_handlers, mlist, req, rsp)
     if not ok then
         return INTERNAL_SERVER_ERROR, res
     end

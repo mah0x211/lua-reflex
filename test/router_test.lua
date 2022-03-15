@@ -223,96 +223,132 @@ function testcase.serve()
     for method, v in pairs({
         any = {
             ['/foobar/posts/1234'] = {
-                block_ip = 'all',
-                check_user = 'all',
-                block_user = 'all',
-                extract_id = 'all',
-                glob = {
-                    user = 'foobar',
-                    id = '1234',
+                header = {},
+                body = {
+                    block_ip = 'all',
+                    check_user = 'all',
+                    block_user = 'all',
+                    extract_id = 'all',
+                    params = {
+                        user = 'foobar',
+                        id = '1234',
+                    },
+                    user_posts_id = 'any',
                 },
-                user_posts_id = 'any',
             },
         },
         get = {
             ['/'] = {
-                block_ip = 'all',
-                check_user = 'all',
-                glob = {},
-                ['/'] = 'get',
+                header = {},
+                body = {
+                    block_ip = 'all',
+                    check_user = 'all',
+                    params = {},
+                    ['/'] = 'get',
+                },
             },
             ['/signin'] = {
-                glob = {},
-                signin = 'get',
+                header = {},
+                body = {
+                    params = {},
+                    signin = 'get',
+                },
             },
             ['/foobar'] = {
-                block_ip = 'all',
-                check_user = 'all',
-                block_user = 'all',
-                glob = {
-                    user = 'foobar',
+                header = {},
+                body = {
+                    block_ip = 'all',
+                    check_user = 'all',
+                    block_user = 'all',
+                    params = {
+                        user = 'foobar',
+                    },
+                    user = 'get',
                 },
-                user = 'get',
             },
             ['/foobar/posts'] = {
-                block_ip = 'all',
-                check_user = 'all',
-                block_user = 'all',
-                extract_id = 'all',
-                glob = {
-                    user = 'foobar',
+                header = {},
+                body = {
+                    block_ip = 'all',
+                    check_user = 'all',
+                    block_user = 'all',
+                    extract_id = 'all',
+                    params = {
+                        user = 'foobar',
+                    },
+                    user_posts = 'get',
                 },
-                user_posts = 'get',
             },
             ['/foobar/posts/9876'] = {
-                block_ip = 'all',
-                check_user = 'all',
-                block_user = 'all',
-                extract_id = 'all',
-                glob = {
-                    user = 'foobar',
-                    id = '9876',
+                header = {},
+                body = {
+                    block_ip = 'all',
+                    check_user = 'all',
+                    block_user = 'all',
+                    extract_id = 'all',
+                    params = {
+                        user = 'foobar',
+                        id = '9876',
+                    },
+                    user_posts_id = 'get',
                 },
-                user_posts_id = 'get',
             },
         },
         post = {
             ['/signin'] = {
-                glob = {},
-                signin = 'post',
+                header = {},
+                body = {
+                    params = {},
+                    signin = 'post',
+                },
             },
         },
     }) do
         for rpath, cmp in pairs(v) do
             local req = {}
-            local data = {}
-            local rc, err, file = r:serve(method, rpath, req, data, {})
+            local rsp = {
+                header = {},
+                body = {},
+            }
+            local rc, err, file = r:serve(method, rpath, req, rsp)
             assert.equal(rc, status.OK)
             assert.is_nil(err)
             assert.is_table(file)
-            assert.equal(data, cmp)
+            assert.equal(rsp, cmp)
         end
     end
 
     -- test that returns OK and file
-    local rc, err, file = r:serve('get', '/signout', {}, {}, {})
+    local rc, err, file = r:serve('get', '/signout', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.OK)
     assert.is_nil(err)
     assert.is_table(file)
 
     -- test that returns METHOD_NOT_ALLOWED if method is not a GET method
-    rc, err, file = r:serve('post', '/signout', {}, {}, {})
+    rc, err, file = r:serve('post', '/signout', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
     assert.is_nil(err)
     assert.is_nil(file)
 
     -- test that returns METHOD_NOT_ALLOWED
-    rc, err = r:serve('put', '/api', {}, {}, {})
+    rc, err = r:serve('put', '/api', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
     assert.is_nil(err)
 
     -- test that returns NOT_FOUND
-    rc, err = r:serve('get', '/api/unknown', {}, {}, {})
+    rc, err = r:serve('get', '/api/unknown', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.NOT_FOUND)
     assert.is_nil(err)
 
@@ -322,7 +358,10 @@ function testcase.serve()
         '/foobar/^',
         '/foobar/#',
     }) do
-        rc, err = r:serve('get', pathname, {}, {}, {})
+        rc, err = r:serve('get', pathname, {}, {
+            header = {},
+            body = {},
+        })
         assert.equal(rc, status.NOT_FOUND)
         assert.is_nil(err)
     end
@@ -334,18 +373,27 @@ function testcase.serve()
             return nil, 'router error'
         end,
     }
-    rc, err = r:serve('get', '/api', {}, {}, {})
+    rc, err = r:serve('get', '/api', {}, {
+        header = {},
+        body = {},
+    })
     r.router = router
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
     assert.match(err, 'router error')
 
     -- test that returns INTERNAL_SERVER_ERROR if invalid hander
-    rc, err = r:serve('get', '/api', {}, {}, {})
+    rc, err = r:serve('get', '/api', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
     assert.match(err, 'attempt to concatenate')
 
     -- test that returns INTERNAL_SERVER_ERROR if handler returns a invalid status
-    rc, err = r:serve('post', '/api', {}, {}, {})
+    rc, err = r:serve('post', '/api', {}, {
+        header = {},
+        body = {},
+    })
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
     assert.match(err, 'invalid status code')
 
@@ -363,9 +411,15 @@ function testcase.serve()
 
     -- test that throw an error if data is invalid
     err = assert.throws(r.serve, r, 'get', '/', {}, 'bar')
-    assert.match(err, 'data must be table')
+    assert.match(err, 'rsp must be table')
 
     -- test that throw an error if header is invalid
-    err = assert.throws(r.serve, r, 'get', '/', {}, {}, 'baz')
-    assert.match(err, 'header must be table')
+    err = assert.throws(r.serve, r, 'get', '/', {}, {})
+    assert.match(err, 'rsp.header must be table')
+
+    -- test that throw an error if header is invalid
+    err = assert.throws(r.serve, r, 'get', '/', {}, {
+        header = {},
+    })
+    assert.match(err, 'rsp.body must be table')
 end

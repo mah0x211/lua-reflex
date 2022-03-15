@@ -1,12 +1,12 @@
 -- handler get request for /:user/posts/*id
-function handler.get(req, glob, data)
+function handler.get(req, rsp)
     -- set data for *id.html
-    data.glob = glob
-    data.user_posts_id = 'get'
+    rsp.body.params = req.params
+    rsp.body.user_posts_id = 'get'
 end
 
 -- handler any request for /:user/posts/*id
-function handler.any(req, glob, data)
-    data.glob = glob
-    data.user_posts_id = 'any'
+function handler.any(req, rsp)
+    rsp.body.params = req.params
+    rsp.body.user_posts_id = 'any'
 end
