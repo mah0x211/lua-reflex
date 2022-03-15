@@ -21,6 +21,7 @@
 --
 local concat = table.concat
 local sub = string.sub
+local match = string.match
 local random = math.random
 local tostring = tostring
 local encodeURL = require('base64mix').encodeURL
@@ -29,14 +30,15 @@ math.randomseed(os.time())
 
 --- random_bytes
 --- @param n integer
+--- @param encode boolean
 --- @return string url
 --- @return string err
-local function randstr(n)
+local function randstr(n, encode)
     local nbyte = 0
     local src = {}
 
     while nbyte < n do
-        local s = tostring(random())
+        local s = match(tostring(random()), '%.(.+)$')
         nbyte = nbyte + #s
         if nbyte > n then
             s = sub(s, 1, #s - (nbyte - n))
@@ -44,7 +46,10 @@ local function randstr(n)
         src[#src + 1] = s
     end
 
-    return sub(encodeURL(concat(src)), 1, n)
+    if encode then
+        return sub(encodeURL(concat(src)), 1, n)
+    end
+    return concat(src)
 end
 
 return randstr
