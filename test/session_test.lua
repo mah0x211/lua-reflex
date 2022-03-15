@@ -238,6 +238,7 @@ function testcase.destroy()
     c.expires = nil
     assert.equal(c, {
         domain = 'example.com',
+        path = '/',
         httponly = true,
         maxage = -60,
         name = 'sid',

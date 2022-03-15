@@ -131,9 +131,9 @@ function Session:save(attr)
     return true, nil, bake_cookie(NAME, self.id, {
         maxage = MAXAGE,
         domain = attr.domain,
-        path = attr.path,
-        secure = attr.secure or true,
-        httponly = attr.httponly or true,
+        path = attr.path or '/',
+        secure = attr.secure == nil or attr.secure,
+        httponly = attr.httponly == nil or attr.httponly,
         samesite = attr.samesite or 'lax',
     })
 end
@@ -200,9 +200,9 @@ function Session:destroy(attr)
     return ok, nil, bake_cookie(NAME, 'void', {
         maxage = -60,
         domain = attr.domain,
-        path = attr.path,
-        secure = attr.secure or true,
-        httponly = attr.httponly or true,
+        path = attr.path or '/',
+        secure = attr.secure == nil or attr.secure,
+        httponly = attr.httponly == nil or attr.httponly,
         samesite = attr.samesite or 'lax',
     })
 end
