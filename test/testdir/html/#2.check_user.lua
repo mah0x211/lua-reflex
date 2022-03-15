@@ -1,3 +1,3 @@
-function handler.all(req, glob, data)
-    data.check_user = 'all'
+function handler.all(req, rsp)
+    rsp.body.check_user = 'all'
 end

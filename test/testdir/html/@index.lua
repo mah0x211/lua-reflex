@@ -1,6 +1,6 @@
-function handler.get(req, glob, data)
-    data.glob = glob
-    data['/'] = 'get'
+function handler.get(req, rsp)
+    rsp.body.params = req.params
+    rsp.body['/'] = 'get'
     return 200
 end
 

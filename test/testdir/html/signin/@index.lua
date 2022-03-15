@@ -1,9 +1,9 @@
-function handler.post(req, glob, data)
-    data.glob = glob
-    data.signin = 'post'
+function handler.post(req, rsp)
+    rsp.body.params = req.params
+    rsp.body.signin = 'post'
 end
 
-function handler.get(req, glob, data)
-    data.glob = glob
-    data.signin = 'get'
+function handler.get(req, rsp)
+    rsp.body.params = req.params
+    rsp.body.signin = 'get'
 end
