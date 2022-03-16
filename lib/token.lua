@@ -23,15 +23,25 @@ require('reflex.global')
 local error = error
 local is_string = is_string
 local sub = string.sub
-local hmac = require('openssl').hmac.hmac
+local hmacsha = require('hmac').sha224
 local randstr = require('reflex.randstr')
 -- constants
 -- N byte = 128 bit / 8 bit
 local MSG_LEN = 128 / 8
--- N byte = SHA1(160 bit) / 8 bit * 2(HEX)
-local SHA1_LEN = 160 / 8 * 2
+-- N byte = SHA-224(224 bit) / 8 bit * 2(HEX)
+local SHA1_LEN = 224 / 8 * 2
 -- SHA1_LEN(160bit) + DELIMITER('.') + MSG_LEM
 local TOKEN_LEN = SHA1_LEN + 1 + MSG_LEN
+
+--- compute
+--- @param key string
+--- @param msg any
+--- @return string
+local function compute(msg, key)
+    local ctx = hmacsha(key)
+    ctx:update(msg)
+    return ctx:final()
+end
 
 --- verify
 --- @param key string
@@ -48,12 +58,7 @@ local function verify(key, token)
     end
 
     local msg = sub(token, -MSG_LEN)
-    local cmp, err = hmac('sha1', msg, key, false)
-    if err then
-        return false, err
-    end
-
-    return cmp == sub(token, 1, SHA1_LEN)
+    return compute(msg, key) == sub(token, 1, SHA1_LEN)
 end
 
 --- generate
@@ -66,11 +71,7 @@ local function generate(key)
     end
 
     local msg = randstr(MSG_LEN)
-    local str, err = hmac('sha1', msg, key, false)
-    if err then
-        return nil, err
-    end
-    return str .. '.' .. msg
+    return compute(msg, key) .. '.' .. msg
 end
 
 return {
