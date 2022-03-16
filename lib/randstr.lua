@@ -38,7 +38,7 @@ local function randstr(n, encode)
     local src = {}
 
     while nbyte < n do
-        local s = match(tostring(random()), '%.(.+)$')
+        local s = match(tostring(random()), '%.(%d+)')
         nbyte = nbyte + #s
         if nbyte > n then
             s = sub(s, 1, #s - (nbyte - n))
