@@ -22,7 +22,7 @@
 local type = type
 local require = require
 local new_basedir = require('basedir').new
-local yyjson_encode = require('yyjson').encode
+local json_encode = require('reflex.json').encode
 local new_rez = require('rez').new
 
 --- @class Renderer
@@ -42,7 +42,7 @@ function Renderer:render(data, pathname)
     if type(data) ~= 'table' then
         error('data must be table')
     elseif pathname == nil then
-        return yyjson_encode(data)
+        return json_encode(data)
     elseif type(pathname) ~= 'string' then
         error('pathname must be string', 2)
     end

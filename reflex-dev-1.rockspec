@@ -40,6 +40,7 @@ build = {
         ['reflex.getopts'] = 'lib/getopts.lua',
         ['reflex.global'] = 'lib/global.lua',
         ['reflex.install'] = 'lib/install.lua',
+        ['reflex.json'] = 'lib/json.lua',
         ['reflex.randstr'] = 'lib/randstr.lua',
         ['reflex.readcfg'] = 'lib/readcfg.lua',
         ['reflex.renderer'] = 'lib/renderer.lua',
