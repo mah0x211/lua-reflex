@@ -10,8 +10,7 @@ function testcase.before_each()
     -- restore default value
     CACHE = cache.new()
     session.set_store(CACHE)
-    session.set_name('sid')
-    session.set_maxage(60 * 30)
+    session.reset_default()
 end
 
 function testcase.set_store()
@@ -30,38 +29,61 @@ function testcase.set_store()
     assert.match(err, 'store must have .+ methods', false)
 end
 
-function testcase.get_set_name()
-    -- test that returns a current name
-    assert.equal(session.get_name(), 'sid')
+function testcase.set_default()
+    -- test that returns a current default name and attr
+    local name, attr = session.get_default()
+    assert.equal(name, 'sid')
+    assert.is_table(attr)
 
-    -- test that set a name
-    session.set_name('foo')
-    assert.equal(session.get_name(), 'foo')
+    -- test that set default name
+    session.set_default('foo')
+    local newname, newattr = session.get_default()
+    assert.equal(newname, 'foo')
+    assert.equal(newattr, attr)
 
-    -- test that throws an error
-    local err = assert.throws(session.set_name, 'foo-bar')
-    assert.match(err, 'name must be string of')
-end
+    -- test that set default attributes
+    name = newname
+    session.set_default(nil, {
+        domain = 'example.com',
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+    })
+    newname, newattr = session.get_default()
+    assert.equal(newname, name)
+    assert.equal(newattr, {
+        domain = 'example.com',
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+        samesite = 'lax',
+    })
 
-function testcase.get_set_maxage()
-    -- test that returns a current maxage
-    assert.equal(session.get_maxage(), 60 * 30)
+    -- test that remove domain attribute
+    session.set_default(nil, {})
+    newname, newattr = session.get_default()
+    assert.equal(newname, name)
+    assert.equal(newattr, {
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+        samesite = 'lax',
+    })
 
-    -- test that returns a current maxage
-    session.set_maxage(30)
-    assert.equal(session.get_maxage(), 30)
+    -- test that throws an error if maxage is not greater than 0
+    local err = assert.throws(session.set_default, nil, {
+        maxage = 0,
+    })
+    assert.match(err, 'maxage must be integer greater than 0')
 
-    -- test that throws an error
-    for _, v in ipairs({
-        {},
-        true,
-        -1,
-        1 / 0,
-        0 / 0,
-    }) do
-        local err = assert.throws(session.set_maxage, v)
-        assert.match(err, 'maxage must be integer greater than 0')
-    end
+    -- test that thows an error if attribute value is invalid
+    err = assert.throws(session.set_default, nil, {
+        secure = {},
+    })
+    assert.match(err, 'secure must be boolean')
 end
 
 function testcase.new()
@@ -108,8 +130,9 @@ function testcase.save()
     local s = assert(session.new())
 
     -- test that save session value
-    session.set_name('session')
-    session.set_maxage(60 * 60)
+    session.set_default('session', {
+        maxage = 60 * 60,
+    })
     s:set('foo', {
         bar = {
             baz = {
