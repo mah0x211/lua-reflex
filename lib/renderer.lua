@@ -19,7 +19,10 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local type = type
+local isa = require('isa')
+local is_boolean = isa.boolean
+local is_table = isa.table
+local is_string = isa.string
 local require = require
 local new_basedir = require('basedir').new
 local json_encode = require('reflex.json').encode
@@ -39,11 +42,11 @@ Renderer.__index = Renderer
 --- @return string err
 function Renderer:render(data, pathname)
     data = data or {}
-    if type(data) ~= 'table' then
+    if not is_table(data) then
         error('data must be table')
     elseif pathname == nil then
         return json_encode(data)
-    elseif type(pathname) ~= 'string' then
+    elseif not is_string(pathname) then
         error('pathname must be string', 2)
     end
 
@@ -60,7 +63,7 @@ end
 --- @param pathname string
 --- @return boolean ok
 function Renderer:exists(pathname)
-    if type(pathname) ~= 'string' then
+    if not is_string(pathname) then
         error('pathname must be string', 2)
     end
     return self.rez:exists(pathname)
@@ -70,7 +73,7 @@ end
 --- @param pathname string
 --- @return boolean ok
 function Renderer:del(pathname)
-    if type(pathname) ~= 'string' then
+    if not is_string(pathname) then
         error('pathname must be string', 2)
     end
     return self.rez:del(pathname)
@@ -81,7 +84,7 @@ end
 --- @return boolean ok
 --- @return string err
 function Renderer:add(pathname)
-    if type(pathname) ~= 'string' then
+    if not is_string(pathname) then
         error('pathname must be string', 2)
     end
 
@@ -100,11 +103,11 @@ end
 --- @return Renderer
 --- @return string err
 local function new(rootdir, follow_symlink, cache)
-    if type(rootdir) ~= 'string' then
+    if not is_string(rootdir) then
         error('rootdir must be string', 2)
-    elseif follow_symlink ~= nil and type(follow_symlink) ~= 'boolean' then
+    elseif follow_symlink ~= nil and not is_boolean(follow_symlink) then
         error('follow_symlink must be boolean', 2)
-    elseif cache ~= nil and type(cache) ~= 'boolean' then
+    elseif cache ~= nil and not is_boolean(cache) then
         error('cache must be boolean', 2)
     end
 
