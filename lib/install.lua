@@ -28,6 +28,7 @@ local match = string.match
 local sub = string.sub
 local open = io.open
 local remove = os.remove
+local errorf = require('reflex.errorf')
 local exec = require('reflex.exec')
 -- constants
 local ROCKSPEC_TMPL = [[

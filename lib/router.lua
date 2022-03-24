@@ -19,9 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local assert = assert
-local error = error
 local ipairs = ipairs
 local lower = string.lower
 local next = next
@@ -32,6 +30,7 @@ local tostring = tostring
 local type = type
 local require = require
 local new_fsrouter = require('fsrouter').new
+local errorf = require('reflex.errorf')
 local status = require('reflex.status')
 --- constants
 local OK = status.OK
@@ -74,17 +73,17 @@ Router.__index = Router
 --- @return table file
 function Router:serve(method, pathname, req, rsp)
     if type(method) ~= 'string' then
-        error('method must be string', 2)
+        errorf(2, 'method must be string')
     elseif type(pathname) ~= 'string' then
-        error('pathname must be string', 2)
+        errorf(2, 'pathname must be string')
     elseif type(req) ~= 'table' then
-        error('req must be table', 2)
+        errorf(2, 'req must be table')
     elseif type(rsp) ~= 'table' then
-        error('rsp must be table', 2)
+        errorf(2, 'rsp must be table')
     elseif type(rsp.header) ~= 'table' then
-        error('rsp.header must be table', 2)
+        errorf(2, 'rsp.header must be table')
     elseif type(rsp.body) ~= 'table' then
-        error('rsp.body must be table', 2)
+        errorf(2, 'rsp.body must be table')
     end
 
     -- get route
@@ -127,9 +126,9 @@ end
 local function new(rootdir, opts)
     opts = opts or {}
     if type(rootdir) ~= 'string' then
-        error('rootdir must be string', 2)
+        errorf(2, 'rootdir must be string')
     elseif type(opts) ~= 'table' then
-        error('opts must be table', 2)
+        errorf(2, 'opts must be table')
     end
 
     local router, err, routes = new_fsrouter(rootdir, {

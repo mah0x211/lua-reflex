@@ -19,13 +19,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local time = os.time
-local format = format
-local is_boolean = is_boolean
-local is_string = is_string
-local is_uint = is_uint
 local find = string.find
+local isa = require('isa')
+local is_boolean = isa.boolean
+local is_string = isa.string
+local is_uint = isa.uint
+local format = require('print').format
 
 --- is_valid_key
 --- @param key string

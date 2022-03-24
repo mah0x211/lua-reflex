@@ -19,10 +19,9 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local error = error
-local is_string = is_string
 local sub = string.sub
+local is_string = require('isa').string
 local hmacsha = require('hmac').sha224
 local randstr = require('reflex.randstr')
 -- constants
