@@ -1,21 +1,6 @@
 std = 'max'
 read_globals = {
     'printv',
-    print = {
-        fields = {
-            'flush',
-            'format',
-            'setdebug',
-            'setlevel',
-            'emerge',
-            'alert',
-            'crit',
-            'error',
-            'warn',
-            'notice',
-            'info',
-        },
-    },
 }
 include_files = {
     'bin/*.lua',
