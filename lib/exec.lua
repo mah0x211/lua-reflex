@@ -19,10 +19,10 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local unpack = require('unpack')
 local error = error
 local concat = table.concat
 local type = type
+local unpack = require('unpack')
 local execvp = require('exec').execvp
 
 local function noop()
