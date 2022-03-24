@@ -45,8 +45,6 @@ _G.is_uint8 = isa['uint8']
 _G.is_unsigned = isa['unsigned']
 _G.is_userdata = isa['userdata']
 
-_G.unpack = require('unpack')
-
 local assert = require('assert')
 _G.assert = assert
 
