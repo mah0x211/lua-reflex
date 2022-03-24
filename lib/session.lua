@@ -29,6 +29,7 @@ local getmetatable = debug.getmetatable
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
+local errorf = require('reflex.errorf')
 
 -- use reflex.cache module as default session store
 local Store = require('reflex.cache').new()

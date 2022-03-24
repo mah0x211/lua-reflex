@@ -19,38 +19,15 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
-local pcall = pcall
-local loadfile = require('loadchunk').file
-local errorf = require('reflex.errorf')
+local type = type
+local format = require('print').format
 
---- readconf
---- @return table<string, any> cfg
---- @return boolean loaded
-local function readcfg(pathname)
-    local cfg = {
-        name = 'unknown',
-        version = '0.0.0',
-    }
-
-    -- return default config
-    if not pathname then
-        return cfg, false
+local function errorf(...)
+    local lv = ...
+    if type(lv) == 'number' then
+        error(format(select(2, ...)), lv + 1)
     end
-
-    -- load config file
-    local fn, err = loadfile(pathname, cfg)
-    if err then
-        errorf('failed to load %q: %s', pathname, err)
-    end
-
-    local ok
-    ok, err = pcall(fn)
-    if not ok then
-        errorf('failed to evaluate %q: %s', pathname, err)
-    end
-
-    return cfg, true
+    error(format(...), 2)
 end
 
-return readcfg
+return errorf

@@ -19,7 +19,6 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local type = type
 
 local isa = require('isa')
 _G.is_boolean = isa['boolean']
@@ -68,13 +67,4 @@ local function printv(...)
     }))
 end
 _G.printv = printv
-
-local function errorf(...)
-    local lv = ...
-    if type(lv) == 'number' then
-        error(format(select(2, ...)), lv + 1)
-    end
-    error(format(...), 2)
-end
-_G.errorf = errorf
 
