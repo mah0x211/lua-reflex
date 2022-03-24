@@ -1,7 +1,4 @@
 std = 'max'
-read_globals = {
-    'printv',
-}
 include_files = {
     'bin/*.lua',
     'lib/**/*.lua',

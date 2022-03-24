@@ -40,7 +40,6 @@ build = {
         ['reflex.errorf'] = 'lib/errorf.lua',
         ['reflex.fs'] = 'lib/fs.lua',
         ['reflex.getopts'] = 'lib/getopts.lua',
-        ['reflex.global'] = 'lib/global.lua',
         ['reflex.install'] = 'lib/install.lua',
         ['reflex.json'] = 'lib/json.lua',
         ['reflex.randstr'] = 'lib/randstr.lua',
