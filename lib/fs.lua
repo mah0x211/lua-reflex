@@ -19,7 +19,6 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local assert = assert
 local basedir = require('basedir')
 local getcwd = require('getcwd')
