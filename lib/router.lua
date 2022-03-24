@@ -105,7 +105,8 @@ function Router:serve(method, pathname, req, rsp)
         return METHOD_NOT_ALLOWED
     end
 
-    local mlist = route.methods[lower(method)] or route.methods.any
+    local mlist = route.methods[lower(method)] or route.methods.any or
+                      route.filters.all
     if not mlist then
         return METHOD_NOT_ALLOWED
     end
@@ -146,6 +147,23 @@ local function new(rootdir, opts)
     -- build the routing table for print
     local route_list = {}
     for _, route in ipairs(routes) do
+        -- filter.all
+        if route.filters.all then
+            local hlist = {}
+            for _, handler in ipairs(route.filters.all) do
+                hlist[#hlist + 1] = {
+                    method = 'all',
+                    name = handler.stat.rpath,
+                }
+            end
+            route_list[#route_list + 1] = {
+                method = 'all',
+                rpath = route.rpath,
+                file = route.file,
+                handlers = hlist,
+            }
+        end
+
         -- static file
         if not next(route.methods) then
             route_list[#route_list + 1] = {
