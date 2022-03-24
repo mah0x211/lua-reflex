@@ -1,7 +1,6 @@
 std = 'max'
 read_globals = {
     'dump',
-    'errorf',
     'format',
     'is_boolean',
     'is_false',

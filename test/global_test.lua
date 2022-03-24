@@ -43,15 +43,3 @@ function testcase.printv()
     })
 end
 
-function testcase.errorf()
-    -- test that throw an error
-    local err = assert.throws(errorf, 'hello')
-    assert.equal(err, 'hello')
-
-    -- test that change the error level witg the first argument
-    err = assert.throws(function()
-        errorf(1, 'hello')
-    end)
-    assert.match(err, 'global_test.lua.+ hello', false)
-end
-
