@@ -7,6 +7,113 @@ function testcase.new()
     -- test that create new router
     local _, routes = assert(new_router('./testdir/html'))
     local compare = {
+        all = {
+            ['/'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                },
+            },
+            ['/favicon.ico'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                },
+            },
+            ['/img/example.jpg'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                },
+            },
+            ['/api'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                },
+            },
+            ['/:user'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/$user/#1.block_user.lua',
+                    },
+                },
+            },
+            ['/:user/posts'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/$user/#1.block_user.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/$user/posts/#1.extract_id.lua',
+                    },
+                },
+            },
+            ['/:user/posts/*id'] = {
+                handlers = {
+                    {
+                        method = 'all',
+                        name = '/#1.block_ip.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/#2.check_user.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/$user/#1.block_user.lua',
+                    },
+                    {
+                        method = 'all',
+                        name = '/$user/posts/#1.extract_id.lua',
+                    },
+                },
+            },
+
+        },
         any = {
             ['/:user/posts/*id'] = {
                 handlers = {
@@ -337,7 +444,7 @@ function testcase.serve()
     assert.is_nil(file)
 
     -- test that returns METHOD_NOT_ALLOWED
-    rc, err = r:serve('put', '/api', {}, {
+    rc, err = r:serve('put', '/signin', {}, {
         header = {},
         body = {},
     })
