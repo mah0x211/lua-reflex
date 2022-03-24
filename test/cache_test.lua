@@ -1,4 +1,5 @@
 require('luacov')
+local unpack = unpack or table.unpack
 local testcase = require('testcase')
 local usleep = require('testcase.timer').usleep
 local cache = require('reflex.cache')

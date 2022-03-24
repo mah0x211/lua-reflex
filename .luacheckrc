@@ -24,7 +24,6 @@ read_globals = {
     'is_unsigned',
     'is_userdata',
     'printv',
-    'unpack',
     assert = {
         fields = {
             'empty',
