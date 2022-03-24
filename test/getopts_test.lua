@@ -1,4 +1,5 @@
 require('luacov')
+local format = require('print').format
 local testcase = require('testcase')
 local getopts = require('reflex.getopts')
 

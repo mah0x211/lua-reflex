@@ -20,7 +20,6 @@
 -- THE SOFTWARE.
 --
 require('reflex.global')
-local format = format
 local concat = table.concat
 local sort = table.sort
 local ipairs = ipairs
@@ -30,6 +29,7 @@ local split = string.split
 local match = string.match
 local is_table = is_table
 local is_string = is_string
+local format = require('print').format
 
 local function print_pair_opt(opts, fmt)
     local list = {}

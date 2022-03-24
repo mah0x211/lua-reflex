@@ -58,9 +58,6 @@ _G.error = error
 
 _G.print = require('print')
 
-local format = print.format
-_G.format = format
-
 local function printv(...)
     print(dump({
         ...,
