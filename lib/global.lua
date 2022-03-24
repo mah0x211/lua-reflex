@@ -20,9 +20,6 @@
 -- THE SOFTWARE.
 --
 
-local assert = require('assert')
-_G.assert = assert
-
 local dump = require('dump')
 _G.dump = dump
 
