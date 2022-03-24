@@ -20,9 +20,6 @@
 -- THE SOFTWARE.
 --
 
-local error = require('error')
-_G.error = error
-
 local function printv(...)
     local dump = require('dump')
     print(dump({
