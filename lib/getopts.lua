@@ -19,7 +19,6 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local concat = table.concat
 local sort = table.sort
 local ipairs = ipairs
@@ -27,8 +26,9 @@ local string = require('stringex')
 local has_prefix = string.has_prefix
 local split = string.split
 local match = string.match
-local is_table = is_table
-local is_string = is_string
+local isa = require('isa')
+local is_table = isa.table
+local is_string = isa.string
 local format = require('print').format
 
 local function print_pair_opt(opts, fmt)

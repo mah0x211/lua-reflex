@@ -19,7 +19,6 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
 local pcall = pcall
 local loadfile = require('loadchunk').file
 local errorf = require('reflex.errorf')

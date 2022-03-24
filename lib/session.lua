@@ -19,13 +19,13 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-require('reflex.global')
-local is_finite = is_finite
-local is_string = is_string
-local is_table = is_table
-local is_function = is_function
 local find = string.find
 local getmetatable = debug.getmetatable
+local isa = require('isa')
+local is_finite = isa.finite
+local is_string = isa.string
+local is_table = isa.table
+local is_function = isa.Function
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str

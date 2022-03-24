@@ -1,28 +1,5 @@
 std = 'max'
 read_globals = {
-    'is_boolean',
-    'is_false',
-    'is_file',
-    'is_finite',
-    'is_function',
-    'is_int',
-    'is_int8',
-    'is_int16',
-    'is_int32',
-    'is_nan',
-    'is_nil',
-    'is_none',
-    'is_number',
-    'is_string',
-    'is_table',
-    'is_thread',
-    'is_true',
-    'is_uint',
-    'is_uint8',
-    'is_uint16',
-    'is_uint32',
-    'is_unsigned',
-    'is_userdata',
     'printv',
     assert = {
         fields = {
