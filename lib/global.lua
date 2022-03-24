@@ -23,8 +23,6 @@
 local error = require('error')
 _G.error = error
 
-_G.print = require('print')
-
 local function printv(...)
     local dump = require('dump')
     print(dump({
