@@ -94,6 +94,7 @@ function Router:serve(method, pathname, req, rsp)
         return NOT_FOUND
     end
     req.params = glob
+    req.route_uri = route.rpath
 
     -- no method in route
     if not next(route.methods) then
