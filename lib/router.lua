@@ -24,7 +24,8 @@ local ipairs = ipairs
 local lower = string.lower
 local next = next
 local pairs = pairs
-local pcall = pcall
+local xpcall = xpcall
+local traceback = debug.traceback
 local setmetatable = setmetatable
 local tostring = tostring
 local type = type
@@ -111,7 +112,9 @@ function Router:serve(method, pathname, req, rsp)
         return METHOD_NOT_ALLOWED
     end
 
-    local ok, res = pcall(invoke_handlers, mlist, req, rsp)
+    local ok, res = xpcall(function()
+        return invoke_handlers(mlist, req, rsp)
+    end, traceback)
     if not ok then
         return INTERNAL_SERVER_ERROR, res
     end
