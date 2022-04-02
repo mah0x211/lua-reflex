@@ -39,10 +39,12 @@ function testcase.set()
     assert(h:set('foo'))
     -- confirm
     assert.is_nil(h:get('foo'))
+    assert.empty(h.list)
 
     -- test that empty-value treat as nil
     assert(h:set('foo', 'bar'))
     assert(h:set('foo', {}))
+    assert.empty(h.list)
 
     -- test that return false if key is not exists
     assert.is_false(h:set('foo'))
@@ -135,5 +137,31 @@ function testcase.get()
     -- test that throws an error if key is not valid header key
     local err = assert.throws(h.get, h, 1)
     assert.match(err, 'key must be string')
+end
+
+function testcase.each()
+    local h = header.new()
+    assert(h:set('foo-bar', 'hello'))
+    assert(h:set('baz-qux', 'world'))
+
+    -- test that iterate each headers
+    local headers = {}
+    for i, k, v in h:each() do
+        headers[i] = {
+            [k] = v,
+        }
+    end
+    assert.equal(headers, {
+        {
+            ['Foo-Bar'] = {
+                'hello',
+            },
+        },
+        {
+            ['Baz-Qux'] = {
+                'world',
+            },
+        },
+    })
 end
 
