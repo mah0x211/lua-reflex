@@ -23,6 +23,7 @@ local error = error
 local lower = string.lower
 local find = string.find
 local format = string.format
+local remove = table.remove
 local setmetatable = setmetatable
 local capitalize = require('stringex').capitalize
 local isa = require('isa')
@@ -67,7 +68,8 @@ local function copy_values(vals)
 end
 
 --- @class Header
---- @field dict table<string, string[]>
+--- @field list table<integer, table<string, string[]>>
+--- @field dict table<string, table<string, string[]>>
 --- @field header userdata
 local Header = {}
 Header.__index = Header
@@ -100,18 +102,29 @@ function Header:set(key, val)
     local lkey = lower(key)
     if val == nil then
         -- remove key
-        if self.dict[lkey] then
+        local item = self.dict[lkey]
+        if item then
+            remove(self.list, item.idx)
             self.dict[lkey] = nil
             return true
         end
         return false
     end
 
-    -- set value
-    self.dict[lkey] = {
-        key = capitalize(key),
-        val = val,
-    }
+    local item = self.dict[lkey]
+    if item then
+        -- update value
+        item.val = val
+    else
+        -- set new item
+        item = {
+            idx = #self.list + 1,
+            key = capitalize(key),
+            val = val,
+        }
+        self.list[item.idx] = item
+        self.dict[lkey] = item
+    end
 
     return true
 end
@@ -147,12 +160,15 @@ function Header:add(key, val)
             arr[#arr + 1] = v
         end
     else
+        -- set new item
         item = {
+            idx = #self.list + 1,
             key = capitalize(key),
             val = val,
         }
+        self.list[item.idx] = item
+        self.dict[lkey] = item
     end
-    self.dict[lkey] = item
 
     return true
 end
@@ -173,10 +189,23 @@ function Header:get(key)
     return nil
 end
 
+--- each
+--- @return function iterator
+function Header:each()
+    local list = self.list
+    return function(_, ...)
+        local idx, item = next(list, ...)
+        if idx then
+            return idx, item.key, item.val
+        end
+    end
+end
+
 --- new
 --- @return Header
 local function new()
     return setmetatable({
+        list = {},
         dict = {},
     }, Header)
 end
