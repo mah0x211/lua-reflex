@@ -23,6 +23,7 @@ dependencies = {
     'getenv >= 0.2.1',
     'hmac >= 0.1.0',
     'loadchunk >= 0.1.2',
+    'metamodule >= 0.3.1',
     'ossp-uuid >= 1.6.2',
     'print >= 0.1.0',
     'rez >= 0.5.1',
