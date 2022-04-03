@@ -162,6 +162,22 @@ function Session:set(key, val)
     self.value[key] = val
 end
 
+--- delete
+--- @param key string
+--- @return any val
+function Session:delete(key)
+    if not is_string(key) then
+        error('key must be string', 2)
+    end
+
+    local val = self.value[key]
+    if val then
+        self.value[key] = nil
+    end
+
+    return val
+end
+
 --- get
 --- @param key string
 --- @return any val

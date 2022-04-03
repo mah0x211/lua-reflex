@@ -91,26 +91,33 @@ function testcase.new()
     assert(session.new())
 end
 
-function testcase.set()
+function testcase.set_get_delete()
     local s = assert(session.new())
 
     -- test that set a value to session
-    assert(pcall(s.set, s, 'foo', 'bar'))
+    s:set('foo', 'bar')
+    s:set('qux', 'quux')
+    assert.equal(s:get('foo'), 'bar')
+    assert.equal(s:get('qux'), 'quux')
+
+    -- test that set a nil to delete key
+    s:set('foo')
+    assert.is_nil(s:get('foo'))
+
+    -- test that return a deleted value
+    assert.equal(s:delete('qux'), 'quux')
+    assert.is_nil(s:get('qux'))
 
     -- test that throws an error if key is invalid
     local err = assert.throws(s.set, s, ' \n')
     assert.match(err, 'key must be non-empty string')
-end
 
-function testcase.del()
-    local s = assert(session.new())
+    -- test that throws an error if key is not string
+    err = assert.throws(s.get, s, {})
+    assert.match(err, 'key must be string')
 
-    -- test that get a value associated with key
-    s:set('foo', 'bar')
-    assert.equal(s:get('foo'), 'bar')
-
-    -- test that throws an error if key is invalid
-    local err = assert.throws(s.get, s, {})
+    -- test that throws an error if key is not string
+    err = assert.throws(s.delete, s, 1)
     assert.match(err, 'key must be string')
 end
 
