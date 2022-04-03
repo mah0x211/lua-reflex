@@ -2,14 +2,11 @@ require('luacov')
 local testcase = require('testcase')
 local status = require('reflex.status')
 local response = require('reflex.response')
-local dump = require('dump')
 
 function testcase.new()
     -- test that create new Response
     local res = assert(response.new())
-    print(dump(res))
-    assert.is_table(res.header)
-    assert.is_table(res.body)
+    assert.match(res, '^reflex%.response: ', false)
 end
 
 function testcase.continue()
