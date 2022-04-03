@@ -19,18 +19,16 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local setmetatable = setmetatable
 local isa = require('isa')
 local is_table = isa.table
 local is_string = isa.string
 local new_header = require('reflex.header').new
 local status = require('reflex.status')
 
---- @class Response
+--- @class reflex.Response
 --- @field header Header
 --- @field body table
 local Response = {}
-Response.__index = Response
 
 --- continue
 --- @param body table
@@ -758,16 +756,15 @@ function Response:network_authentication_required(err)
     return 511
 end
 
---- new
---- @return Response
-local function new()
-    return setmetatable({
-        header = new_header(),
-        body = {},
-    }, Response)
+--- init
+--- @return reflex.Response
+function Response:init()
+    self.header = new_header()
+    self.body = {}
+    return self
 end
 
 return {
-    new = new,
+    new = require('metamodule').new(Response),
 }
 
