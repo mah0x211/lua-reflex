@@ -19,6 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
+local find = string.find
 local isa = require('isa')
 local is_table = isa.table
 local is_string = isa.string
@@ -29,6 +30,14 @@ local status = require('reflex.status')
 --- @field header Header
 --- @field body table
 local Response = {}
+
+--- init
+--- @return reflex.Response
+function Response:init()
+    self.header = new_header()
+    self.body = {}
+    return self
+end
 
 --- continue
 --- @param body table
@@ -230,8 +239,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:moved_permanently(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 301
@@ -242,8 +251,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:found(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 302
@@ -254,8 +263,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:see_other(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 303
@@ -280,8 +289,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:use_proxy(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 305
@@ -292,8 +301,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:temporary_redirect(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 307
@@ -304,8 +313,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:permanent_redirect(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 308
@@ -313,13 +322,13 @@ function Response:permanent_redirect(uri)
 end
 
 --- bad_request
---- @param uri string
+--- @param err any
 --- @return integer
-function Response:bad_request(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+function Response:bad_request(err)
+    if err == nil then
+        err = status[400]
     end
-    self.header:set('Location', uri)
+    self.body.error = err
     self.status = 400
     return 400
 end
@@ -754,14 +763,6 @@ function Response:network_authentication_required(err)
     self.body.error = err
     self.status = 511
     return 511
-end
-
---- init
---- @return reflex.Response
-function Response:init()
-    self.header = new_header()
-    self.body = {}
-    return self
 end
 
 return {
