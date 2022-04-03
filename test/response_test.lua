@@ -299,9 +299,13 @@ function testcase.moved_permanently()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.moved_permanently, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.moved_permanently, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.moved_permanently, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.found()
@@ -314,9 +318,13 @@ function testcase.found()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.found, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.found, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.found, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.see_other()
@@ -329,9 +337,13 @@ function testcase.see_other()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.see_other, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.see_other, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.see_other, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.not_modified()
@@ -364,9 +376,13 @@ function testcase.use_proxy()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.use_proxy, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.use_proxy, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.use_proxy, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.temporary_redirect()
@@ -379,9 +395,13 @@ function testcase.temporary_redirect()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.temporary_redirect, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.temporary_redirect, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.temporary_redirect, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.permanent_redirect()
@@ -394,9 +414,13 @@ function testcase.permanent_redirect()
         '/foo/bar',
     })
 
+    -- test that throws an error if uri is empty-string
+    local err = assert.throws(res.permanent_redirect, res, ' \n \t ')
+    assert.match(err, 'uri must be non-empty string with no spaces')
+
     -- test that throws an error if uri is not string
-    local err = assert.throws(res.permanent_redirect, res, 1)
-    assert.match(err, 'uri must be string')
+    err = assert.throws(res.permanent_redirect, res, 1)
+    assert.match(err, 'uri must be non-empty string with no spaces')
 end
 
 function testcase.bad_request()
