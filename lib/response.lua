@@ -19,6 +19,7 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
+local find = string.find
 local isa = require('isa')
 local is_table = isa.table
 local is_string = isa.string
@@ -238,8 +239,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:moved_permanently(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 301
@@ -250,8 +251,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:found(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 302
@@ -262,8 +263,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:see_other(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 303
@@ -288,8 +289,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:use_proxy(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 305
@@ -300,8 +301,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:temporary_redirect(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 307
@@ -312,8 +313,8 @@ end
 --- @param uri string
 --- @return integer
 function Response:permanent_redirect(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+    if not is_string(uri) or #uri == 0 or find(uri, '%s') then
+        error('uri must be non-empty string with no spaces', 2)
     end
     self.header:set('Location', uri)
     self.status = 308
