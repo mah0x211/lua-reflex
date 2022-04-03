@@ -403,15 +403,16 @@ function testcase.bad_request()
     local res = assert(response.new())
 
     -- test that returns 400
-    assert.equal(res:bad_request('/foo/bar'), 400)
+    assert.equal(res:bad_request(), 400)
     assert.equal(res.status, 400)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.body.error, status[400])
 
-    -- test that throws an error if uri is not string
-    local err = assert.throws(res.bad_request, res, 1)
-    assert.match(err, 'uri must be string')
+    -- test that set value to body.error field
+    assert.equal(res:bad_request('hello'), 400)
+    assert.equal(res.status, 400)
+    assert.equal(res.body, {
+        error = 'hello',
+    })
 end
 
 function testcase.unauthorized()
