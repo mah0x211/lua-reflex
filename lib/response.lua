@@ -30,6 +30,14 @@ local status = require('reflex.status')
 --- @field body table
 local Response = {}
 
+--- init
+--- @return reflex.Response
+function Response:init()
+    self.header = new_header()
+    self.body = {}
+    return self
+end
+
 --- continue
 --- @param body table
 --- @return integer
@@ -313,13 +321,13 @@ function Response:permanent_redirect(uri)
 end
 
 --- bad_request
---- @param uri string
+--- @param err any
 --- @return integer
-function Response:bad_request(uri)
-    if not is_string(uri) then
-        error('uri must be string', 2)
+function Response:bad_request(err)
+    if err == nil then
+        err = status[400]
     end
-    self.header:set('Location', uri)
+    self.body.error = err
     self.status = 400
     return 400
 end
@@ -754,14 +762,6 @@ function Response:network_authentication_required(err)
     self.body.error = err
     self.status = 511
     return 511
-end
-
---- init
---- @return reflex.Response
-function Response:init()
-    self.header = new_header()
-    self.body = {}
-    return self
 end
 
 return {
