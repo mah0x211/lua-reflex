@@ -30,23 +30,22 @@ local setmetatable = setmetatable
 local tostring = tostring
 local type = type
 local require = require
+local format = string.format
+local isa = require('isa')
+local is_string = isa.string
+local is_table = isa.table
 local new_fsrouter = require('fsrouter').new
 local errorf = require('reflex.errorf')
 local status = require('reflex.status')
---- constants
-local OK = status.OK
-local NOT_FOUND = status.NOT_FOUND
-local METHOD_NOT_ALLOWED = status.METHOD_NOT_ALLOWED
-local INTERNAL_SERVER_ERROR = status.INTERNAL_SERVER_ERROR
 
 --- invoke_handlers
+--- @param res reflex.Response
+--- @param req reflex.Request
 --- @param mlist table[]
---- @param req Request
---- @param rsp table
 --- @return integer status_code
-local function invoke_handlers(mlist, req, rsp)
+local function invoke_handlers(res, req, mlist)
     for i, imp in ipairs(mlist) do
-        local code = imp.fn(req, rsp)
+        local code = imp.fn(req, res)
         if code then
             if status[code] then
                 return code
@@ -55,6 +54,8 @@ local function invoke_handlers(mlist, req, rsp)
                    tostring(code))
         end
     end
+
+    return res:ok()
 end
 
 --- @alias fsrouter userdata
@@ -65,61 +66,59 @@ local Router = {}
 Router.__index = Router
 
 --- serve
---- @param method string
---- @param pathname string
---- @param req table
---- @param rsp table
+--- @param res reflex.Response
+--- @param req reflex.Request
 --- @return integer status
---- @return string err
 --- @return table file
-function Router:serve(method, pathname, req, rsp)
-    if type(method) ~= 'string' then
-        errorf(2, 'method must be string')
-    elseif type(pathname) ~= 'string' then
-        errorf(2, 'pathname must be string')
-    elseif type(req) ~= 'table' then
-        errorf(2, 'req must be table')
-    elseif type(rsp) ~= 'table' then
-        errorf(2, 'rsp must be table')
-    elseif type(rsp.header) ~= 'table' then
-        errorf(2, 'rsp.header must be table')
-    elseif type(rsp.body) ~= 'table' then
-        errorf(2, 'rsp.body must be table')
+function Router:serve(res, req)
+    if not is_table(res) then
+        error('res must be table', 2)
+    elseif not is_table(res.header) then
+        error('res.header must be table', 2)
+    elseif not is_table(res.body) then
+        error('res.body must be table', 2)
+    elseif not is_table(req) then
+        error('req must be table', 2)
+    elseif not is_string(req.method) then
+        error('req.method must be string', 2)
+    elseif not is_string(req.uri) then
+        error('req.uri must be string', 2)
+    elseif not is_table(req.header) then
+        error('req.header must be table', 2)
     end
 
     -- get route
-    local route, err, glob = self.router:lookup(pathname)
+    local route, err, glob = self.router:lookup(req.uri)
     if err then
-        return INTERNAL_SERVER_ERROR, err
+        return res:internal_server_error(err)
     elseif not route then
-        return NOT_FOUND
+        return res:not_found(format('%q not found', req.uri))
     end
     req.params = glob
     req.route_uri = route.rpath
 
     -- no method in route
     if not next(route.methods) then
-        -- allow only the GET method
-        if lower(method) == 'get' then
-            return OK, nil, route.file
+        -- allow only the GET method for request to file
+        if route.file and lower(req.method) == 'get' then
+            return res:ok(), route.file
         end
-        return METHOD_NOT_ALLOWED
+        return res:method_not_allowed()
     end
 
-    local mlist = route.methods[lower(method)] or route.methods.any or
-                      route.filters.all
+    local mlist = route.methods[lower(req.method)] or route.methods.any
     if not mlist then
-        return METHOD_NOT_ALLOWED
+        return res:method_not_allowed()
     end
 
-    local ok, res = xpcall(function()
-        return invoke_handlers(mlist, req, rsp)
+    local ok, rsp = xpcall(function()
+        return invoke_handlers(res, req, mlist)
     end, traceback)
     if not ok then
-        return INTERNAL_SERVER_ERROR, res
+        return res:internal_server_error(rsp)
     end
 
-    return res or OK, nil, route.file
+    return rsp, route.file
 end
 
 --- new
@@ -150,23 +149,6 @@ local function new(rootdir, opts)
     -- build the routing table for print
     local route_list = {}
     for _, route in ipairs(routes) do
-        -- filter.all
-        if route.filters.all then
-            local hlist = {}
-            for _, handler in ipairs(route.filters.all) do
-                hlist[#hlist + 1] = {
-                    method = 'all',
-                    name = handler.stat.rpath,
-                }
-            end
-            route_list[#route_list + 1] = {
-                method = 'all',
-                rpath = route.rpath,
-                file = route.file,
-                handlers = hlist,
-            }
-        end
-
         -- static file
         if not next(route.methods) then
             route_list[#route_list + 1] = {
