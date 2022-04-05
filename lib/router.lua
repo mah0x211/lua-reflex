@@ -99,8 +99,8 @@ function Router:serve(res, req)
 
     -- no method in route
     if not next(route.methods) then
-        -- allow only the GET method
-        if lower(req.method) == 'get' then
+        -- allow only the GET method for request to file
+        if route.file and lower(req.method) == 'get' then
             return res:ok(), route.file
         end
         return res:method_not_allowed()
