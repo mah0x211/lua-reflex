@@ -20,8 +20,49 @@
 -- THE SOFTWARE.
 --
 local pcall = pcall
+local pairs = pairs
+local assert = require('assert')
+local isa = require('isa')
+local is_table = isa.table
+local is_string = isa.string
+local setenv = require('setenv')
 local loadfile = require('loadchunk').file
+local session = require('reflex.session')
 local errorf = require('reflex.errorf')
+
+--- verify
+--- @param cfg table
+--- @return table
+local function verify(cfg)
+    assert.is_table(cfg)
+
+    -- TODO: check the config format
+
+    -- verify openresty command
+    if cfg.openresty ~= nil and not is_string(cfg.openresty) then
+        error('openresty must be string')
+    end
+
+    -- set default session config
+    if cfg.session then
+        if not is_table(cfg.session) then
+            error('session must be table')
+        end
+        session.set_default(cfg.session.name, cfg.session)
+    end
+
+    -- export environment variables
+    if cfg.env then
+        if not is_table(cfg.env) then
+            error('env must be table')
+        end
+        for k, v in pairs(cfg.env) do
+            assert(setenv(k, v, true))
+        end
+    end
+
+    return cfg
+end
 
 --- readconf
 --- @return table<string, any> cfg
@@ -30,11 +71,12 @@ local function readcfg(pathname)
     local cfg = {
         name = 'unknown',
         version = '0.0.0',
+        docroot = 'html',
     }
 
     -- return default config
     if not pathname then
-        return cfg, false
+        return verify(cfg), false
     end
 
     -- load config file
@@ -49,7 +91,7 @@ local function readcfg(pathname)
         errorf('failed to evaluate %q: %s', pathname, err)
     end
 
-    return cfg, true
+    return verify(cfg), true
 end
 
 return readcfg
