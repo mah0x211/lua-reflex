@@ -27,6 +27,7 @@ dependencies = {
     'ossp-uuid >= 1.6.2',
     'print >= 0.1.0',
     'rez >= 0.5.1',
+    'setenv >= 0.1.0',
     'stringex >= 0.2.2',
     'unpack >= 0.1.0',
     'url >= 1.3.1',
