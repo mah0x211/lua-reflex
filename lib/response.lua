@@ -102,8 +102,10 @@ local function response4xx5xx(res, code, err)
 end
 
 --- @class reflex.Response
+--- @field status integer
 --- @field header Header
 --- @field body table
+--- @field json boolean
 local Response = {}
 
 --- init
