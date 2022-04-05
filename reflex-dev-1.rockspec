@@ -48,6 +48,7 @@ build = {
         ['reflex.randstr'] = 'lib/randstr.lua',
         ['reflex.readcfg'] = 'lib/readcfg.lua',
         ['reflex.renderer'] = 'lib/renderer.lua',
+        ['reflex.request'] = 'lib/request.lua',
         ['reflex.response'] = 'lib/response.lua',
         ['reflex.router'] = 'lib/router.lua',
         ['reflex.session'] = 'lib/session.lua',
