@@ -87,12 +87,6 @@ function testcase.render()
     -- test that templates has been deleted after rendered
     assert.is_false(r:exists('/index.html'))
 
-    -- test that returns a JSON encoded string
-    s = assert(r:render({
-        hello = 'hello world',
-    }))
-    assert.equal(s, '{"hello":"hello world"}')
-
     -- test that returns an error
     local err
     s, err = r:render({
