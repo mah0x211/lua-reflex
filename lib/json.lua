@@ -19,4 +19,32 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-return require('yyjson')
+local yyjson = require('yyjson')
+local encode_json = yyjson.encode
+local decode_json = yyjson.decode
+--- constants
+local WRITE_PRETTY = yyjson.WRITE_PRETTY
+
+--- encode
+--- @param data boolean|string|number|table
+--- @return string json
+--- @return string err
+--- @return integer errno
+local function encode(data)
+    return encode_json(data, nil, WRITE_PRETTY)
+end
+
+--- decode
+--- @param data string
+--- @return boolean|string|number|table value
+--- @return string err
+--- @return integer errno
+local function decode(data)
+    return decode_json(data)
+end
+
+return {
+    encode = encode,
+    decode = decode,
+}
+
