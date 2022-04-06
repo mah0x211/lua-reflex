@@ -44,8 +44,6 @@ function Renderer:render(data, pathname)
     data = data or {}
     if not is_table(data) then
         error('data must be table')
-    elseif pathname == nil then
-        return json_encode(data)
     elseif not is_string(pathname) then
         error('pathname must be string', 2)
     end
