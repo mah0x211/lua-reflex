@@ -34,6 +34,15 @@ local function encode(data)
     return encode_json(data, nil, WRITE_PRETTY)
 end
 
+--- encode_compact
+--- @param data boolean|string|number|table
+--- @return string json
+--- @return string err
+--- @return integer errno
+local function encode_compact(data)
+    return encode_json(data)
+end
+
 --- decode
 --- @param data string
 --- @return boolean|string|number|table value
@@ -45,6 +54,7 @@ end
 
 return {
     encode = encode,
+    encode_compact = encode_compact,
     decode = decode,
 }
 
