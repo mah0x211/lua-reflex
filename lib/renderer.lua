@@ -25,7 +25,6 @@ local is_table = isa.table
 local is_string = isa.string
 local require = require
 local new_basedir = require('basedir').new
-local json_encode = require('reflex.json').encode
 local new_rez = require('rez').new
 
 --- @class Renderer
