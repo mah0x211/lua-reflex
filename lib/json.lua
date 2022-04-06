@@ -52,9 +52,19 @@ local function decode(data)
     return decode_json(data)
 end
 
+--- decode_with_ref
+--- @param data string
+--- @return boolean|string|number|table value
+--- @return string err
+--- @return integer errno
+local function decode_with_ref(data)
+    return decode_json(data, nil, true)
+end
+
 return {
     encode = encode,
     encode_compact = encode_compact,
     decode = decode,
+    decode_with_ref = decode_with_ref,
 }
 
