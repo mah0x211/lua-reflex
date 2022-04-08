@@ -7,7 +7,8 @@ source = {
 description = {
     summary = '',
     homepage = 'https://github.com/mah0x211/lua-reflex',
-    license = 'MIT/X11'
+    license = 'MIT/X11',
+    maintainer = "Masatoshi Fukunaga",
 }
 dependencies = {
     'lua >= 5.1',
@@ -29,6 +30,7 @@ dependencies = {
     'rez >= 0.5.1',
     'setenv >= 0.1.0',
     'stringex >= 0.2.2',
+    'string-capitalize >= 0.1.0',
     'unpack >= 0.1.0',
     'url >= 1.3.1',
     'yyjson >= 0.4.0',
