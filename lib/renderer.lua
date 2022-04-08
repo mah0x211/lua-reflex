@@ -99,7 +99,6 @@ local function default_helpers()
     local string = require('stringex')
     return {
         format = require('print').format,
-        capitalize = string.capitalize,
         has_prefix = string.has_prefix,
         has_suffix = string.has_suffix,
         split = string.split,
@@ -108,6 +107,7 @@ local function default_helpers()
         trim_prefix = string.trim_prefix,
         trim_space = string.trim_space,
         trim_suffix = string.trim_suffix,
+        capitalize = require('string.capitalize'),
     }
 end
 
