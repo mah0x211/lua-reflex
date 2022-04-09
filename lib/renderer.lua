@@ -109,6 +109,7 @@ local function default_helpers()
         capitalize = require('string.capitalize'),
         contains = require('string.contains'),
         split = require('string.split'),
+        trim = require('string.trim'),
     }
 end
 
