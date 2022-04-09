@@ -107,6 +107,7 @@ local function default_helpers()
         trim_space = string.trim_space,
         trim_suffix = string.trim_suffix,
         capitalize = require('string.capitalize'),
+        contains = require('string.contains'),
         split = require('string.split'),
     }
 end
