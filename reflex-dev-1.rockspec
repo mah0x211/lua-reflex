@@ -33,6 +33,7 @@ dependencies = {
     'string-capitalize >= 0.1.0',
     'string-contains >= 0.1.0',
     'string-split >= 0.3.0',
+    'string-trim >= 0.2.0',
     'unpack >= 0.1.0',
     'url >= 1.3.1',
     'yyjson >= 0.4.0',
