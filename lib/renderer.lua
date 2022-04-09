@@ -96,18 +96,12 @@ end
 --- default_helpers
 --- @return table env
 local function default_helpers()
-    local string = require('stringex')
     return {
         format = require('print').format,
-        capitalize = string.capitalize,
-        has_prefix = string.has_prefix,
-        has_suffix = string.has_suffix,
-        split = string.split,
-        split_after = string.split_after,
-        split_fields = string.split_fields,
-        trim_prefix = string.trim_prefix,
-        trim_space = string.trim_space,
-        trim_suffix = string.trim_suffix,
+        capitalize = require('string.capitalize'),
+        contains = require('string.contains'),
+        split = require('string.split'),
+        trim = require('string.trim'),
     }
 end
 

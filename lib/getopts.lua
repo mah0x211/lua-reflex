@@ -22,10 +22,9 @@
 local concat = table.concat
 local sort = table.sort
 local ipairs = ipairs
-local string = require('stringex')
-local has_prefix = string.has_prefix
-local split = string.split
 local match = string.match
+local has_prefix = require('string.contains').prefix
+local split = require('string.split')
 local isa = require('isa')
 local is_table = isa.table
 local is_string = isa.string
@@ -133,7 +132,7 @@ local function getopts(args, opts)
         if not has_prefix(s, '-') then
             vals[#vals + 1] = s
         else
-            local arr = split(s, '=', false, 1)
+            local arr = split(s, '=', 1)
             local opt = opts[arr[1]]
             local key = match(arr[1], '^-*(.+)$')
 
