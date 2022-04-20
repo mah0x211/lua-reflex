@@ -61,6 +61,7 @@ build = {
         ['reflex.status'] = 'lib/status.lua',
         ['reflex.token'] = 'lib/token.lua',
         ['reflex.which'] = 'lib/which.lua',
+        ['reflex.resty.log'] = 'lib/resty/log.lua',
         ['reflex.resty.request'] = 'lib/resty/request.lua',
         ['reflex.resty.cache.dict'] = 'lib/resty/cache/dict.lua',
         ['reflex.resty.conf.mime'] = 'lib/resty/conf/mime.lua',
