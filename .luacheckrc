@@ -1,4 +1,4 @@
-std = 'max'
+std = 'max+ngx_lua'
 include_files = {
     'bin/*.lua',
     'lib/**/*.lua',
