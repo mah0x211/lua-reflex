@@ -63,6 +63,7 @@ build = {
         ['reflex.which'] = 'lib/which.lua',
         ['reflex.resty.log'] = 'lib/resty/log.lua',
         ['reflex.resty.request'] = 'lib/resty/request.lua',
+        ['reflex.resty.response'] = 'lib/resty/response.lua',
         ['reflex.resty.cache.dict'] = 'lib/resty/cache/dict.lua',
         ['reflex.resty.conf.mime'] = 'lib/resty/conf/mime.lua',
         ['reflex.resty.conf.nginx'] = 'lib/resty/conf/nginx.lua',
