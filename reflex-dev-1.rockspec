@@ -23,6 +23,7 @@ dependencies = {
     'getcwd >= 0.1.0',
     'getenv >= 0.2.1',
     'hmac >= 0.1.0',
+    'libmdbx',
     'loadchunk >= 0.1.2',
     'metamodule >= 0.3.1',
     'ossp-uuid >= 1.6.2',
@@ -41,6 +42,7 @@ build = {
     type = 'builtin',
     modules = {
         ['reflex.cache'] = 'lib/cache.lua',
+        ['reflex.cache.mdbx'] = 'lib/cache/mdbx.lua',
         ['reflex.exec'] = 'lib/exec.lua',
         ['reflex.env'] = 'lib/env.lua',
         ['reflex.errorf'] = 'lib/errorf.lua',
