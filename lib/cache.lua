@@ -38,10 +38,31 @@ local function is_valid_key(key)
     return true
 end
 
---- @class Cache
+--- @class reflex.cache
 --- @field data table
 local Cache = {}
-Cache.__index = Cache
+
+--- new
+--- @return reflex.cache
+function Cache:init()
+    self.data = {}
+    return self
+end
+
+--- set_item
+--- @param key string
+--- @param val any
+--- @param ttl integer
+--- @return boolean ok
+--- @return string err
+function Cache:set_item(key, val, ttl)
+    self.data[key] = {
+        val = val,
+        ttl = ttl,
+        exp = ttl and time() + ttl or nil,
+    }
+    return true
+end
 
 --- set
 --- @param key string
@@ -59,27 +80,15 @@ function Cache:set(key, val, ttl)
         return false, format('ttl must be integer greater than 0')
     end
 
-    self.data[key] = {
-        val = val,
-        ttl = ttl,
-        exp = ttl and time() + ttl or nil,
-    }
-    return true
+    return self:set_item(key, val, ttl)
 end
 
---- get
+--- get_item
 --- @param key string
 --- @param touch boolean
 --- @return string val
 --- @return string err
-function Cache:get(key, touch)
-    local ok, err = is_valid_key(key)
-    if not ok then
-        return nil, err
-    elseif touch ~= nil and not is_boolean(touch) then
-        return nil, 'touch must be boolean'
-    end
-
+function Cache:get_item(key, touch)
     local item = self.data[key]
     if not item then
         return nil
@@ -96,6 +105,34 @@ function Cache:get(key, touch)
     return item.val
 end
 
+--- get
+--- @param key string
+--- @param touch boolean
+--- @return string val
+--- @return string err
+function Cache:get(key, touch)
+    local ok, err = is_valid_key(key)
+    if not ok then
+        return nil, err
+    elseif touch ~= nil and not is_boolean(touch) then
+        return nil, 'touch must be boolean'
+    end
+
+    return self:get_item(key, touch)
+end
+
+--- del_item
+--- @param key string
+--- @return boolean ok
+--- @return string err
+function Cache:del_item(key)
+    if self.data[key] ~= nil then
+        self.data[key] = nil
+        return true
+    end
+    return false
+end
+
 --- del
 --- @param key string
 --- @return boolean ok
@@ -104,23 +141,12 @@ function Cache:del(key)
     local ok, err = is_valid_key(key)
     if not ok then
         return false, err
-    elseif self.data[key] ~= nil then
-        self.data[key] = nil
-        return true
     end
-    return false
-end
 
---- new
---- @return Cache
---- @return string err
-local function new()
-    return setmetatable({
-        data = {},
-    }, Cache)
+    return self:del_item(key)
 end
 
 return {
-    new = new,
+    new = require('metamodule').new(Cache),
 }
 
