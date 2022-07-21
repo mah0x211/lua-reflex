@@ -11,10 +11,10 @@ jobs:
       uses: actions/checkout@v2
     -
       name: Setup Lua
-      uses: leafo/gh-actions-lua@v8.0.0
+      uses: leafo/gh-actions-lua@v9
     -
       name: Setup Luarocks
-      uses: leafo/gh-actions-luarocks@v4.0.0
+      uses: leafo/gh-actions-luarocks@v4
     -
       name: Install Tools
       run: luarocks install luacheck
@@ -42,18 +42,30 @@ jobs:
         submodules: 'true'
     -
       name: Setup Lua ${{ matrix.lua-version }}
-      uses: leafo/gh-actions-lua@v8.0.0
+      uses: leafo/gh-actions-lua@v9
       with:
         luaVersion: ${{ matrix.lua-version }}
     -
       name: Setup Luarocks
-      uses: leafo/gh-actions-luarocks@v4.0.0
+      uses: leafo/gh-actions-luarocks@v4
       with:
         luarocksVersion: "3.8.0"
     -
+      name: Install Required Packages
+      run: |
+        sudo apt install libtool
+        wget https://causal.agency/libretls/libretls-3.5.1.tar.gz
+        tar xvzf ./libretls-3.5.1.tar.gz
+        cd ./libretls-3.5.1
+        autoreconf -fi
+        ./configure
+        make all
+        sudo make install
+    -
       name: Install
       run: |
-        luarocks make
+        luarocks --dev install net-http
+        luarocks --dev make
     -
       name: Install Tools
       run: |

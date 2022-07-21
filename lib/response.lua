@@ -25,7 +25,7 @@ local is_boolean = isa.boolean
 local is_table = isa.table
 local is_string = isa.string
 local new_header = require('reflex.header').new
-local status = require('reflex.status')
+local status2reason = require('reflex.status').code2reason
 
 --- merge
 --- @param dst any
@@ -94,7 +94,7 @@ local function response4xx5xx(res, code, err)
     end
     res.body.error = {
         code = code,
-        status = status[code],
+        status = status2reason(code),
         message = err,
     }
     res.status = code
@@ -369,10 +369,10 @@ function Response:precondition_failed(err)
     return response4xx5xx(self, 412, err)
 end
 
---- request_entity_too_large
+--- payload_too_large
 --- @param err any
 --- @return integer
-function Response:request_entity_too_large(err)
+function Response:payload_too_large(err)
     return response4xx5xx(self, 413, err)
 end
 

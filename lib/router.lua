@@ -36,10 +36,10 @@ local is_string = isa.string
 local is_table = isa.table
 local new_fsrouter = require('fsrouter').new
 local errorf = require('reflex.errorf')
-local status = require('reflex.status')
+local code2name = require('reflex.status').code2name
 
 --- invoke_handlers
---- @param res reflex.Response
+--- @param res reflex.response
 --- @param req reflex.Request
 --- @param mlist table[]
 --- @return integer status_code
@@ -47,7 +47,7 @@ local function invoke_handlers(res, req, mlist)
     for i, imp in ipairs(mlist) do
         local code = imp.fn(req, res)
         if code then
-            if status[code] then
+            if code2name(code) then
                 return code
             end
             errorf('#%d: %s returns an invalid status code %q', i, imp.name,
@@ -66,7 +66,7 @@ local Router = {}
 Router.__index = Router
 
 --- serve
---- @param res reflex.Response
+--- @param res reflex.response
 --- @param req reflex.Request
 --- @return integer status
 --- @return table file
