@@ -51,6 +51,7 @@ build = {
         ['reflex.header'] = 'lib/header.lua',
         ['reflex.install'] = 'lib/install.lua',
         ['reflex.json'] = 'lib/json.lua',
+        ['reflex.log'] = 'lib/log.lua',
         ['reflex.randstr'] = 'lib/randstr.lua',
         ['reflex.readcfg'] = 'lib/readcfg.lua',
         ['reflex.renderer'] = 'lib/renderer.lua',
