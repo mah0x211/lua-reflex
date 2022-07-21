@@ -24,7 +24,6 @@ local pairs = pairs
 local assert = require('assert')
 local isa = require('isa')
 local is_table = isa.table
-local is_string = isa.string
 local setenv = require('setenv')
 local loadfile = require('loadchunk').file
 local session = require('reflex.session')
@@ -37,11 +36,6 @@ local function verify(cfg)
     assert.is_table(cfg)
 
     -- TODO: check the config format
-
-    -- verify openresty command
-    if cfg.openresty ~= nil and not is_string(cfg.openresty) then
-        error('openresty must be string')
-    end
 
     -- set default session config
     if cfg.session then
