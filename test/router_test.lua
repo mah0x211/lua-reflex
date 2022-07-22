@@ -1,6 +1,6 @@
 require('luacov')
 local testcase = require('testcase')
-local new_reponse = require('reflex.response').new
+local new_reponse = require('reflex.response')
 local new_router = require('reflex.router')
 local status = require('reflex.status')
 

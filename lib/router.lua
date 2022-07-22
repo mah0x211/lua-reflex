@@ -26,7 +26,6 @@ local next = next
 local pairs = pairs
 local xpcall = xpcall
 local traceback = debug.traceback
-local setmetatable = setmetatable
 local tostring = tostring
 local type = type
 local require = require
@@ -60,10 +59,9 @@ end
 
 --- @alias fsrouter userdata
 
---- @class Router
+--- @class reflex.router
 --- @field router fsrouter
 local Router = {}
-Router.__index = Router
 
 --- serve
 --- @param res reflex.response
@@ -121,12 +119,12 @@ function Router:serve(res, req)
     return rsp, route.file
 end
 
---- new
+--- init
 --- @param rootdir string
 --- @param opts table
---- @return Router
+--- @return reflex.router
 --- @return table[] routes
-local function new(rootdir, opts)
+function Router:init(rootdir, opts)
     opts = opts or {}
     if type(rootdir) ~= 'string' then
         errorf(2, 'rootdir must be string')
@@ -178,10 +176,11 @@ local function new(rootdir, opts)
         end
     end
 
-    return setmetatable({
-        router = router,
-    }, Router), route_list
+    self.router = router
+    return self, route_list
 end
 
-return new
+Router = require('metamodule').new(Router)
+
+return Router
 
