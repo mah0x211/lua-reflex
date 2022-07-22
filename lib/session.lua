@@ -146,11 +146,69 @@ local function get_default()
     return NAME, defval
 end
 
---- @class Session
+--- restore
+--- @param id string
+--- @return table value
+--- @return string err
+local function restore(id)
+    if not is_string(id) then
+        error('id must be string', 3)
+    end
+
+    local data, err = Store:get(id, true)
+    if not data then
+        return nil, err
+    end
+
+    return data
+end
+
+--- @class reflex.session
 --- @field id string
 --- @field value table<string, any>
 local Session = {}
-Session.__index = Session
+
+--- init
+--- @param id string
+--- @return reflex.session ses
+--- @return string err
+function Session:init(id)
+    if id ~= nil then
+        local value, err = restore(id)
+        if err then
+            return nil, err
+        elseif value then
+            self.id = id
+            self.value = value
+            return self
+        end
+    end
+
+    local newid, err = uuid4str()
+    if not newid then
+        return nil, err
+    end
+
+    self.id = newid
+    self.value = {}
+    return self
+end
+
+--- restore
+--- @param id string
+--- @return boolean ok
+--- @return string err
+function Session:restore(id)
+    local value, err = restore(id)
+
+    if value then
+        self.id = id
+        self.value = value
+        return true
+    end
+
+    return false, err
+end
 
 --- set
 --- @param key string
@@ -207,39 +265,6 @@ function Session:save(attr)
     return bake_cookie(NAME, self.id, bake_attributes({}, attr))
 end
 
---- restore
---- @param id string
---- @return table value
---- @return string err
-local function restore(id)
-    if not is_string(id) then
-        error('id must be string', 3)
-    end
-
-    local data, err = Store:get(id, true)
-    if not data then
-        return nil, err
-    end
-
-    return data
-end
-
---- restore
---- @param id string
---- @return boolean ok
---- @return string err
-function Session:restore(id)
-    local value, err = restore(id)
-
-    if value then
-        self.id = id
-        self.value = value
-        return true
-    end
-
-    return false, err
-end
-
 --- destroy
 --- @param attr table|nil
 --- @return string void_cookie
@@ -269,36 +294,8 @@ function Session:destroy(attr)
     }, attr))
 end
 
---- new
---- @param id string
---- @return Session ses
---- @return string err
-local function new(id)
-    if id ~= nil then
-        local value, err = restore(id)
-        if err then
-            return nil, err
-        elseif value then
-            return setmetatable({
-                id = id,
-                value = value,
-            }, Session)
-        end
-    end
-
-    local newid, err = uuid4str()
-    if not newid then
-        return nil, err
-    end
-
-    return setmetatable({
-        id = newid,
-        value = {},
-    }, Session)
-end
-
 return {
-    new = new,
+    new = require('metamodule').new(Session),
     set_store = set_store,
     reset_default = reset_default,
     set_default = set_default,
