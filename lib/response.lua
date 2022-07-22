@@ -110,16 +110,19 @@ local function response4xx5xx(res, code, err)
 end
 
 --- @class reflex.response
+--- @field conn net.http.connection
 --- @field status integer
 --- @field resp net.http.message.response
 --- @field header net.http.header
 --- @field body table
---- @field json boolean
+--- @field as_json boolean
 local Response = {}
 
 --- init
+--- @param conn net.http.connection
 --- @return reflex.response
-function Response:init()
+function Response:init(conn)
+    self.conn = conn
     self.resp = new_response()
     self.header = self.resp.header
     self.body = {}
@@ -134,6 +137,24 @@ function Response:set_status(code)
         error(string.format('failed to set status code: %s', err), 2)
     end
     self.status = code
+end
+
+--- flush
+--- @return integer n
+--- @return string err
+function Response:flush()
+    return self.conn:flush()
+end
+
+--- write
+--- @param msg any
+--- @return integer n
+--- @return string err
+function Response:write(msg)
+    if msg ~= nil and not is_string(msg) then
+        error('msg must be string', 2)
+    end
+    return self.resp:write(self.conn, msg)
 end
 
 --- continue
