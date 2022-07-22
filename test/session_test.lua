@@ -149,10 +149,9 @@ function testcase.save()
             },
         },
     })
-    local ok, err, cookie = s:save({
+    local cookie, err = assert(s:save({
         path = '/pathname',
-    })
-    assert(ok, err)
+    }))
     local c = assert(parse_baked_cookie(cookie))
     -- confirm cookie
     c.expires = nil
@@ -181,10 +180,9 @@ function testcase.save()
 
     -- test that return an error from store
     session.set_store(TEST_STORE)
-    ok, err, cookie = s:save()
-    assert.is_false(ok)
-    assert.equal(err, 'test-set-error')
+    cookie, err = s:save()
     assert.is_nil(cookie)
+    assert.equal(err, 'test-set-error')
 
     -- test that throws an error
     err = assert.throws(s.save, s, 1)
@@ -198,7 +196,7 @@ function testcase.restore()
             baz = 'qux',
         },
     })
-    local _, _, cookie = assert(s:save())
+    local cookie = assert(s:save())
     local c = parse_baked_cookie(cookie)
     local sid = c.value
 
@@ -249,8 +247,7 @@ function testcase.destroy()
             baz = 'qux',
         },
     })
-    local ok, err, cookie = s:save()
-    assert(ok, err)
+    local cookie = assert(s:save())
     local c = parse_baked_cookie(cookie)
     local sid = c.value
     s = assert(session.new())

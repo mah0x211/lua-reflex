@@ -190,9 +190,8 @@ end
 
 --- save
 --- @param attr table
---- @return boolean ok
---- @return string err
 --- @return string cookie
+--- @return any err
 function Session:save(attr)
     if attr == nil then
         attr = {}
@@ -202,10 +201,10 @@ function Session:save(attr)
 
     local ok, serr = Store:set(self.id, self.value, ATTR.maxage)
     if not ok then
-        return false, serr
+        return nil, serr
     end
 
-    return true, nil, bake_cookie(NAME, self.id, bake_attributes({}, attr))
+    return bake_cookie(NAME, self.id, bake_attributes({}, attr))
 end
 
 --- restore
