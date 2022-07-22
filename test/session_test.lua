@@ -152,6 +152,7 @@ function testcase.save()
     local cookie, err = assert(s:save({
         path = '/pathname',
     }))
+    assert.is_nil(err)
     local c = assert(parse_baked_cookie(cookie))
     -- confirm cookie
     c.expires = nil
@@ -247,7 +248,8 @@ function testcase.destroy()
             baz = 'qux',
         },
     })
-    local cookie = assert(s:save())
+    local cookie, err = assert(s:save())
+    assert.is_nil(err)
     local c = parse_baked_cookie(cookie)
     local sid = c.value
     s = assert(session.new())
@@ -256,10 +258,10 @@ function testcase.destroy()
     assert.equal(s.id, sid)
 
     -- test that destroy a session
-    ok, err, cookie = s:destroy({
+    cookie, err = assert(s:destroy({
         domain = 'example.com',
-    })
-    assert(ok, err)
+    }))
+    assert.is_nil(err)
     -- confirm cookie
     c = parse_baked_cookie(cookie)
     c.expires = nil
@@ -278,8 +280,8 @@ function testcase.destroy()
 
     -- test that return an error from store
     session.set_store(TEST_STORE)
-    ok, err = s:destroy()
-    assert.is_false(ok)
+    cookie, err = s:destroy()
+    assert.is_nil(cookie)
     assert.equal(err, 'test-del-error')
 
     -- test that throws an error

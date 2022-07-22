@@ -242,9 +242,8 @@ end
 
 --- destroy
 --- @param attr table|nil
---- @return boolean ok
---- @return string err
 --- @return string void_cookie
+--- @return string err
 function Session:destroy(attr)
     if attr == nil then
         attr = {}
@@ -254,18 +253,18 @@ function Session:destroy(attr)
 
     local id, err = uuid4str()
     if not id then
-        return false, err
+        return nil, err
     end
 
     local ok, serr = Store:del(self.id)
     if not ok then
-        return false, serr
+        return nil, serr
     end
 
     -- clear
     self.id = id
     self.value = {}
-    return ok, nil, bake_cookie(NAME, 'void', bake_attributes({
+    return bake_cookie(NAME, 'void', bake_attributes({
         maxage = -60,
     }, attr))
 end
