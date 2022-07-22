@@ -1,16 +1,16 @@
 require('luacov')
 local testcase = require('testcase')
-local response = require('reflex.response')
+local new_response = require('reflex.response')
 local code2reason = require('reflex.status').code2reason
 
 function testcase.new()
     -- test that create new Response
-    local res = assert(response.new())
+    local res = assert(new_response())
     assert.match(res, '^reflex%.response: ', false)
 end
 
 function testcase.continue()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 100
     assert.equal(res:continue(), 100)
@@ -58,7 +58,7 @@ function testcase.continue()
 end
 
 function testcase.switching_protocols()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 101
     assert.equal(res:switching_protocols(), 101)
@@ -106,7 +106,7 @@ function testcase.switching_protocols()
 end
 
 function testcase.processing()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 102
     assert.equal(res:processing(), 102)
@@ -154,7 +154,7 @@ function testcase.processing()
 end
 
 function testcase.ok()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 200
     assert.equal(res:ok(), 200)
@@ -202,7 +202,7 @@ function testcase.ok()
 end
 
 function testcase.created()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 201
     assert.equal(res:created(), 201)
@@ -250,7 +250,7 @@ function testcase.created()
 end
 
 function testcase.accepted()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 202
     assert.equal(res:accepted(), 202)
@@ -298,7 +298,7 @@ function testcase.accepted()
 end
 
 function testcase.non_authoritative_information()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 203
     assert.equal(res:non_authoritative_information(), 203)
@@ -346,7 +346,7 @@ function testcase.non_authoritative_information()
 end
 
 function testcase.no_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 204
     assert.equal(res:no_content(), 204)
@@ -394,7 +394,7 @@ function testcase.no_content()
 end
 
 function testcase.reset_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 205
     assert.equal(res:reset_content(), 205)
@@ -442,7 +442,7 @@ function testcase.reset_content()
 end
 
 function testcase.partial_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 206
     assert.equal(res:partial_content(), 206)
@@ -490,7 +490,7 @@ function testcase.partial_content()
 end
 
 function testcase.multi_status()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 207
     assert.equal(res:multi_status(), 207)
@@ -538,7 +538,7 @@ function testcase.multi_status()
 end
 
 function testcase.already_reported()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 208
     assert.equal(res:already_reported(), 208)
@@ -586,7 +586,7 @@ function testcase.already_reported()
 end
 
 function testcase.im_used()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 226
     assert.equal(res:im_used(), 226)
@@ -634,7 +634,7 @@ function testcase.im_used()
 end
 
 function testcase.multiple_choices()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 300
     assert.equal(res:multiple_choices(), 300)
@@ -682,7 +682,7 @@ function testcase.multiple_choices()
 end
 
 function testcase.moved_permanently()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 301
     assert.equal(res:moved_permanently('/foo/bar'), 301)
@@ -701,7 +701,7 @@ function testcase.moved_permanently()
 end
 
 function testcase.found()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 302
     assert.equal(res:found('/foo/bar'), 302)
@@ -720,7 +720,7 @@ function testcase.found()
 end
 
 function testcase.see_other()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 303
     assert.equal(res:see_other('/foo/bar'), 303)
@@ -739,7 +739,7 @@ function testcase.see_other()
 end
 
 function testcase.not_modified()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 304
     assert.equal(res:not_modified(), 304)
@@ -787,7 +787,7 @@ function testcase.not_modified()
 end
 
 function testcase.use_proxy()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 305
     assert.equal(res:use_proxy('/foo/bar'), 305)
@@ -806,7 +806,7 @@ function testcase.use_proxy()
 end
 
 function testcase.temporary_redirect()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 307
     assert.equal(res:temporary_redirect('/foo/bar'), 307)
@@ -825,7 +825,7 @@ function testcase.temporary_redirect()
 end
 
 function testcase.permanent_redirect()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 308
     assert.equal(res:permanent_redirect('/foo/bar'), 308)
@@ -844,7 +844,7 @@ function testcase.permanent_redirect()
 end
 
 function testcase.bad_request()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 400
     assert.equal(res:bad_request(), 400)
@@ -868,7 +868,7 @@ function testcase.bad_request()
 end
 
 function testcase.unauthorized()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 401
     assert.equal(res:unauthorized(), 401)
@@ -892,7 +892,7 @@ function testcase.unauthorized()
 end
 
 function testcase.payment_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 402
     assert.equal(res:payment_required(), 402)
@@ -916,7 +916,7 @@ function testcase.payment_required()
 end
 
 function testcase.forbidden()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 403
     assert.equal(res:forbidden(), 403)
@@ -940,7 +940,7 @@ function testcase.forbidden()
 end
 
 function testcase.not_found()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 404
     assert.equal(res:not_found(), 404)
@@ -964,7 +964,7 @@ function testcase.not_found()
 end
 
 function testcase.method_not_allowed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 405
     assert.equal(res:method_not_allowed(), 405)
@@ -988,7 +988,7 @@ function testcase.method_not_allowed()
 end
 
 function testcase.not_acceptable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 406
     assert.equal(res:not_acceptable(), 406)
@@ -1012,7 +1012,7 @@ function testcase.not_acceptable()
 end
 
 function testcase.proxy_authentication_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 407
     assert.equal(res:proxy_authentication_required(), 407)
@@ -1036,7 +1036,7 @@ function testcase.proxy_authentication_required()
 end
 
 function testcase.request_timeout()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 408
     assert.equal(res:request_timeout(), 408)
@@ -1060,7 +1060,7 @@ function testcase.request_timeout()
 end
 
 function testcase.conflict()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 409
     assert.equal(res:conflict(), 409)
@@ -1084,7 +1084,7 @@ function testcase.conflict()
 end
 
 function testcase.gone()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 410
     assert.equal(res:gone(), 410)
@@ -1108,7 +1108,7 @@ function testcase.gone()
 end
 
 function testcase.length_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 411
     assert.equal(res:length_required(), 411)
@@ -1132,7 +1132,7 @@ function testcase.length_required()
 end
 
 function testcase.precondition_failed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 412
     assert.equal(res:precondition_failed(), 412)
@@ -1156,7 +1156,7 @@ function testcase.precondition_failed()
 end
 
 function testcase.payload_too_large()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 413
     assert.equal(res:payload_too_large(), 413)
@@ -1180,7 +1180,7 @@ function testcase.payload_too_large()
 end
 
 function testcase.request_uri_too_long()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 414
     assert.equal(res:request_uri_too_long(), 414)
@@ -1204,7 +1204,7 @@ function testcase.request_uri_too_long()
 end
 
 function testcase.unsupported_media_type()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 415
     assert.equal(res:unsupported_media_type(), 415)
@@ -1228,7 +1228,7 @@ function testcase.unsupported_media_type()
 end
 
 function testcase.requested_range_not_satisfiable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 416
     assert.equal(res:requested_range_not_satisfiable(), 416)
@@ -1252,7 +1252,7 @@ function testcase.requested_range_not_satisfiable()
 end
 
 function testcase.expectation_failed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 417
     assert.equal(res:expectation_failed(), 417)
@@ -1276,7 +1276,7 @@ function testcase.expectation_failed()
 end
 
 function testcase.unprocessable_entity()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 422
     assert.equal(res:unprocessable_entity(), 422)
@@ -1300,7 +1300,7 @@ function testcase.unprocessable_entity()
 end
 
 function testcase.locked()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 423
     assert.equal(res:locked(), 423)
@@ -1324,7 +1324,7 @@ function testcase.locked()
 end
 
 function testcase.failed_dependency()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 424
     assert.equal(res:failed_dependency(), 424)
@@ -1348,7 +1348,7 @@ function testcase.failed_dependency()
 end
 
 function testcase.upgrade_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 426
     assert.equal(res:upgrade_required(), 426)
@@ -1372,7 +1372,7 @@ function testcase.upgrade_required()
 end
 
 function testcase.precondition_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 428
     assert.equal(res:precondition_required(), 428)
@@ -1396,7 +1396,7 @@ function testcase.precondition_required()
 end
 
 function testcase.too_many_requests()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 429
     assert.equal(res:too_many_requests(), 429)
@@ -1420,7 +1420,7 @@ function testcase.too_many_requests()
 end
 
 function testcase.request_header_fields_too_large()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 431
     assert.equal(res:request_header_fields_too_large(), 431)
@@ -1444,7 +1444,7 @@ function testcase.request_header_fields_too_large()
 end
 
 function testcase.unavailable_for_legal_reasons()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 451
     assert.equal(res:unavailable_for_legal_reasons(), 451)
@@ -1468,7 +1468,7 @@ function testcase.unavailable_for_legal_reasons()
 end
 
 function testcase.internal_server_error()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 500
     assert.equal(res:internal_server_error(), 500)
@@ -1492,7 +1492,7 @@ function testcase.internal_server_error()
 end
 
 function testcase.not_implemented()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 501
     assert.equal(res:not_implemented(), 501)
@@ -1516,7 +1516,7 @@ function testcase.not_implemented()
 end
 
 function testcase.bad_gateway()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 502
     assert.equal(res:bad_gateway(), 502)
@@ -1540,7 +1540,7 @@ function testcase.bad_gateway()
 end
 
 function testcase.service_unavailable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 503
     assert.equal(res:service_unavailable(), 503)
@@ -1564,7 +1564,7 @@ function testcase.service_unavailable()
 end
 
 function testcase.gateway_timeout()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 504
     assert.equal(res:gateway_timeout(), 504)
@@ -1588,7 +1588,7 @@ function testcase.gateway_timeout()
 end
 
 function testcase.http_version_not_supported()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 505
     assert.equal(res:http_version_not_supported(), 505)
@@ -1612,7 +1612,7 @@ function testcase.http_version_not_supported()
 end
 
 function testcase.variant_also_negotiates()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 506
     assert.equal(res:variant_also_negotiates(), 506)
@@ -1636,7 +1636,7 @@ function testcase.variant_also_negotiates()
 end
 
 function testcase.insufficient_storage()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 507
     assert.equal(res:insufficient_storage(), 507)
@@ -1660,7 +1660,7 @@ function testcase.insufficient_storage()
 end
 
 function testcase.loop_detected()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 508
     assert.equal(res:loop_detected(), 508)
@@ -1684,7 +1684,7 @@ function testcase.loop_detected()
 end
 
 function testcase.not_extended()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 510
     assert.equal(res:not_extended(), 510)
@@ -1708,7 +1708,7 @@ function testcase.not_extended()
 end
 
 function testcase.network_authentication_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 511
     assert.equal(res:network_authentication_required(), 511)
