@@ -114,6 +114,10 @@ end
 function testcase.new()
     -- test that create a new session
     assert(session.new())
+
+    -- test that throws an error if argument is not string
+    local err = assert.throws(session.new, {})
+    assert.match(err, 'cookies must be string')
 end
 
 function testcase.set_get_delete()
@@ -239,7 +243,7 @@ function testcase.restore()
     })
 
     -- test that restore session by new function
-    s = assert(session.new(sid))
+    s = assert(session.new(c.name .. '=' .. c.value))
     assert.equal(s.id, sid)
     assert.equal(s:get('foo'), {
         bar = {
@@ -254,15 +258,15 @@ function testcase.restore()
 
     -- test that return an error from store
     session.set_store(TEST_STORE)
-    ok, err = s:restore('foo')
+    ok, err = s:restore(sid)
     assert.is_false(ok)
     assert.equal(err, 'test-get-error')
 
-    local _, nerr = session.new('foo')
+    local _, nerr = session.new(c.name .. '=' .. c.value)
     assert.is_nil(_)
     assert.equal(nerr, 'test-get-error')
 
-    -- test that throws an error
+    -- test that throws an error if argument is invalid
     err = assert.throws(s.restore, s, true)
     assert.match(err, 'id must be string')
 end

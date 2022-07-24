@@ -26,6 +26,7 @@ local is_finite = isa.finite
 local is_string = isa.string
 local is_table = isa.table
 local is_function = isa.Function
+local parse_cookie = require('cookie').parse
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
@@ -175,10 +176,22 @@ end
 local Session = {}
 
 --- init
---- @param id string
+--- @param cookies string
 --- @return reflex.session ses
 --- @return string err
-function Session:init(id)
+function Session:init(cookies)
+    local id
+    if cookies then
+        if not is_string(cookies) then
+            error('cookies must be string', 2)
+        end
+        local kv, err = parse_cookie(cookies)
+        if err then
+            return nil, err
+        end
+        id = kv[get_name()]
+    end
+
     if id ~= nil then
         local value, err = restore(id)
         if err then
