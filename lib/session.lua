@@ -162,6 +162,49 @@ local function set_name(name)
     NAME = name
 end
 
+--- get_attr
+--- @return table attr
+local function get_attr()
+    local attr = {}
+    for k, v in pairs(ATTR) do
+        attr[k] = v
+    end
+    return attr
+end
+
+--- set_attr
+--- @param attr table
+local function set_attr(attr)
+    if attr == nil then
+        attr = {
+            path = DEFAULT_PATH_ATTR,
+            maxage = DEFAULT_MAXAGE_ATTR,
+            secure = DEFAULT_SECURE_ATTR,
+            httponly = DEFAULT_HTTPONLY_ATTR,
+            samesite = DEFAULT_SAMESITE_ATTR,
+        }
+    end
+
+    new_cookie(NAME, attr)
+    if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
+        error('attr.maxage must be integer greater than 0', 2)
+    end
+
+    ATTR.domain = attr.domain
+    for _, k in ipairs({
+        'maxage',
+        'path',
+        'secure',
+        'httponly',
+        'samesite',
+    }) do
+        local v = attr[k]
+        if v ~= nil then
+            ATTR[k] = v
+        end
+    end
+end
+
 --- restore
 --- @param id string
 --- @return table value
@@ -318,5 +361,7 @@ return {
     get_default = get_default,
     get_name = get_name,
     set_name = set_name,
+    get_attr = get_attr,
+    set_attr = set_attr,
 }
 

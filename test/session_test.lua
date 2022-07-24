@@ -10,7 +10,8 @@ function testcase.before_each()
     -- restore default value
     CACHE = cache.new()
     session.set_store(CACHE)
-    session.reset_default()
+    session.set_name()
+    session.set_attr()
 end
 
 function testcase.set_store()
@@ -103,6 +104,70 @@ function testcase.set_get_name()
     assert.match(err, 'name must be valid cookie-name string')
 end
 
+function testcase.set_get_attr()
+    -- test that return a current default attributes
+    assert.equal(session.get_attr(), {
+        path = '/',
+        maxage = 60 * 30,
+        secure = true,
+        httponly = true,
+        samesite = 'lax',
+    })
+
+    -- test that set default attributes
+    session.set_attr({
+        domain = 'example.com',
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+    })
+    assert.equal(session.get_attr(), {
+        domain = 'example.com',
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+        samesite = 'lax',
+    })
+
+    -- test that remove domain attribute
+    session.set_attr({})
+    assert.equal(session.get_attr(), {
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+        samesite = 'lax',
+    })
+
+    -- test that revert to module default attribute
+    session.set_attr()
+    assert.equal(session.get_attr(), {
+        path = '/',
+        maxage = 60 * 30,
+        secure = true,
+        httponly = true,
+        samesite = 'lax',
+    })
+
+    -- test that throws an error if argument is invalid
+    local err = assert.throws(session.set_attr, 'hello')
+    assert.match(err, 'attr must be table')
+
+    -- test that throws an error if maxage is not greater than 0
+    err = assert.throws(session.set_attr, {
+        maxage = 0,
+    })
+    assert.match(err, 'maxage must be integer greater than 0')
+
+    -- test that thows an error if attribute value is invalid
+    err = assert.throws(session.set_attr, {
+        secure = {},
+    })
+    assert.match(err, 'secure must be boolean')
+end
+
 function testcase.new()
     -- test that create a new session
     assert(session.new())
@@ -154,7 +219,8 @@ function testcase.save()
     local s = assert(session.new())
 
     -- test that save session value
-    session.set_default('session', {
+    session.set_name('session')
+    session.set_attr({
         maxage = 60 * 60,
     })
     s:set('foo', {
