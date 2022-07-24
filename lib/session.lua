@@ -26,6 +26,7 @@ local is_finite = isa.finite
 local is_string = isa.string
 local is_table = isa.table
 local is_function = isa.Function
+local parse_cookie = require('cookie').parse
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
@@ -93,57 +94,63 @@ local function bake_attributes(newattr, attr)
     return newattr
 end
 
---- reset_defualt
-local function reset_default()
-    NAME = DEFAULT_NAME
-    ATTR.domain = nil
-    ATTR.path = DEFAULT_PATH_ATTR
-    ATTR.maxage = DEFAULT_MAXAGE_ATTR
-    ATTR.secure = DEFAULT_SECURE_ATTR
-    ATTR.httponly = DEFAULT_HTTPONLY_ATTR
-    ATTR.samesite = DEFAULT_SAMESITE_ATTR
+--- get_name
+--- @return string name
+local function get_name()
+    return NAME
 end
 
---- set_default
+--- set_name
 --- @param name string
---- @param attr table<string, any>
-local function set_default(name, attr)
+local function set_name(name)
     if name == nil then
-        name = NAME
+        name = DEFAULT_NAME
     end
-    new_cookie(name, attr)
-
-    if attr then
-        if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
-            error('attr.maxage must be integer greater than 0', 2)
-        end
-
-        ATTR.domain = attr.domain
-        for _, k in ipairs({
-            'maxage',
-            'path',
-            'secure',
-            'httponly',
-            'samesite',
-        }) do
-            local v = attr[k]
-            if v ~= nil then
-                ATTR[k] = v
-            end
-        end
-    end
+    new_cookie(name, ATTR)
     NAME = name
 end
 
---- get_defualt
---- @return string name
+--- get_attr
 --- @return table attr
-local function get_default()
-    local defval = {}
+local function get_attr()
+    local attr = {}
     for k, v in pairs(ATTR) do
-        defval[k] = v
+        attr[k] = v
     end
-    return NAME, defval
+    return attr
+end
+
+--- set_attr
+--- @param attr table
+local function set_attr(attr)
+    if attr == nil then
+        attr = {
+            path = DEFAULT_PATH_ATTR,
+            maxage = DEFAULT_MAXAGE_ATTR,
+            secure = DEFAULT_SECURE_ATTR,
+            httponly = DEFAULT_HTTPONLY_ATTR,
+            samesite = DEFAULT_SAMESITE_ATTR,
+        }
+    end
+
+    new_cookie(NAME, attr)
+    if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
+        error('attr.maxage must be integer greater than 0', 2)
+    end
+
+    ATTR.domain = attr.domain
+    for _, k in ipairs({
+        'maxage',
+        'path',
+        'secure',
+        'httponly',
+        'samesite',
+    }) do
+        local v = attr[k]
+        if v ~= nil then
+            ATTR[k] = v
+        end
+    end
 end
 
 --- restore
@@ -169,10 +176,22 @@ end
 local Session = {}
 
 --- init
---- @param id string
+--- @param cookies string
 --- @return reflex.session ses
 --- @return string err
-function Session:init(id)
+function Session:init(cookies)
+    local id
+    if cookies then
+        if not is_string(cookies) then
+            error('cookies must be string', 2)
+        end
+        local kv, err = parse_cookie(cookies)
+        if err then
+            return nil, err
+        end
+        id = kv[get_name()]
+    end
+
     if id ~= nil then
         local value, err = restore(id)
         if err then
@@ -297,8 +316,9 @@ end
 return {
     new = require('metamodule').new(Session),
     set_store = set_store,
-    reset_default = reset_default,
-    set_default = set_default,
-    get_default = get_default,
+    get_name = get_name,
+    set_name = set_name,
+    get_attr = get_attr,
+    set_attr = set_attr,
 }
 

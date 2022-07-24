@@ -10,7 +10,8 @@ function testcase.before_each()
     -- restore default value
     CACHE = cache.new()
     session.set_store(CACHE)
-    session.reset_default()
+    session.set_name()
+    session.set_attr()
 end
 
 function testcase.set_store()
@@ -29,30 +30,42 @@ function testcase.set_store()
     assert.match(err, 'store must have .+ methods', false)
 end
 
-function testcase.set_default()
-    -- test that returns a current default name and attr
-    local name, attr = session.get_default()
-    assert.equal(name, 'sid')
-    assert.is_table(attr)
+function testcase.set_get_name()
+    -- test that get a current default name
+    assert.equal(session.get_name(), 'sid')
 
-    -- test that set default name
-    session.set_default('foo')
-    local newname, newattr = session.get_default()
-    assert.equal(newname, 'foo')
-    assert.equal(newattr, attr)
+    -- test that set name
+    session.set_name('foo')
+    assert.equal(session.get_name(), 'foo')
+
+    -- test that revert to default name
+    session.set_name()
+    assert.equal(session.get_name(), 'sid')
+
+    -- test that throws an error if argument is invalid
+    local err = assert.throws(session.set_name, {})
+    assert.match(err, 'name must be valid cookie-name string')
+end
+
+function testcase.set_get_attr()
+    -- test that return a current default attributes
+    assert.equal(session.get_attr(), {
+        path = '/',
+        maxage = 60 * 30,
+        secure = true,
+        httponly = true,
+        samesite = 'lax',
+    })
 
     -- test that set default attributes
-    name = newname
-    session.set_default(nil, {
+    session.set_attr({
         domain = 'example.com',
         maxage = 30,
         secure = false,
         httponly = false,
         path = 'hello/world',
     })
-    newname, newattr = session.get_default()
-    assert.equal(newname, name)
-    assert.equal(newattr, {
+    assert.equal(session.get_attr(), {
         domain = 'example.com',
         maxage = 30,
         secure = false,
@@ -62,10 +75,8 @@ function testcase.set_default()
     })
 
     -- test that remove domain attribute
-    session.set_default(nil, {})
-    newname, newattr = session.get_default()
-    assert.equal(newname, name)
-    assert.equal(newattr, {
+    session.set_attr({})
+    assert.equal(session.get_attr(), {
         maxage = 30,
         secure = false,
         httponly = false,
@@ -73,14 +84,28 @@ function testcase.set_default()
         samesite = 'lax',
     })
 
+    -- test that revert to module default attribute
+    session.set_attr()
+    assert.equal(session.get_attr(), {
+        path = '/',
+        maxage = 60 * 30,
+        secure = true,
+        httponly = true,
+        samesite = 'lax',
+    })
+
+    -- test that throws an error if argument is invalid
+    local err = assert.throws(session.set_attr, 'hello')
+    assert.match(err, 'attr must be table')
+
     -- test that throws an error if maxage is not greater than 0
-    local err = assert.throws(session.set_default, nil, {
+    err = assert.throws(session.set_attr, {
         maxage = 0,
     })
     assert.match(err, 'maxage must be integer greater than 0')
 
     -- test that thows an error if attribute value is invalid
-    err = assert.throws(session.set_default, nil, {
+    err = assert.throws(session.set_attr, {
         secure = {},
     })
     assert.match(err, 'secure must be boolean')
@@ -89,6 +114,10 @@ end
 function testcase.new()
     -- test that create a new session
     assert(session.new())
+
+    -- test that throws an error if argument is not string
+    local err = assert.throws(session.new, {})
+    assert.match(err, 'cookies must be string')
 end
 
 function testcase.set_get_delete()
@@ -137,7 +166,8 @@ function testcase.save()
     local s = assert(session.new())
 
     -- test that save session value
-    session.set_default('session', {
+    session.set_name('session')
+    session.set_attr({
         maxage = 60 * 60,
     })
     s:set('foo', {
@@ -213,7 +243,7 @@ function testcase.restore()
     })
 
     -- test that restore session by new function
-    s = assert(session.new(sid))
+    s = assert(session.new(c.name .. '=' .. c.value))
     assert.equal(s.id, sid)
     assert.equal(s:get('foo'), {
         bar = {
@@ -228,15 +258,15 @@ function testcase.restore()
 
     -- test that return an error from store
     session.set_store(TEST_STORE)
-    ok, err = s:restore('foo')
+    ok, err = s:restore(sid)
     assert.is_false(ok)
     assert.equal(err, 'test-get-error')
 
-    local _, nerr = session.new('foo')
+    local _, nerr = session.new(c.name .. '=' .. c.value)
     assert.is_nil(_)
     assert.equal(nerr, 'test-get-error')
 
-    -- test that throws an error
+    -- test that throws an error if argument is invalid
     err = assert.throws(s.restore, s, true)
     assert.match(err, 'id must be string')
 end
