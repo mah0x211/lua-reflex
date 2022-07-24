@@ -1,12 +1,8 @@
 require('luacov')
 local unpack = unpack or table.unpack
 local testcase = require('testcase')
-local usleep = require('testcase.timer').usleep
+local sleep = require('testcase.timer').sleep
 local cache = require('reflex.cache')
-
-local function sleep(sec)
-    usleep(sec * 1000 * 1000)
-end
 
 function testcase.new()
     -- test that returns a new cache object
@@ -49,7 +45,7 @@ function testcase.get()
     local c = assert(cache.new())
 
     -- test that return a value associated with key
-    assert(c:set('foo', 'bar', 2))
+    assert(c:set('foo', 'bar', 3))
     local val = assert(c:get('foo'))
     assert.equal(val, 'bar')
 
@@ -59,7 +55,7 @@ function testcase.get()
     -- test that return nil after reached to ttl
     sleep(1)
     assert(c:get('foo'))
-    sleep(1)
+    sleep(2)
     assert.is_nil(c:get('foo'))
 
     -- test that return nil and error
