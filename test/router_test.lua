@@ -7,7 +7,7 @@ local status = require('reflex.status')
 local function new_request(method, uri)
     return {
         method = method,
-        uri = uri,
+        path = uri,
         header = {},
     }
 end
@@ -501,9 +501,9 @@ function testcase.serve()
     err = assert.throws(r.serve, r, res, new_request({}, '/'))
     assert.match(err, 'req.method must be string')
 
-    -- test that throw an error if uri is invalid
+    -- test that throw an error if path is invalid
     err = assert.throws(r.serve, r, res, new_request('get', {}))
-    assert.match(err, 'req.uri must be string')
+    assert.match(err, 'req.path must be string')
 
     -- test that throw an error if uri is invalid
     local req = new_request('get', '/')

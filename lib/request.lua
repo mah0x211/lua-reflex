@@ -19,51 +19,56 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
---- @class reflex.Request
+local sub = string.sub
+local pairs = pairs
+local new_kvpairs = require('kvpairs').new
+local realpath = require('realpath')
+
+--- @class reflex.request : net.http.message.request
 --- @field method string
---- @field scheme string
 --- @field uri string
---- @field request_uri string
---- @field query table<string, any>
---- @field header Header
---- @field errors string[]
---- @field session Session?
+--- @field header net.http.header
+--- @field content? net.http.content
+--- @field session reflex.session
 local Request = {}
 
 --- init
---- @return reflex.Response
-function Request:init()
-    self.errors = {}
+--- @param req net.http.message.request
+--- @return reflex.request req
+--- @return any error
+function Request:init(req)
+    -- path normalization
+    local path, err = realpath(req.path, nil, false)
+    if err then
+        return nil, err
+    end
+
+    req.is_normalized = req.path ~= path
+    if path == '.' then
+        req.path = '/'
+    elseif sub(path, 1, 1) == '.' then
+        req.path = '/' .. path
+    else
+        req.path = path
+    end
+
+    -- wrap
+    for k, v in pairs(req) do
+        self[k] = v
+    end
+
+    local kvp = new_kvpairs()
+    if self.query_params then
+        kvp.dict = self.query_params
+        self.rawquery = self.query
+        self.query_params = nil
+    end
+    self.query = kvp
+
     return self
 end
 
---- get_body_data
---- @return string body
---- @return string err
-function Request:get_body_data()
-    return nil
-end
+Request = require('metamodule').new(Request, 'net.http.message.request')
 
---- get_body
---- @return table<string, string[]> body
---- @return string err
-function Request:get_body()
-    return nil
-end
-
---- push_error
---- @param err string
-function Request:push_error(err)
-    self.errors[#self.errors + 1] = err
-end
-
---- get_errors
---- @param err string[]
-function Request:get_errors(err)
-    return self.errors
-end
-
-return {
-    new = require('metamodule').new(Request),
-}
+return Request
 

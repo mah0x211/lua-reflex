@@ -79,18 +79,18 @@ function Router:serve(res, req)
         error('req must be table', 2)
     elseif not is_string(req.method) then
         error('req.method must be string', 2)
-    elseif not is_string(req.uri) then
-        error('req.uri must be string', 2)
+    elseif not is_string(req.path) then
+        error('req.path must be string', 2)
     elseif not is_table(req.header) then
         error('req.header must be table', 2)
     end
 
     -- get route
-    local route, err, glob = self.router:lookup(req.uri)
+    local route, err, glob = self.router:lookup(req.path)
     if err then
         return res:internal_server_error(err)
     elseif not route then
-        return res:not_found(format('%q not found', req.uri))
+        return res:not_found(format('%q not found', req.path))
     end
     req.params = glob
     req.route_uri = route.rpath
