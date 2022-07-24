@@ -42,7 +42,8 @@ local function verify(cfg)
         if not is_table(cfg.session) then
             error('session must be table')
         end
-        session.set_default(cfg.session.name, cfg.session)
+        session.set_name(cfg.session.name)
+        session.set_attr(cfg.session)
     end
 
     -- export environment variables

@@ -93,59 +93,6 @@ local function bake_attributes(newattr, attr)
     return newattr
 end
 
---- reset_defualt
-local function reset_default()
-    NAME = DEFAULT_NAME
-    ATTR.domain = nil
-    ATTR.path = DEFAULT_PATH_ATTR
-    ATTR.maxage = DEFAULT_MAXAGE_ATTR
-    ATTR.secure = DEFAULT_SECURE_ATTR
-    ATTR.httponly = DEFAULT_HTTPONLY_ATTR
-    ATTR.samesite = DEFAULT_SAMESITE_ATTR
-end
-
---- set_default
---- @param name string
---- @param attr table<string, any>
-local function set_default(name, attr)
-    if name == nil then
-        name = NAME
-    end
-    new_cookie(name, attr)
-
-    if attr then
-        if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
-            error('attr.maxage must be integer greater than 0', 2)
-        end
-
-        ATTR.domain = attr.domain
-        for _, k in ipairs({
-            'maxage',
-            'path',
-            'secure',
-            'httponly',
-            'samesite',
-        }) do
-            local v = attr[k]
-            if v ~= nil then
-                ATTR[k] = v
-            end
-        end
-    end
-    NAME = name
-end
-
---- get_defualt
---- @return string name
---- @return table attr
-local function get_default()
-    local defval = {}
-    for k, v in pairs(ATTR) do
-        defval[k] = v
-    end
-    return NAME, defval
-end
-
 --- get_name
 --- @return string name
 local function get_name()
@@ -356,9 +303,6 @@ end
 return {
     new = require('metamodule').new(Session),
     set_store = set_store,
-    reset_default = reset_default,
-    set_default = set_default,
-    get_default = get_default,
     get_name = get_name,
     set_name = set_name,
     get_attr = get_attr,
