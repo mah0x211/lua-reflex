@@ -86,6 +86,23 @@ function testcase.set_default()
     assert.match(err, 'secure must be boolean')
 end
 
+function testcase.set_get_name()
+    -- test that get a current default name
+    assert.equal(session.get_name(), 'sid')
+
+    -- test that set name
+    session.set_name('foo')
+    assert.equal(session.get_name(), 'foo')
+
+    -- test that revert to default name
+    session.set_name()
+    assert.equal(session.get_name(), 'sid')
+
+    -- test that throws an error if argument is invalid
+    local err = assert.throws(session.set_name, {})
+    assert.match(err, 'name must be valid cookie-name string')
+end
+
 function testcase.new()
     -- test that create a new session
     assert(session.new())

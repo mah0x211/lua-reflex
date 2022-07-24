@@ -146,6 +146,22 @@ local function get_default()
     return NAME, defval
 end
 
+--- get_name
+--- @return string name
+local function get_name()
+    return NAME
+end
+
+--- set_name
+--- @param name string
+local function set_name(name)
+    if name == nil then
+        name = DEFAULT_NAME
+    end
+    new_cookie(name, ATTR)
+    NAME = name
+end
+
 --- restore
 --- @param id string
 --- @return table value
@@ -300,5 +316,7 @@ return {
     reset_default = reset_default,
     set_default = set_default,
     get_default = get_default,
+    get_name = get_name,
+    set_name = set_name,
 }
 
