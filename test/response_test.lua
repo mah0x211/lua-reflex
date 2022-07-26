@@ -690,6 +690,13 @@ function testcase.moved_permanently()
     assert.equal(res.header:get('Location'), {
         '/foo/bar',
     })
+    assert.equal(res.body, {
+        redirection = {
+            code = 301,
+            location = '/foo/bar',
+            status = code2reason(301),
+        },
+    })
 
     -- test that throws an error if uri is empty-string
     local err = assert.throws(res.moved_permanently, res, ' \n \t ')
@@ -709,6 +716,13 @@ function testcase.found()
     assert.equal(res.header:get('Location'), {
         '/foo/bar',
     })
+    assert.equal(res.body, {
+        redirection = {
+            code = 302,
+            location = '/foo/bar',
+            status = code2reason(302),
+        },
+    })
 
     -- test that throws an error if uri is empty-string
     local err = assert.throws(res.found, res, ' \n \t ')
@@ -727,6 +741,13 @@ function testcase.see_other()
     assert.equal(res.status, 303)
     assert.equal(res.header:get('Location'), {
         '/foo/bar',
+    })
+    assert.equal(res.body, {
+        redirection = {
+            code = 303,
+            location = '/foo/bar',
+            status = code2reason(303),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -795,6 +816,13 @@ function testcase.use_proxy()
     assert.equal(res.header:get('Location'), {
         '/foo/bar',
     })
+    assert.equal(res.body, {
+        redirection = {
+            code = 305,
+            location = '/foo/bar',
+            status = code2reason(305),
+        },
+    })
 
     -- test that throws an error if uri is empty-string
     local err = assert.throws(res.use_proxy, res, ' \n \t ')
@@ -813,6 +841,13 @@ function testcase.temporary_redirect()
     assert.equal(res.status, 307)
     assert.equal(res.header:get('Location'), {
         '/foo/bar',
+    })
+    assert.equal(res.body, {
+        redirection = {
+            code = 307,
+            location = '/foo/bar',
+            status = code2reason(307),
+        },
     })
 
     -- test that throws an error if uri is empty-string

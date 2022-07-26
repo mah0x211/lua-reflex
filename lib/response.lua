@@ -25,7 +25,7 @@ local is_boolean = isa.boolean
 local is_table = isa.table
 local is_string = isa.string
 local new_response = require('net.http.message.response').new
-local status2reason = require('reflex.status').code2reason
+local code2reason = require('reflex.status').code2reason
 
 --- merge
 --- @param dst any
@@ -84,6 +84,16 @@ local function response3xx(res, code, uri)
     if not is_string(uri) or #uri == 0 or find(uri, '%s') then
         error('uri must be non-empty string with no spaces', 3)
     end
+
+    if not is_table(res.body) then
+        res.body = {}
+    end
+    res.body.redirection = {
+        code = code,
+        status = code2reason(code),
+        location = uri,
+    }
+
     res.header:set('Location', uri)
     res.status = code
     return code
@@ -102,7 +112,7 @@ local function response4xx5xx(res, code, err)
     end
     res.body.error = {
         code = code,
-        status = status2reason(code),
+        status = code2reason(code),
         message = err,
     }
     res.status = code
