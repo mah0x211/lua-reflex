@@ -28,9 +28,9 @@ local randstr = require('reflex.randstr')
 -- N byte = 128 bit / 8 bit
 local MSG_LEN = 128 / 8
 -- N byte = SHA-224(224 bit) / 8 bit * 2(HEX)
-local SHA1_LEN = 224 / 8 * 2
--- SHA1_LEN(160bit) + DELIMITER('.') + MSG_LEM
-local TOKEN_LEN = SHA1_LEN + 1 + MSG_LEN
+local SHA_LEN = 224 / 8 * 2
+-- SHA_LEN + DELIMITER('.') + MSG_LEM
+local TOKEN_LEN = SHA_LEN + 1 + MSG_LEN
 
 --- compute
 --- @param key string
@@ -46,18 +46,17 @@ end
 --- @param key string
 --- @param token string
 --- @return boolean ok
---- @return string err
 local function verify(key, token)
     if not is_string(key) then
         error('key must be string', 2)
     elseif not is_string(token) then
         error('token must be string', 2)
-    elseif #token ~= TOKEN_LEN or sub(token, SHA1_LEN + 1, SHA1_LEN + 1) ~= '.' then
+    elseif #token ~= TOKEN_LEN or sub(token, SHA_LEN + 1, SHA_LEN + 1) ~= '.' then
         return false
     end
 
     local msg = sub(token, -MSG_LEN)
-    return compute(msg, key) == sub(token, 1, SHA1_LEN)
+    return compute(msg, key) == sub(token, 1, SHA_LEN)
 end
 
 --- generate
