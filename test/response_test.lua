@@ -687,9 +687,7 @@ function testcase.moved_permanently()
     -- test that returns 301
     assert.equal(res:moved_permanently('/foo/bar'), 301)
     assert.equal(res.status, 301)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
     assert.equal(res.body, {
         redirection = {
             code = 301,
@@ -713,9 +711,7 @@ function testcase.found()
     -- test that returns 302
     assert.equal(res:found('/foo/bar'), 302)
     assert.equal(res.status, 302)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
     assert.equal(res.body, {
         redirection = {
             code = 302,
@@ -739,9 +735,7 @@ function testcase.see_other()
     -- test that returns 303
     assert.equal(res:see_other('/foo/bar'), 303)
     assert.equal(res.status, 303)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
     assert.equal(res.body, {
         redirection = {
             code = 303,
@@ -813,9 +807,7 @@ function testcase.use_proxy()
     -- test that returns 305
     assert.equal(res:use_proxy('/foo/bar'), 305)
     assert.equal(res.status, 305)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
     assert.equal(res.body, {
         redirection = {
             code = 305,
@@ -839,9 +831,7 @@ function testcase.temporary_redirect()
     -- test that returns 307
     assert.equal(res:temporary_redirect('/foo/bar'), 307)
     assert.equal(res.status, 307)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
     assert.equal(res.body, {
         redirection = {
             code = 307,
@@ -865,9 +855,7 @@ function testcase.permanent_redirect()
     -- test that returns 308
     assert.equal(res:permanent_redirect('/foo/bar'), 308)
     assert.equal(res.status, 308)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
 
     -- test that throws an error if uri is empty-string
     local err = assert.throws(res.permanent_redirect, res, ' \n \t ')
