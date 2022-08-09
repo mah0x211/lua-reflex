@@ -21,10 +21,14 @@
 --
 local pcall = pcall
 local pairs = pairs
+local open = io.open
+local format = string.format
 local assert = require('assert')
 local isa = require('isa')
+local is_string = isa.string
 local is_table = isa.table
 local setenv = require('setenv')
+local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
 local session = require('reflex.session')
 local errorf = require('reflex.errorf')
@@ -53,6 +57,49 @@ local function verify(cfg)
         end
         for k, v in pairs(cfg.env) do
             assert(setenv(k, v, true))
+        end
+    end
+
+    -- check cert files
+    if cfg.cert then
+        if not is_table(cfg.cert) then
+            error('cert must be table')
+        end
+
+        local key = cfg.cert.key
+        local pem = cfg.cert.pem
+        local dhparams = cfg.cert.dhparams
+        if key and pem then
+            if not is_string(key) then
+                error('cert.key must be string')
+            elseif not is_string(pem) then
+                error('cert.pem must be string')
+            elseif dhparams ~= nil and not is_string(dhparams) then
+                error('cert.dhparams must be string')
+            end
+
+            local tlscfg = new_tls_config()
+            local ok, err = tlscfg:set_keypair_file(pem, key)
+            if not ok then
+                error(format('failed to set tls keypair files: %s', err))
+            elseif dhparams then
+                local f
+                f, err = open(dhparams, 'r')
+                if not f then
+                    error(format('failed to open dhparam file %q: %s', dhparams,
+                                 err))
+                end
+                local s = f:read('*a')
+                f:close()
+
+                ok, err = tlscfg:set_dheparams(s)
+                if not ok then
+                    error(format('failed to set tls dhparams %q: %s', dhparams,
+                                 err))
+                end
+            end
+
+            cfg.tlscfg = tlscfg
         end
     end
 
