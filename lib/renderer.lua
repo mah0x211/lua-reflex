@@ -27,12 +27,49 @@ local require = require
 local new_basedir = require('basedir').new
 local new_rez = require('rez').new
 
---- @class Renderer
+--- default_helpers
+--- @return table env
+local function default_helpers()
+    return {
+        format = require('print').format,
+        capitalize = require('string.capitalize'),
+        contains = require('string.contains'),
+        split = require('string.split'),
+        trim = require('string.trim'),
+    }
+end
+
+--- @class reflex.renderer
 --- @field rootdir userdata
 --- @field rez userdata
 --- @field cache boolean
 local Renderer = {}
-Renderer.__index = Renderer
+
+--- init
+--- @param rootdir string
+--- @param follow_symlink boolean
+--- @param cache boolean
+--- @return reflex.renderer
+function Renderer:init(rootdir, follow_symlink, cache)
+    if not is_string(rootdir) then
+        error('rootdir must be string', 2)
+    elseif follow_symlink ~= nil and not is_boolean(follow_symlink) then
+        error('follow_symlink must be boolean', 2)
+    elseif cache ~= nil and not is_boolean(cache) then
+        error('cache must be boolean', 2)
+    end
+
+    self.rootdir = new_basedir(rootdir, follow_symlink)
+    self.cache = cache == true
+    self.rez = new_rez({
+        loader = function(_, pathname)
+            return self:add(pathname)
+        end,
+        env = default_helpers(),
+    })
+
+    return self
+end
 
 --- render
 --- @param data table
@@ -42,7 +79,7 @@ Renderer.__index = Renderer
 function Renderer:render(data, pathname)
     data = data or {}
     if not is_table(data) then
-        error('data must be table')
+        error('data must be table', 2)
     elseif not is_string(pathname) then
         error('pathname must be string', 2)
     end
@@ -93,46 +130,6 @@ function Renderer:add(pathname)
     return self.rez:add(pathname, content)
 end
 
---- default_helpers
---- @return table env
-local function default_helpers()
-    return {
-        format = require('print').format,
-        capitalize = require('string.capitalize'),
-        contains = require('string.contains'),
-        split = require('string.split'),
-        trim = require('string.trim'),
-    }
-end
-
---- new
---- @param rootdir string
---- @param follow_symlink boolean
---- @param cache boolean
---- @return Renderer
---- @return string err
-local function new(rootdir, follow_symlink, cache)
-    if not is_string(rootdir) then
-        error('rootdir must be string', 2)
-    elseif follow_symlink ~= nil and not is_boolean(follow_symlink) then
-        error('follow_symlink must be boolean', 2)
-    elseif cache ~= nil and not is_boolean(cache) then
-        error('cache must be boolean', 2)
-    end
-
-    local renderer = setmetatable({
-        rootdir = new_basedir(rootdir, follow_symlink),
-        cache = cache == true,
-    }, Renderer)
-    renderer.rez = new_rez({
-        loader = function(_, pathname)
-            return renderer:add(pathname)
-        end,
-        env = default_helpers(),
-    })
-
-    return renderer
-end
-
-return new
+Renderer = require('metamodule').new(Renderer)
+return Renderer
 
