@@ -27,7 +27,6 @@ local pairs = pairs
 local xpcall = xpcall
 local traceback = debug.traceback
 local tostring = tostring
-local type = type
 local require = require
 local format = string.format
 local isa = require('isa')
@@ -37,87 +36,11 @@ local new_fsrouter = require('fsrouter').new
 local errorf = require('reflex.errorf')
 local code2name = require('reflex.status').code2name
 
---- invoke_handlers
---- @param res reflex.response
---- @param req reflex.Request
---- @param mlist table[]
---- @return integer status_code
-local function invoke_handlers(res, req, mlist)
-    for i, imp in ipairs(mlist) do
-        local code = imp.fn(req, res)
-        if code then
-            if code2name(code) then
-                return code
-            end
-            errorf('#%d: %s returns an invalid status code %q', i, imp.name,
-                   tostring(code))
-        end
-    end
-
-    return res:ok()
-end
-
 --- @alias fsrouter userdata
 
 --- @class reflex.router
 --- @field router fsrouter
 local Router = {}
-
---- serve
---- @param res reflex.response
---- @param req reflex.Request
---- @return integer status
---- @return table file
-function Router:serve(res, req)
-    if not is_table(res) then
-        error('res must be table', 2)
-    elseif not is_table(res.header) then
-        error('res.header must be table', 2)
-    elseif not is_table(res.body) then
-        error('res.body must be table', 2)
-    elseif not is_table(req) then
-        error('req must be table', 2)
-    elseif not is_string(req.method) then
-        error('req.method must be string', 2)
-    elseif not is_string(req.path) then
-        error('req.path must be string', 2)
-    elseif not is_table(req.header) then
-        error('req.header must be table', 2)
-    end
-
-    -- get route
-    local route, err, glob = self.router:lookup(req.path)
-    if err then
-        return res:internal_server_error(err)
-    elseif not route then
-        return res:not_found(format('%q not found', req.path))
-    end
-    req.params = glob
-    req.route_uri = route.rpath
-
-    -- no method in route
-    if not next(route.methods) then
-        -- allow only the GET method for request to file
-        if route.file and lower(req.method) == 'get' then
-            return res:ok(), route.file
-        end
-        return res:method_not_allowed()
-    end
-
-    local mlist = route.methods[lower(req.method)] or route.methods.any
-    if not mlist then
-        return res:method_not_allowed()
-    end
-
-    local ok, rsp = xpcall(function()
-        return invoke_handlers(res, req, mlist)
-    end, traceback)
-    if not ok then
-        return res:internal_server_error(rsp)
-    end
-
-    return rsp, route.file
-end
 
 --- init
 --- @param rootdir string
@@ -126,9 +49,11 @@ end
 --- @return table[] routes
 function Router:init(rootdir, opts)
     opts = opts or {}
-    if type(rootdir) ~= 'string' then
+    if not is_string(rootdir) then
         errorf(2, 'rootdir must be string')
-    elseif type(opts) ~= 'table' then
+    elseif opts == nil then
+        opts = {}
+    elseif not is_table(opts) then
         errorf(2, 'opts must be table')
     end
 
@@ -178,6 +103,83 @@ function Router:init(rootdir, opts)
 
     self.router = router
     return self, route_list
+end
+
+--- invoke_handlers
+--- @param res reflex.response
+--- @param req reflex.Request
+--- @param mlist table[]
+--- @return integer status_code
+local function invoke_handlers(res, req, mlist)
+    for i, imp in ipairs(mlist) do
+        local code = imp.fn(req, res)
+        if code then
+            if code2name(code) then
+                return code
+            end
+            errorf('#%d: %s returns an invalid status code %q', i, imp.name,
+                   tostring(code))
+        end
+    end
+
+    return res:ok()
+end
+
+--- serve
+--- @param res reflex.response
+--- @param req reflex.Request
+--- @return integer status
+--- @return any err
+--- @return table|nil file
+function Router:serve(res, req)
+    if not is_table(res) then
+        error('res must be table', 2)
+    elseif not is_table(res.header) then
+        error('res.header must be table', 2)
+    elseif not is_table(res.body) then
+        error('res.body must be table', 2)
+    elseif not is_table(req) then
+        error('req must be table', 2)
+    elseif not is_string(req.method) then
+        error('req.method must be string', 2)
+    elseif not is_string(req.path) then
+        error('req.path must be string', 2)
+    elseif not is_table(req.header) then
+        error('req.header must be table', 2)
+    end
+
+    -- get route
+    local route, err, glob = self.router:lookup(req.path)
+    if err then
+        return res:internal_server_error(err)
+    elseif not route then
+        return res:not_found(format('%q not found', req.path))
+    end
+    req.params = glob
+    req.route_uri = route.rpath
+
+    -- no method in route
+    if not next(route.methods) then
+        -- allow only the GET method for request to file
+        if route.file and lower(req.method) == 'get' then
+            return res:ok(), nil, route.file
+        end
+        return res:method_not_allowed()
+    end
+
+    local mlist = route.methods[lower(req.method)] or route.methods.any
+    if not mlist then
+        return res:method_not_allowed()
+    end
+
+    local ok, rsp = xpcall(function()
+        return invoke_handlers(res, req, mlist)
+    end, traceback)
+    if not ok then
+        return nil, rsp
+    end
+
+    return rsp, nil, route.file
 end
 
 Router = require('metamodule').new(Router)
