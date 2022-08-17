@@ -151,20 +151,28 @@ end
 
 --- flush
 --- @return integer n
---- @return string err
+--- @return any err
+--- @return boolean timeout
 function Response:flush()
     return self.conn:flush()
 end
 
 --- write
---- @param msg any
+--- @param data any
 --- @return integer n
---- @return string err
-function Response:write(msg)
-    if msg ~= nil and not is_string(msg) then
-        error('msg must be string', 2)
-    end
-    return self.resp:write(self.conn, msg)
+--- @return any err
+--- @return boolean timeout
+function Response:write(data)
+    return self.resp:write(self.conn, data)
+end
+
+--- write_file
+--- @param file file*
+--- @return integer n
+--- @return any err
+--- @return boolean timeout
+function Response:write_file(file)
+    return self.resp:write_file(self.conn, file)
 end
 
 --- continue
