@@ -46,6 +46,7 @@ build = {
     modules = {
         ['reflex.cache'] = 'lib/cache.lua',
         ['reflex.cache.mdbx'] = 'lib/cache/mdbx.lua',
+        ['reflex.date'] = 'lib/date.lua',
         ['reflex.env'] = 'lib/env.lua',
         ['reflex.errorf'] = 'lib/errorf.lua',
         ['reflex.exec'] = 'lib/exec.lua',
