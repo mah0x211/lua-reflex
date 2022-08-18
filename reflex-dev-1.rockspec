@@ -43,6 +43,11 @@ dependencies = {
 }
 build = {
     type = "builtin",
+    install = {
+        bin = {
+            reflex = "bin/reflex.lua",
+        },
+    },
     modules = {
         ["reflex"] = "lib/reflex.lua",
         ["reflex.cache"] = "lib/cache.lua",
