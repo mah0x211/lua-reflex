@@ -266,7 +266,7 @@ function Session:get(key)
 end
 
 --- save
---- @param attr table
+--- @param attr table|nil
 --- @return string cookie
 --- @return any err
 function Session:save(attr)

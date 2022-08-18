@@ -44,6 +44,7 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
+        ["reflex"] = "lib/reflex.lua",
         ["reflex.cache"] = "lib/cache.lua",
         ["reflex.cache.mdbx"] = "lib/cache/mdbx.lua",
         ["reflex.date"] = "lib/date.lua",
