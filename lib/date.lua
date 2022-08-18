@@ -19,4 +19,4 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-return require('net.http.header')
+return require('net.http.date').now

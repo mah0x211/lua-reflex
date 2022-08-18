@@ -1,16 +1,16 @@
 require('luacov')
 local testcase = require('testcase')
-local status = require('reflex.status')
-local response = require('reflex.response')
+local new_response = require('reflex.response')
+local code2reason = require('reflex.status').code2reason
 
 function testcase.new()
     -- test that create new Response
-    local res = assert(response.new())
+    local res = assert(new_response())
     assert.match(res, '^reflex%.response: ', false)
 end
 
 function testcase.continue()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 100
     assert.equal(res:continue(), 100)
@@ -58,7 +58,7 @@ function testcase.continue()
 end
 
 function testcase.switching_protocols()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 101
     assert.equal(res:switching_protocols(), 101)
@@ -106,7 +106,7 @@ function testcase.switching_protocols()
 end
 
 function testcase.processing()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 102
     assert.equal(res:processing(), 102)
@@ -154,7 +154,7 @@ function testcase.processing()
 end
 
 function testcase.ok()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 200
     assert.equal(res:ok(), 200)
@@ -202,7 +202,7 @@ function testcase.ok()
 end
 
 function testcase.created()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 201
     assert.equal(res:created(), 201)
@@ -250,7 +250,7 @@ function testcase.created()
 end
 
 function testcase.accepted()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 202
     assert.equal(res:accepted(), 202)
@@ -298,7 +298,7 @@ function testcase.accepted()
 end
 
 function testcase.non_authoritative_information()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 203
     assert.equal(res:non_authoritative_information(), 203)
@@ -346,7 +346,7 @@ function testcase.non_authoritative_information()
 end
 
 function testcase.no_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 204
     assert.equal(res:no_content(), 204)
@@ -394,7 +394,7 @@ function testcase.no_content()
 end
 
 function testcase.reset_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 205
     assert.equal(res:reset_content(), 205)
@@ -442,7 +442,7 @@ function testcase.reset_content()
 end
 
 function testcase.partial_content()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 206
     assert.equal(res:partial_content(), 206)
@@ -490,7 +490,7 @@ function testcase.partial_content()
 end
 
 function testcase.multi_status()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 207
     assert.equal(res:multi_status(), 207)
@@ -538,7 +538,7 @@ function testcase.multi_status()
 end
 
 function testcase.already_reported()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 208
     assert.equal(res:already_reported(), 208)
@@ -586,7 +586,7 @@ function testcase.already_reported()
 end
 
 function testcase.im_used()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 226
     assert.equal(res:im_used(), 226)
@@ -634,7 +634,7 @@ function testcase.im_used()
 end
 
 function testcase.multiple_choices()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 300
     assert.equal(res:multiple_choices(), 300)
@@ -682,13 +682,18 @@ function testcase.multiple_choices()
 end
 
 function testcase.moved_permanently()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 301
     assert.equal(res:moved_permanently('/foo/bar'), 301)
     assert.equal(res.status, 301)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
+    assert.equal(res.header:get('Location'), '/foo/bar')
+    assert.equal(res.body, {
+        redirection = {
+            code = 301,
+            location = '/foo/bar',
+            status = code2reason(301),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -701,13 +706,18 @@ function testcase.moved_permanently()
 end
 
 function testcase.found()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 302
     assert.equal(res:found('/foo/bar'), 302)
     assert.equal(res.status, 302)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
+    assert.equal(res.header:get('Location'), '/foo/bar')
+    assert.equal(res.body, {
+        redirection = {
+            code = 302,
+            location = '/foo/bar',
+            status = code2reason(302),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -720,13 +730,18 @@ function testcase.found()
 end
 
 function testcase.see_other()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 303
     assert.equal(res:see_other('/foo/bar'), 303)
     assert.equal(res.status, 303)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
+    assert.equal(res.header:get('Location'), '/foo/bar')
+    assert.equal(res.body, {
+        redirection = {
+            code = 303,
+            location = '/foo/bar',
+            status = code2reason(303),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -739,7 +754,7 @@ function testcase.see_other()
 end
 
 function testcase.not_modified()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 304
     assert.equal(res:not_modified(), 304)
@@ -787,13 +802,18 @@ function testcase.not_modified()
 end
 
 function testcase.use_proxy()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 305
     assert.equal(res:use_proxy('/foo/bar'), 305)
     assert.equal(res.status, 305)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
+    assert.equal(res.header:get('Location'), '/foo/bar')
+    assert.equal(res.body, {
+        redirection = {
+            code = 305,
+            location = '/foo/bar',
+            status = code2reason(305),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -806,13 +826,18 @@ function testcase.use_proxy()
 end
 
 function testcase.temporary_redirect()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 307
     assert.equal(res:temporary_redirect('/foo/bar'), 307)
     assert.equal(res.status, 307)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
+    assert.equal(res.header:get('Location'), '/foo/bar')
+    assert.equal(res.body, {
+        redirection = {
+            code = 307,
+            location = '/foo/bar',
+            status = code2reason(307),
+        },
     })
 
     -- test that throws an error if uri is empty-string
@@ -825,14 +850,12 @@ function testcase.temporary_redirect()
 end
 
 function testcase.permanent_redirect()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 308
     assert.equal(res:permanent_redirect('/foo/bar'), 308)
     assert.equal(res.status, 308)
-    assert.equal(res.header:get('Location'), {
-        '/foo/bar',
-    })
+    assert.equal(res.header:get('Location'), '/foo/bar')
 
     -- test that throws an error if uri is empty-string
     local err = assert.throws(res.permanent_redirect, res, ' \n \t ')
@@ -844,14 +867,14 @@ function testcase.permanent_redirect()
 end
 
 function testcase.bad_request()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 400
     assert.equal(res:bad_request(), 400)
     assert.equal(res.status, 400)
     assert.equal(res.body.error, {
         code = 400,
-        status = status[400],
+        status = code2reason(400),
     })
 
     -- test that set value to body.error field
@@ -861,21 +884,21 @@ function testcase.bad_request()
     assert.equal(res.body, {
         error = {
             code = 400,
-            status = status[400],
+            status = code2reason(400),
             message = 'hello',
         },
     })
 end
 
 function testcase.unauthorized()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 401
     assert.equal(res:unauthorized(), 401)
     assert.equal(res.status, 401)
     assert.equal(res.body.error, {
         code = 401,
-        status = status[401],
+        status = code2reason(401),
     })
 
     -- test that set value to body.error field
@@ -885,21 +908,21 @@ function testcase.unauthorized()
     assert.equal(res.body, {
         error = {
             code = 401,
-            status = status[401],
+            status = code2reason(401),
             message = 'hello',
         },
     })
 end
 
 function testcase.payment_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 402
     assert.equal(res:payment_required(), 402)
     assert.equal(res.status, 402)
     assert.equal(res.body.error, {
         code = 402,
-        status = status[402],
+        status = code2reason(402),
     })
 
     -- test that set value to body.error field
@@ -909,21 +932,21 @@ function testcase.payment_required()
     assert.equal(res.body, {
         error = {
             code = 402,
-            status = status[402],
+            status = code2reason(402),
             message = 'hello',
         },
     })
 end
 
 function testcase.forbidden()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 403
     assert.equal(res:forbidden(), 403)
     assert.equal(res.status, 403)
     assert.equal(res.body.error, {
         code = 403,
-        status = status[403],
+        status = code2reason(403),
     })
 
     -- test that set value to body.error field
@@ -933,21 +956,21 @@ function testcase.forbidden()
     assert.equal(res.body, {
         error = {
             code = 403,
-            status = status[403],
+            status = code2reason(403),
             message = 'hello',
         },
     })
 end
 
 function testcase.not_found()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 404
     assert.equal(res:not_found(), 404)
     assert.equal(res.status, 404)
     assert.equal(res.body.error, {
         code = 404,
-        status = status[404],
+        status = code2reason(404),
     })
 
     -- test that set value to body.error field
@@ -957,21 +980,21 @@ function testcase.not_found()
     assert.equal(res.body, {
         error = {
             code = 404,
-            status = status[404],
+            status = code2reason(404),
             message = 'hello',
         },
     })
 end
 
 function testcase.method_not_allowed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 405
     assert.equal(res:method_not_allowed(), 405)
     assert.equal(res.status, 405)
     assert.equal(res.body.error, {
         code = 405,
-        status = status[405],
+        status = code2reason(405),
     })
 
     -- test that set value to body.error field
@@ -981,21 +1004,21 @@ function testcase.method_not_allowed()
     assert.equal(res.body, {
         error = {
             code = 405,
-            status = status[405],
+            status = code2reason(405),
             message = 'hello',
         },
     })
 end
 
 function testcase.not_acceptable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 406
     assert.equal(res:not_acceptable(), 406)
     assert.equal(res.status, 406)
     assert.equal(res.body.error, {
         code = 406,
-        status = status[406],
+        status = code2reason(406),
     })
 
     -- test that set value to body.error field
@@ -1005,21 +1028,21 @@ function testcase.not_acceptable()
     assert.equal(res.body, {
         error = {
             code = 406,
-            status = status[406],
+            status = code2reason(406),
             message = 'hello',
         },
     })
 end
 
 function testcase.proxy_authentication_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 407
     assert.equal(res:proxy_authentication_required(), 407)
     assert.equal(res.status, 407)
     assert.equal(res.body.error, {
         code = 407,
-        status = status[407],
+        status = code2reason(407),
     })
 
     -- test that set value to body.error field
@@ -1029,21 +1052,21 @@ function testcase.proxy_authentication_required()
     assert.equal(res.body, {
         error = {
             code = 407,
-            status = status[407],
+            status = code2reason(407),
             message = 'hello',
         },
     })
 end
 
 function testcase.request_timeout()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 408
     assert.equal(res:request_timeout(), 408)
     assert.equal(res.status, 408)
     assert.equal(res.body.error, {
         code = 408,
-        status = status[408],
+        status = code2reason(408),
     })
 
     -- test that set value to body.error field
@@ -1053,21 +1076,21 @@ function testcase.request_timeout()
     assert.equal(res.body, {
         error = {
             code = 408,
-            status = status[408],
+            status = code2reason(408),
             message = 'hello',
         },
     })
 end
 
 function testcase.conflict()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 409
     assert.equal(res:conflict(), 409)
     assert.equal(res.status, 409)
     assert.equal(res.body.error, {
         code = 409,
-        status = status[409],
+        status = code2reason(409),
     })
 
     -- test that set value to body.error field
@@ -1077,21 +1100,21 @@ function testcase.conflict()
     assert.equal(res.body, {
         error = {
             code = 409,
-            status = status[409],
+            status = code2reason(409),
             message = 'hello',
         },
     })
 end
 
 function testcase.gone()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 410
     assert.equal(res:gone(), 410)
     assert.equal(res.status, 410)
     assert.equal(res.body.error, {
         code = 410,
-        status = status[410],
+        status = code2reason(410),
     })
 
     -- test that set value to body.error field
@@ -1101,21 +1124,21 @@ function testcase.gone()
     assert.equal(res.body, {
         error = {
             code = 410,
-            status = status[410],
+            status = code2reason(410),
             message = 'hello',
         },
     })
 end
 
 function testcase.length_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 411
     assert.equal(res:length_required(), 411)
     assert.equal(res.status, 411)
     assert.equal(res.body.error, {
         code = 411,
-        status = status[411],
+        status = code2reason(411),
     })
 
     -- test that set value to body.error field
@@ -1125,21 +1148,21 @@ function testcase.length_required()
     assert.equal(res.body, {
         error = {
             code = 411,
-            status = status[411],
+            status = code2reason(411),
             message = 'hello',
         },
     })
 end
 
 function testcase.precondition_failed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 412
     assert.equal(res:precondition_failed(), 412)
     assert.equal(res.status, 412)
     assert.equal(res.body.error, {
         code = 412,
-        status = status[412],
+        status = code2reason(412),
     })
 
     -- test that set value to body.error field
@@ -1149,45 +1172,45 @@ function testcase.precondition_failed()
     assert.equal(res.body, {
         error = {
             code = 412,
-            status = status[412],
+            status = code2reason(412),
             message = 'hello',
         },
     })
 end
 
-function testcase.request_entity_too_large()
-    local res = assert(response.new())
+function testcase.payload_too_large()
+    local res = assert(new_response())
 
     -- test that returns 413
-    assert.equal(res:request_entity_too_large(), 413)
+    assert.equal(res:payload_too_large(), 413)
     assert.equal(res.status, 413)
     assert.equal(res.body.error, {
         code = 413,
-        status = status[413],
+        status = code2reason(413),
     })
 
     -- test that set value to body.error field
     res.body = 'foo'
-    assert.equal(res:request_entity_too_large('hello'), 413)
+    assert.equal(res:payload_too_large('hello'), 413)
     assert.equal(res.status, 413)
     assert.equal(res.body, {
         error = {
             code = 413,
-            status = status[413],
+            status = code2reason(413),
             message = 'hello',
         },
     })
 end
 
 function testcase.request_uri_too_long()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 414
     assert.equal(res:request_uri_too_long(), 414)
     assert.equal(res.status, 414)
     assert.equal(res.body.error, {
         code = 414,
-        status = status[414],
+        status = code2reason(414),
     })
 
     -- test that set value to body.error field
@@ -1197,21 +1220,21 @@ function testcase.request_uri_too_long()
     assert.equal(res.body, {
         error = {
             code = 414,
-            status = status[414],
+            status = code2reason(414),
             message = 'hello',
         },
     })
 end
 
 function testcase.unsupported_media_type()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 415
     assert.equal(res:unsupported_media_type(), 415)
     assert.equal(res.status, 415)
     assert.equal(res.body.error, {
         code = 415,
-        status = status[415],
+        status = code2reason(415),
     })
 
     -- test that set value to body.error field
@@ -1221,21 +1244,21 @@ function testcase.unsupported_media_type()
     assert.equal(res.body, {
         error = {
             code = 415,
-            status = status[415],
+            status = code2reason(415),
             message = 'hello',
         },
     })
 end
 
 function testcase.requested_range_not_satisfiable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 416
     assert.equal(res:requested_range_not_satisfiable(), 416)
     assert.equal(res.status, 416)
     assert.equal(res.body.error, {
         code = 416,
-        status = status[416],
+        status = code2reason(416),
     })
 
     -- test that set value to body.error field
@@ -1245,21 +1268,21 @@ function testcase.requested_range_not_satisfiable()
     assert.equal(res.body, {
         error = {
             code = 416,
-            status = status[416],
+            status = code2reason(416),
             message = 'hello',
         },
     })
 end
 
 function testcase.expectation_failed()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 417
     assert.equal(res:expectation_failed(), 417)
     assert.equal(res.status, 417)
     assert.equal(res.body.error, {
         code = 417,
-        status = status[417],
+        status = code2reason(417),
     })
 
     -- test that set value to body.error field
@@ -1269,21 +1292,21 @@ function testcase.expectation_failed()
     assert.equal(res.body, {
         error = {
             code = 417,
-            status = status[417],
+            status = code2reason(417),
             message = 'hello',
         },
     })
 end
 
 function testcase.unprocessable_entity()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 422
     assert.equal(res:unprocessable_entity(), 422)
     assert.equal(res.status, 422)
     assert.equal(res.body.error, {
         code = 422,
-        status = status[422],
+        status = code2reason(422),
     })
 
     -- test that set value to body.error field
@@ -1293,21 +1316,21 @@ function testcase.unprocessable_entity()
     assert.equal(res.body, {
         error = {
             code = 422,
-            status = status[422],
+            status = code2reason(422),
             message = 'hello',
         },
     })
 end
 
 function testcase.locked()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 423
     assert.equal(res:locked(), 423)
     assert.equal(res.status, 423)
     assert.equal(res.body.error, {
         code = 423,
-        status = status[423],
+        status = code2reason(423),
     })
 
     -- test that set value to body.error field
@@ -1317,21 +1340,21 @@ function testcase.locked()
     assert.equal(res.body, {
         error = {
             code = 423,
-            status = status[423],
+            status = code2reason(423),
             message = 'hello',
         },
     })
 end
 
 function testcase.failed_dependency()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 424
     assert.equal(res:failed_dependency(), 424)
     assert.equal(res.status, 424)
     assert.equal(res.body.error, {
         code = 424,
-        status = status[424],
+        status = code2reason(424),
     })
 
     -- test that set value to body.error field
@@ -1341,21 +1364,21 @@ function testcase.failed_dependency()
     assert.equal(res.body, {
         error = {
             code = 424,
-            status = status[424],
+            status = code2reason(424),
             message = 'hello',
         },
     })
 end
 
 function testcase.upgrade_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 426
     assert.equal(res:upgrade_required(), 426)
     assert.equal(res.status, 426)
     assert.equal(res.body.error, {
         code = 426,
-        status = status[426],
+        status = code2reason(426),
     })
 
     -- test that set value to body.error field
@@ -1365,21 +1388,21 @@ function testcase.upgrade_required()
     assert.equal(res.body, {
         error = {
             code = 426,
-            status = status[426],
+            status = code2reason(426),
             message = 'hello',
         },
     })
 end
 
 function testcase.precondition_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 428
     assert.equal(res:precondition_required(), 428)
     assert.equal(res.status, 428)
     assert.equal(res.body.error, {
         code = 428,
-        status = status[428],
+        status = code2reason(428),
     })
 
     -- test that set value to body.error field
@@ -1389,21 +1412,21 @@ function testcase.precondition_required()
     assert.equal(res.body, {
         error = {
             code = 428,
-            status = status[428],
+            status = code2reason(428),
             message = 'hello',
         },
     })
 end
 
 function testcase.too_many_requests()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 429
     assert.equal(res:too_many_requests(), 429)
     assert.equal(res.status, 429)
     assert.equal(res.body.error, {
         code = 429,
-        status = status[429],
+        status = code2reason(429),
     })
 
     -- test that set value to body.error field
@@ -1413,21 +1436,21 @@ function testcase.too_many_requests()
     assert.equal(res.body, {
         error = {
             code = 429,
-            status = status[429],
+            status = code2reason(429),
             message = 'hello',
         },
     })
 end
 
 function testcase.request_header_fields_too_large()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 431
     assert.equal(res:request_header_fields_too_large(), 431)
     assert.equal(res.status, 431)
     assert.equal(res.body.error, {
         code = 431,
-        status = status[431],
+        status = code2reason(431),
     })
 
     -- test that set value to body.error field
@@ -1437,21 +1460,21 @@ function testcase.request_header_fields_too_large()
     assert.equal(res.body, {
         error = {
             code = 431,
-            status = status[431],
+            status = code2reason(431),
             message = 'hello',
         },
     })
 end
 
 function testcase.unavailable_for_legal_reasons()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 451
     assert.equal(res:unavailable_for_legal_reasons(), 451)
     assert.equal(res.status, 451)
     assert.equal(res.body.error, {
         code = 451,
-        status = status[451],
+        status = code2reason(451),
     })
 
     -- test that set value to body.error field
@@ -1461,21 +1484,21 @@ function testcase.unavailable_for_legal_reasons()
     assert.equal(res.body, {
         error = {
             code = 451,
-            status = status[451],
+            status = code2reason(451),
             message = 'hello',
         },
     })
 end
 
 function testcase.internal_server_error()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 500
     assert.equal(res:internal_server_error(), 500)
     assert.equal(res.status, 500)
     assert.equal(res.body.error, {
         code = 500,
-        status = status[500],
+        status = code2reason(500),
     })
 
     -- test that set value to body.error field
@@ -1485,21 +1508,21 @@ function testcase.internal_server_error()
     assert.equal(res.body, {
         error = {
             code = 500,
-            status = status[500],
+            status = code2reason(500),
             message = 'hello',
         },
     })
 end
 
 function testcase.not_implemented()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 501
     assert.equal(res:not_implemented(), 501)
     assert.equal(res.status, 501)
     assert.equal(res.body.error, {
         code = 501,
-        status = status[501],
+        status = code2reason(501),
     })
 
     -- test that set value to body.error field
@@ -1509,21 +1532,21 @@ function testcase.not_implemented()
     assert.equal(res.body, {
         error = {
             code = 501,
-            status = status[501],
+            status = code2reason(501),
             message = 'hello',
         },
     })
 end
 
 function testcase.bad_gateway()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 502
     assert.equal(res:bad_gateway(), 502)
     assert.equal(res.status, 502)
     assert.equal(res.body.error, {
         code = 502,
-        status = status[502],
+        status = code2reason(502),
     })
 
     -- test that set value to body.error field
@@ -1533,21 +1556,21 @@ function testcase.bad_gateway()
     assert.equal(res.body, {
         error = {
             code = 502,
-            status = status[502],
+            status = code2reason(502),
             message = 'hello',
         },
     })
 end
 
 function testcase.service_unavailable()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 503
     assert.equal(res:service_unavailable(), 503)
     assert.equal(res.status, 503)
     assert.equal(res.body.error, {
         code = 503,
-        status = status[503],
+        status = code2reason(503),
     })
 
     -- test that set value to body.error field
@@ -1557,21 +1580,21 @@ function testcase.service_unavailable()
     assert.equal(res.body, {
         error = {
             code = 503,
-            status = status[503],
+            status = code2reason(503),
             message = 'hello',
         },
     })
 end
 
 function testcase.gateway_timeout()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 504
     assert.equal(res:gateway_timeout(), 504)
     assert.equal(res.status, 504)
     assert.equal(res.body.error, {
         code = 504,
-        status = status[504],
+        status = code2reason(504),
     })
 
     -- test that set value to body.error field
@@ -1581,21 +1604,21 @@ function testcase.gateway_timeout()
     assert.equal(res.body, {
         error = {
             code = 504,
-            status = status[504],
+            status = code2reason(504),
             message = 'hello',
         },
     })
 end
 
 function testcase.http_version_not_supported()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 505
     assert.equal(res:http_version_not_supported(), 505)
     assert.equal(res.status, 505)
     assert.equal(res.body.error, {
         code = 505,
-        status = status[505],
+        status = code2reason(505),
     })
 
     -- test that set value to body.error field
@@ -1605,21 +1628,21 @@ function testcase.http_version_not_supported()
     assert.equal(res.body, {
         error = {
             code = 505,
-            status = status[505],
+            status = code2reason(505),
             message = 'hello',
         },
     })
 end
 
 function testcase.variant_also_negotiates()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 506
     assert.equal(res:variant_also_negotiates(), 506)
     assert.equal(res.status, 506)
     assert.equal(res.body.error, {
         code = 506,
-        status = status[506],
+        status = code2reason(506),
     })
 
     -- test that set value to body.error field
@@ -1629,21 +1652,21 @@ function testcase.variant_also_negotiates()
     assert.equal(res.body, {
         error = {
             code = 506,
-            status = status[506],
+            status = code2reason(506),
             message = 'hello',
         },
     })
 end
 
 function testcase.insufficient_storage()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 507
     assert.equal(res:insufficient_storage(), 507)
     assert.equal(res.status, 507)
     assert.equal(res.body.error, {
         code = 507,
-        status = status[507],
+        status = code2reason(507),
     })
 
     -- test that set value to body.error field
@@ -1653,21 +1676,21 @@ function testcase.insufficient_storage()
     assert.equal(res.body, {
         error = {
             code = 507,
-            status = status[507],
+            status = code2reason(507),
             message = 'hello',
         },
     })
 end
 
 function testcase.loop_detected()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 508
     assert.equal(res:loop_detected(), 508)
     assert.equal(res.status, 508)
     assert.equal(res.body.error, {
         code = 508,
-        status = status[508],
+        status = code2reason(508),
     })
 
     -- test that set value to body.error field
@@ -1677,21 +1700,21 @@ function testcase.loop_detected()
     assert.equal(res.body, {
         error = {
             code = 508,
-            status = status[508],
+            status = code2reason(508),
             message = 'hello',
         },
     })
 end
 
 function testcase.not_extended()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 510
     assert.equal(res:not_extended(), 510)
     assert.equal(res.status, 510)
     assert.equal(res.body.error, {
         code = 510,
-        status = status[510],
+        status = code2reason(510),
     })
 
     -- test that set value to body.error field
@@ -1701,21 +1724,21 @@ function testcase.not_extended()
     assert.equal(res.body, {
         error = {
             code = 510,
-            status = status[510],
+            status = code2reason(510),
             message = 'hello',
         },
     })
 end
 
 function testcase.network_authentication_required()
-    local res = assert(response.new())
+    local res = assert(new_response())
 
     -- test that returns 511
     assert.equal(res:network_authentication_required(), 511)
     assert.equal(res.status, 511)
     assert.equal(res.body.error, {
         code = 511,
-        status = status[511],
+        status = code2reason(511),
     })
 
     -- test that set value to body.error field
@@ -1725,7 +1748,7 @@ function testcase.network_authentication_required()
     assert.equal(res.body, {
         error = {
             code = 511,
-            status = status[511],
+            status = code2reason(511),
             message = 'hello',
         },
     })

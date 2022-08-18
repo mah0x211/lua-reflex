@@ -49,11 +49,6 @@ function testcase.read_default_config()
     assert.match(err, 'failed to evaluate')
 end
 
-function testcase.invalid_openresty()
-    local err = assert.throws(readcfg, 'tmp/invalid_openresty.lua')
-    assert.match(err, 'openresty must be string')
-end
-
 function testcase.invalid_session()
     local err = assert.throws(readcfg, 'tmp/invalid_session.lua')
     assert.match(err, 'session must be table')

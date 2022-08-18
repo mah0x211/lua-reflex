@@ -25,7 +25,7 @@ local format = require('print').format
 local libmdbx = require('libmdbx')
 local errno = libmdbx.errno
 
---- @class reflex.cache.mdbx
+--- @class reflex.cache.mdbx : reflex.cache
 local Cache = {}
 
 --- init

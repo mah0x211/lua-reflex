@@ -24,8 +24,8 @@ local isa = require('isa')
 local is_boolean = isa.boolean
 local is_table = isa.table
 local is_string = isa.string
-local new_header = require('reflex.header').new
-local status = require('reflex.status')
+local new_response = require('net.http.message.response').new
+local code2reason = require('reflex.status').code2reason
 
 --- merge
 --- @param dst any
@@ -48,16 +48,20 @@ local function merge(dst, src)
 end
 
 --- response1xx2xx
---- @param res reflex.Response
+--- @param res reflex.response
 --- @param code integer
 --- @param body table
 --- @param tomerge boolean
 --- @return integer
 local function response1xx2xx(res, code, body, tomerge)
+    res:set_status(code)
+
     if body ~= nil then
         if not is_table(body) then
             error('body must be table', 3)
-        elseif tomerge ~= nil and not is_boolean(tomerge) then
+        elseif tomerge == nil then
+            res.body = body
+        elseif not is_boolean(tomerge) then
             error('tomerge must be boolean', 3)
         elseif not tomerge then
             res.body = body
@@ -65,55 +69,110 @@ local function response1xx2xx(res, code, body, tomerge)
             res.body = merge(res.body, body)
         end
     end
+
     res.status = code
     return code
 end
 
 --- response3xx
---- @param res reflex.Response
+--- @param res reflex.response
 --- @param code integer
 --- @param uri string
 --- @return integer
 local function response3xx(res, code, uri)
+    res:set_status(code)
     if not is_string(uri) or #uri == 0 or find(uri, '%s') then
         error('uri must be non-empty string with no spaces', 3)
     end
+
+    if not is_table(res.body) then
+        res.body = {}
+    end
+    res.body.redirection = {
+        code = code,
+        status = code2reason(code),
+        location = uri,
+    }
+
     res.header:set('Location', uri)
     res.status = code
     return code
 end
 
 --- response4xx5xx
---- @param res reflex.Response
+--- @param res reflex.response
 --- @param code integer
 --- @param err any
 --- @return integer
 local function response4xx5xx(res, code, err)
+    res:set_status(code)
+
     if not is_table(res.body) then
         res.body = {}
     end
     res.body.error = {
         code = code,
-        status = status[code],
+        status = code2reason(code),
         message = err,
     }
     res.status = code
     return code
 end
 
---- @class reflex.Response
+--- @class reflex.response
+--- @field conn net.http.connection
 --- @field status integer
---- @field header Header
+--- @field resp net.http.message.response
+--- @field header net.http.header
 --- @field body table
---- @field json boolean
+--- @field as_json boolean
 local Response = {}
 
 --- init
---- @return reflex.Response
-function Response:init()
-    self.header = new_header()
+--- @param conn net.http.connection
+--- @return reflex.response
+function Response:init(conn)
+    self.conn = conn
+    self.resp = new_response()
+    self.header = self.resp.header
     self.body = {}
     return self
+end
+
+--- set_status
+---@param code integer
+function Response:set_status(code)
+    local ok, err = self.resp:set_status(code)
+    if not ok then
+        error(string.format('failed to set status code: %s', err), 2)
+    end
+    self.status = code
+end
+
+--- flush
+--- @return integer n
+--- @return any err
+--- @return boolean timeout
+function Response:flush()
+    return self.conn:flush()
+end
+
+--- write
+--- @param data any
+--- @return integer n
+--- @return any err
+--- @return boolean timeout
+function Response:write(data)
+    return self.resp:write(self.conn, data)
+end
+
+--- write_file
+--- @param file file*
+--- @return integer n
+--- @return any err
+--- @return boolean timeout
+function Response:write_file(file)
+    return self.resp:write_file(self.conn, file)
 end
 
 --- continue
@@ -369,10 +428,10 @@ function Response:precondition_failed(err)
     return response4xx5xx(self, 412, err)
 end
 
---- request_entity_too_large
+--- payload_too_large
 --- @param err any
 --- @return integer
-function Response:request_entity_too_large(err)
+function Response:payload_too_large(err)
     return response4xx5xx(self, 413, err)
 end
 
@@ -537,7 +596,7 @@ function Response:network_authentication_required(err)
     return response4xx5xx(self, 511, err)
 end
 
-return {
-    new = require('metamodule').new(Response),
-}
+Response = require('metamodule').new(Response)
+
+return Response
 

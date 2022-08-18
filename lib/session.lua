@@ -26,6 +26,7 @@ local is_finite = isa.finite
 local is_string = isa.string
 local is_table = isa.table
 local is_function = isa.Function
+local parse_cookie = require('cookie').parse
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
@@ -93,64 +94,140 @@ local function bake_attributes(newattr, attr)
     return newattr
 end
 
---- reset_defualt
-local function reset_default()
-    NAME = DEFAULT_NAME
-    ATTR.domain = nil
-    ATTR.path = DEFAULT_PATH_ATTR
-    ATTR.maxage = DEFAULT_MAXAGE_ATTR
-    ATTR.secure = DEFAULT_SECURE_ATTR
-    ATTR.httponly = DEFAULT_HTTPONLY_ATTR
-    ATTR.samesite = DEFAULT_SAMESITE_ATTR
+--- get_name
+--- @return string name
+local function get_name()
+    return NAME
 end
 
---- set_default
+--- set_name
 --- @param name string
---- @param attr table<string, any>
-local function set_default(name, attr)
+local function set_name(name)
     if name == nil then
-        name = NAME
+        name = DEFAULT_NAME
     end
-    new_cookie(name, attr)
-
-    if attr then
-        if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
-            error('attr.maxage must be integer greater than 0', 2)
-        end
-
-        ATTR.domain = attr.domain
-        for _, k in ipairs({
-            'maxage',
-            'path',
-            'secure',
-            'httponly',
-            'samesite',
-        }) do
-            local v = attr[k]
-            if v ~= nil then
-                ATTR[k] = v
-            end
-        end
-    end
+    new_cookie(name, ATTR)
     NAME = name
 end
 
---- get_defualt
---- @return string name
+--- get_attr
 --- @return table attr
-local function get_default()
-    local defval = {}
+local function get_attr()
+    local attr = {}
     for k, v in pairs(ATTR) do
-        defval[k] = v
+        attr[k] = v
     end
-    return NAME, defval
+    return attr
 end
 
---- @class Session
+--- set_attr
+--- @param attr table
+local function set_attr(attr)
+    if attr == nil then
+        attr = {
+            path = DEFAULT_PATH_ATTR,
+            maxage = DEFAULT_MAXAGE_ATTR,
+            secure = DEFAULT_SECURE_ATTR,
+            httponly = DEFAULT_HTTPONLY_ATTR,
+            samesite = DEFAULT_SAMESITE_ATTR,
+        }
+    end
+
+    new_cookie(NAME, attr)
+    if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
+        error('attr.maxage must be integer greater than 0', 2)
+    end
+
+    ATTR.domain = attr.domain
+    for _, k in ipairs({
+        'maxage',
+        'path',
+        'secure',
+        'httponly',
+        'samesite',
+    }) do
+        local v = attr[k]
+        if v ~= nil then
+            ATTR[k] = v
+        end
+    end
+end
+
+--- restore
+--- @param id string
+--- @return table value
+--- @return string err
+local function restore(id)
+    if not is_string(id) then
+        error('id must be string', 3)
+    end
+
+    local data, err = Store:get(id, true)
+    if not data then
+        return nil, err
+    end
+
+    return data
+end
+
+--- @class reflex.session
 --- @field id string
 --- @field value table<string, any>
 local Session = {}
-Session.__index = Session
+
+--- init
+--- @param cookies string
+--- @return reflex.session ses
+--- @return string err
+function Session:init(cookies)
+    local id
+    if cookies then
+        if not is_string(cookies) then
+            error('cookies must be string', 2)
+        end
+        local kv, err = parse_cookie(cookies)
+        if err then
+            return nil, err
+        end
+        id = kv[get_name()]
+    end
+
+    if id ~= nil then
+        local value, err = restore(id)
+        if err then
+            return nil, err
+        elseif value then
+            self.id = id
+            self.value = value
+            return self
+        end
+    end
+
+    local newid, err = uuid4str()
+    if not newid then
+        return nil, err
+    end
+
+    self.id = newid
+    self.value = {}
+    return self
+end
+
+--- restore
+--- @param id string
+--- @return boolean ok
+--- @return string err
+function Session:restore(id)
+    local value, err = restore(id)
+
+    if value then
+        self.id = id
+        self.value = value
+        return true
+    end
+
+    return false, err
+end
 
 --- set
 --- @param key string
@@ -189,10 +266,9 @@ function Session:get(key)
 end
 
 --- save
---- @param attr table
---- @return boolean ok
---- @return string err
+--- @param attr table|nil
 --- @return string cookie
+--- @return any err
 function Session:save(attr)
     if attr == nil then
         attr = {}
@@ -202,50 +278,16 @@ function Session:save(attr)
 
     local ok, serr = Store:set(self.id, self.value, ATTR.maxage)
     if not ok then
-        return false, serr
+        return nil, serr
     end
 
-    return true, nil, bake_cookie(NAME, self.id, bake_attributes({}, attr))
-end
-
---- restore
---- @param id string
---- @return table value
---- @return string err
-local function restore(id)
-    if not is_string(id) then
-        error('id must be string', 3)
-    end
-
-    local data, err = Store:get(id, true)
-    if not data then
-        return nil, err
-    end
-
-    return data
-end
-
---- restore
---- @param id string
---- @return boolean ok
---- @return string err
-function Session:restore(id)
-    local value, err = restore(id)
-
-    if value then
-        self.id = id
-        self.value = value
-        return true
-    end
-
-    return false, err
+    return bake_cookie(NAME, self.id, bake_attributes({}, attr))
 end
 
 --- destroy
 --- @param attr table|nil
---- @return boolean ok
---- @return string err
 --- @return string void_cookie
+--- @return string err
 function Session:destroy(attr)
     if attr == nil then
         attr = {}
@@ -255,55 +297,28 @@ function Session:destroy(attr)
 
     local id, err = uuid4str()
     if not id then
-        return false, err
+        return nil, err
     end
 
     local ok, serr = Store:del(self.id)
     if not ok then
-        return false, serr
+        return nil, serr
     end
 
     -- clear
     self.id = id
     self.value = {}
-    return ok, nil, bake_cookie(NAME, 'void', bake_attributes({
+    return bake_cookie(NAME, 'void', bake_attributes({
         maxage = -60,
     }, attr))
 end
 
---- new
---- @param id string
---- @return Session ses
---- @return string err
-local function new(id)
-    if id ~= nil then
-        local value, err = restore(id)
-        if err then
-            return nil, err
-        elseif value then
-            return setmetatable({
-                id = id,
-                value = value,
-            }, Session)
-        end
-    end
-
-    local newid, err = uuid4str()
-    if not newid then
-        return nil, err
-    end
-
-    return setmetatable({
-        id = newid,
-        value = {},
-    }, Session)
-end
-
 return {
-    new = new,
+    new = require('metamodule').new(Session),
     set_store = set_store,
-    reset_default = reset_default,
-    set_default = set_default,
-    get_default = get_default,
+    get_name = get_name,
+    set_name = set_name,
+    get_attr = get_attr,
+    set_attr = set_attr,
 }
 

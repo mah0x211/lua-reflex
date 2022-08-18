@@ -1,13 +1,13 @@
 require('luacov')
 local testcase = require('testcase')
-local new_reponse = require('reflex.response').new
+local new_reponse = require('reflex.response')
 local new_router = require('reflex.router')
 local status = require('reflex.status')
 
 local function new_request(method, uri)
     return {
         method = method,
-        uri = uri,
+        path = uri,
         header = {},
     }
 end
@@ -415,31 +415,36 @@ function testcase.serve()
     }) do
         for rpath, cmp in pairs(v) do
             local rsp = new_reponse()
-            local rc, file = r:serve(rsp, new_request(method, rpath))
+            local rc, err, file = r:serve(rsp, new_request(method, rpath))
             assert.equal(rc, status.OK)
+            assert.is_nil(err)
             assert.is_table(file)
             assert.contains(rsp, cmp)
         end
     end
 
     -- test that returns OK and file
-    local rc, file = r:serve(new_reponse(), new_request('get', '/signout'))
+    local rc, err, file = r:serve(new_reponse(), new_request('get', '/signout'))
     assert.equal(rc, status.OK)
+    assert.is_nil(err)
     assert.is_table(file)
 
     -- test that returns METHOD_NOT_ALLOWED if method is not a GET method
-    rc, file = r:serve(new_reponse(), new_request('post', '/signout'))
+    rc, err, file = r:serve(new_reponse(), new_request('post', '/signout'))
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
+    assert.is_nil(err)
     assert.is_nil(file)
 
     -- test that returns METHOD_NOT_ALLOWED
-    rc, file = r:serve(new_reponse(), new_request('put', '/signin'))
+    rc, err, file = r:serve(new_reponse(), new_request('put', '/signin'))
     assert.equal(rc, status.METHOD_NOT_ALLOWED)
+    assert.is_nil(err)
     assert.is_nil(file)
 
     -- test that returns NOT_FOUND
-    rc, file = r:serve(new_reponse(), new_request('get', '/api/unknown'))
+    rc, err, file = r:serve(new_reponse(), new_request('get', '/api/unknown'))
     assert.equal(rc, status.NOT_FOUND)
+    assert.is_nil(err)
     assert.is_nil(file)
 
     for _, pathname in ipairs({
@@ -448,8 +453,9 @@ function testcase.serve()
         '/foobar/^',
         '/foobar/#',
     }) do
-        rc, file = r:serve(new_reponse(), new_request('get', pathname))
+        rc, err, file = r:serve(new_reponse(), new_request('get', pathname))
         assert.equal(rc, status.NOT_FOUND)
+        assert.is_nil(err)
         assert.is_nil(file)
     end
 
@@ -461,26 +467,29 @@ function testcase.serve()
         end,
     }
     local res = new_reponse()
-    rc, file = r:serve(res, new_request('get', '/api'))
+    rc, err, file = r:serve(res, new_request('get', '/api'))
     r.router = router
     assert.equal(rc, status.INTERNAL_SERVER_ERROR)
+    assert.is_nil(err)
     assert.is_nil(file)
     assert.match(res.body.error.message, 'router error')
 
     -- test that returns INTERNAL_SERVER_ERROR if invalid hander
-    rc, file = r:serve(res, new_request('get', '/api'))
-    assert.equal(rc, status.INTERNAL_SERVER_ERROR)
+    res = new_reponse()
+    rc, err, file = r:serve(res, new_request('get', '/api'))
+    assert.is_nil(rc)
+    assert.match(err, 'testdir/html/api/@index.lua:2')
     assert.is_nil(file)
-    assert.match(res.body.error.message, 'attempt to concatenate')
 
     -- test that returns INTERNAL_SERVER_ERROR if handler returns a invalid status
-    rc, file = r:serve(res, new_request('post', '/api'))
-    assert.equal(rc, status.INTERNAL_SERVER_ERROR)
+    res = new_reponse()
+    rc, err, file = r:serve(res, new_request('post', '/api'))
+    assert.is_nil(rc)
+    assert.match(err, '/api/@index.lua returns an invalid status code')
     assert.is_nil(file)
-    assert.match(res.body.error.message, 'invalid status code')
 
     -- test that throw an error if res is invalid
-    local err = assert.throws(r.serve, r, 'bar')
+    err = assert.throws(r.serve, r, 'bar')
     assert.match(err, 'res must be table')
 
     -- test that throw an error if res.header is invalid
@@ -501,9 +510,9 @@ function testcase.serve()
     err = assert.throws(r.serve, r, res, new_request({}, '/'))
     assert.match(err, 'req.method must be string')
 
-    -- test that throw an error if uri is invalid
+    -- test that throw an error if path is invalid
     err = assert.throws(r.serve, r, res, new_request('get', {}))
-    assert.match(err, 'req.uri must be string')
+    assert.match(err, 'req.path must be string')
 
     -- test that throw an error if uri is invalid
     local req = new_request('get', '/')
