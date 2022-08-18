@@ -71,15 +71,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ matrix.lua-version }}-cache-
     -
-      if: ${{ steps.cache-luarocks.outputs.cache-hit == 'true' }}
-      name: List the state of lua modules
-      continue-on-error: true
+      name: Remove must re-installation modules
       run: |
-        luarocks list
-        luarocks remove errno --force
-        luarocks remove error --force
-        luarocks remove iovec --force
-        luarocks remove lauxhlib --force
+        luarocks remove errno --force || true
+        luarocks remove error --force || true
+        luarocks remove iovec --force || true
+        luarocks remove lauxhlib --force || true
     -
       name: Install
       run: |
