@@ -97,3 +97,9 @@ function testcase.del()
     assert.is_false(ok)
     assert.match(err, 'key must be string')
 end
+
+function testcase.evict()
+    local c = assert(cache.new())
+    -- test that return true
+    assert.is_true(c:evict())
+end

@@ -30,7 +30,7 @@ local format = require('print').format
 --- is_valid_key
 --- @param key string
 --- @return boolean ok
---- @return string err
+--- @return any err
 local function is_valid_key(key)
     if not is_string(key) or not find(key, '^[a-zA-Z0-9_%-]+$') then
         return false, format('key must be string of %q', '^[a-zA-Z0-9_%-]+$')
@@ -54,7 +54,7 @@ end
 --- @param val any
 --- @param ttl integer
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Cache:set_item(key, val, ttl)
     self.data[key] = {
         val = val,
@@ -69,7 +69,7 @@ end
 --- @param val any
 --- @param ttl integer
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Cache:set(key, val, ttl)
     local ok, err = is_valid_key(key)
     if not ok then
@@ -86,8 +86,8 @@ end
 --- get_item
 --- @param key string
 --- @param touch boolean
---- @return string val
---- @return string err
+--- @return string|nil val
+--- @return any err
 function Cache:get_item(key, touch)
     local item = self.data[key]
     if not item then
@@ -109,7 +109,7 @@ end
 --- @param key string
 --- @param touch boolean
 --- @return string val
---- @return string err
+--- @return any err
 function Cache:get(key, touch)
     local ok, err = is_valid_key(key)
     if not ok then
@@ -124,7 +124,7 @@ end
 --- del_item
 --- @param key string
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Cache:del_item(key)
     if self.data[key] ~= nil then
         self.data[key] = nil
@@ -136,7 +136,7 @@ end
 --- del
 --- @param key string
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Cache:del(key)
     local ok, err = is_valid_key(key)
     if not ok then
@@ -144,6 +144,13 @@ function Cache:del(key)
     end
 
     return self:del_item(key)
+end
+
+--- evict
+--- @return boolean ok
+--- @return any err
+function Cache:evict()
+    return true
 end
 
 return {
