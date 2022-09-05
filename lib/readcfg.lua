@@ -118,9 +118,9 @@ local function verify_document(cfg)
                          'document.cache must be boolean')
 
     -- ignore
-    cfg.ignore = checkopt(cfg.ignore, is_table, {},
+    cfg.ignore = checkopt(cfg.ignore, is_table, nil,
                           'document.ignore must be table')
-    for i, v in ipairs(cfg.ignore) do
+    for i, v in ipairs(cfg.ignore or {}) do
         cfg.ignore[i] = checkopt(v, is_string, nil,
                                  'document.ignore#%d must be string', i)
     end

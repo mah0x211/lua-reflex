@@ -5,7 +5,7 @@ source = {
     url = "git+https://github.com/mah0x211/lua-reflex.git",
 }
 description = {
-    summary = '',
+    summary = "A simple web framework for lua",
     homepage = "https://github.com/mah0x211/lua-reflex",
     license = "MIT/X11",
     maintainer = "Masatoshi Fukunaga",
@@ -19,7 +19,7 @@ dependencies = {
     "dump >= 0.1.1",
     "error >= 0.6.2",
     "exec >= 0.2.0",
-    "fsrouter >= 0.4.0",
+    "fsrouter >= 0.4.4",
     "getcwd >= 0.1.0",
     "getenv >= 0.2.1",
     "hmac >= 0.1.0",

@@ -146,10 +146,21 @@ local function start(cfg, reflex)
     log.info('done')
 end
 
+--- loadcfg
+--- @return table<string, any> cfg
+--- @return boolean loaded
+local function loadcfg()
+    log.info('load %q', CFGFILE)
+    local apath, err = fs.realpath(CFGFILE)
+    if err then
+        fatal('loadcfg', 'failed to load %q: %s', CFGFILE, err)
+    end
+    return readcfg(apath)
+end
+
 local function main(opts)
     -- load config.lua
-    log.info('load %q', CFGFILE)
-    local cfg = readcfg(CFGFILE)
+    local cfg = loadcfg()
 
     -- create required directories
     for _, v in ipairs({
