@@ -35,6 +35,7 @@ local new_context = require('context').new
 local update_date = require('net.http.date').update
 local new_http_server = require('net.http.server').new
 local signal = require('signal')
+local loadfile = require('loadchunk').file
 local log = require('reflex.log')
 local getopts = require('reflex.getopts')
 local fs = require('reflex.fs')
@@ -42,6 +43,7 @@ local readcfg = require('reflex.readcfg')
 local new_reflex = require('reflex')
 -- constants
 local CFGFILE = 'config.lua'
+local INITFILE = 'init.lua'
 
 --- fatal
 --- @param op string
@@ -146,6 +148,29 @@ local function start(cfg, reflex)
     log.info('done')
 end
 
+--- init
+--- @param cfg table<string, any>
+local function init(cfg)
+    local pathname, err = fs.realpath(INITFILE)
+    local fn
+
+    if pathname then
+        fn, err = loadfile(pathname)
+    end
+
+    if err then
+        fatal('init', 'failed to load %q: %s', INITFILE, err)
+    elseif fn then
+        log.info('run %q', INITFILE)
+
+        local ok
+        ok, err = pcall(fn, cfg)
+        if not ok then
+            fatal('init', 'failed to evaluate %q: %s', INITFILE, err)
+        end
+    end
+end
+
 --- loadcfg
 --- @return table<string, any> cfg
 --- @return boolean loaded
@@ -226,6 +251,8 @@ local function main(opts)
         end
     end
 
+    -- run custom initializer
+    init(cfg)
     if opts.test then
         return
     end
