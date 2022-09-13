@@ -267,6 +267,8 @@ function Reflex:serve(conn, msg)
             return false
         end
         res:internal_server_error(err)
+        self:write_error(res)
+        return false
     elseif is_detached then
         return false
     end
