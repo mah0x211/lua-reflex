@@ -117,6 +117,14 @@ local function verify_document(cfg)
     cfg.cache = checkopt(cfg.cache, is_boolean, false,
                          'document.cache must be boolean')
 
+    -- static
+    cfg.static = checkopt(cfg.staticc, is_table, nil,
+                          'document.static must be table')
+    for i, v in ipairs(cfg.static or {}) do
+        cfg.static[i] = checkopt(v, is_string, nil,
+                                 'document.static#%d must be string', i)
+    end
+
     -- ignore
     cfg.ignore = checkopt(cfg.ignore, is_table, nil,
                           'document.ignore must be table')
