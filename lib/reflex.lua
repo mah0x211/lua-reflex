@@ -79,6 +79,13 @@ function Reflex:init(cfg)
     return self, routes
 end
 
+--- is_template
+--- @param ext string
+--- @return boolean ok
+function Reflex:is_template(ext)
+    return self.template_files[ext] and true or false
+end
+
 --- write_file
 --- @param res reflex.response
 --- @param file table
