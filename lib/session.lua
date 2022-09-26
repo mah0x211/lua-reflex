@@ -23,10 +23,10 @@ local find = string.find
 local getmetatable = debug.getmetatable
 local isa = require('isa')
 local is_finite = isa.finite
+local is_boolean = isa.boolean
 local is_string = isa.string
 local is_table = isa.table
 local is_function = isa.Function
-local parse_cookie = require('cookie').parse
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
@@ -36,7 +36,7 @@ local errorf = require('reflex.errorf')
 local Store = require('reflex.cache').new()
 
 --- set_store
---- @param store Cache
+--- @param store reflex.cache
 local function set_store(store)
     local t = store
     if not is_table(store) then
@@ -156,7 +156,7 @@ end
 --- restore
 --- @param id string
 --- @return table value
---- @return string err
+--- @return any err
 local function restore(id)
     if not is_string(id) then
         error('id must be string', 3)
@@ -176,31 +176,33 @@ end
 local Session = {}
 
 --- init
---- @param cookies string
---- @return reflex.session ses
---- @return string err
-function Session:init(cookies)
-    local id
-    if cookies then
-        if not is_string(cookies) then
-            error('cookies must be string', 2)
-        end
-        local kv, err = parse_cookie(cookies)
-        if err then
-            return nil, err
-        end
-        id = kv[get_name()]
+--- @param cookies table<string, string>
+--- @param restore_only boolean
+--- @return reflex.session? ses
+--- @return any err
+function Session:init(cookies, restore_only)
+    if cookies ~= nil and not is_table(cookies) then
+        error('cookies must be table', 2)
+    elseif restore_only ~= nil and not is_boolean(restore_only) then
+        error('restore_only must be boolean', 2)
     end
 
-    if id ~= nil then
-        local value, err = restore(id)
-        if err then
-            return nil, err
-        elseif value then
-            self.id = id
-            self.value = value
-            return self
+    if cookies then
+        local id = cookies[get_name()]
+        if id ~= nil then
+            local value, err = restore(id)
+            if err then
+                return nil, err
+            elseif value then
+                self.id = id
+                self.value = value
+                return self
+            end
         end
+    end
+
+    if restore_only then
+        return nil
     end
 
     local newid, err = uuid4str()
@@ -216,7 +218,7 @@ end
 --- restore
 --- @param id string
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Session:restore(id)
     local value, err = restore(id)
 
@@ -276,9 +278,9 @@ function Session:save(attr)
         error('attr must be table', 2)
     end
 
-    local ok, serr = Store:set(self.id, self.value, ATTR.maxage)
+    local ok, err = Store:set(self.id, self.value, ATTR.maxage)
     if not ok then
-        return nil, serr
+        return nil, err
     end
 
     return bake_cookie(NAME, self.id, bake_attributes({}, attr))

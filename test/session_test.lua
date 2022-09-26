@@ -115,9 +115,9 @@ function testcase.new()
     -- test that create a new session
     assert(session.new())
 
-    -- test that throws an error if argument is not string
-    local err = assert.throws(session.new, {})
-    assert.match(err, 'cookies must be string')
+    -- test that throws an error if argument is invalid
+    local err = assert.throws(session.new, true)
+    assert.match(err, 'cookies must be table')
 end
 
 function testcase.set_get_delete()
@@ -242,8 +242,18 @@ function testcase.restore()
         },
     })
 
+    -- test that new session from restore only
+    local err
+    s, err = session.new({
+        unknown = 'invalid_cookie',
+    }, true)
+    assert.is_nil(s)
+    assert.is_nil(err)
+
     -- test that restore session by new function
-    s = assert(session.new(c.name .. '=' .. c.value))
+    s = assert(session.new({
+        [c.name] = c.value,
+    }))
     assert.equal(s.id, sid)
     assert.equal(s:get('foo'), {
         bar = {
@@ -252,7 +262,8 @@ function testcase.restore()
     })
 
     -- test that cannot restore with unknown(or expired) session-id
-    local ok, err = s:restore('foo')
+    local ok
+    ok, err = s:restore('foo')
     assert.is_false(ok)
     assert.is_nil(err)
 
@@ -262,7 +273,9 @@ function testcase.restore()
     assert.is_false(ok)
     assert.equal(err, 'test-get-error')
 
-    local _, nerr = session.new(c.name .. '=' .. c.value)
+    local _, nerr = session.new({
+        [c.name] = c.value,
+    })
     assert.is_nil(_)
     assert.equal(nerr, 'test-get-error')
 
