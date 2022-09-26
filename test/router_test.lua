@@ -332,6 +332,114 @@ function testcase.new()
     assert.match(err, 'unknown_rootdir.+ directory', false)
 end
 
+function testcase.lookup()
+    local r = assert(new_router('./testdir/html'))
+
+    -- test that serve request
+    for pathname, v in pairs({
+        ['/'] = {
+            route = {
+                file = {
+                    rpath = '/index.html',
+                },
+                methods = {
+                    get = {
+                        [1] = {
+                            method = "all",
+                            name = "/#1.block_ip.lua",
+                            type = "filter",
+                        },
+                        [2] = {
+                            method = "all",
+                            name = "/#2.check_user.lua",
+                            type = "filter",
+                        },
+                        [3] = {
+                            method = "get",
+                            name = "/@index.lua",
+                            type = "handler",
+                        },
+                    },
+                },
+            },
+            glob = {},
+        },
+        ['/signin'] = {
+            route = {
+                file = {
+                    rpath = '/signin/index.html',
+                },
+                methods = {
+                    get = {
+                        [1] = {
+                            method = "get",
+                            name = "/signin/@index.lua",
+                            type = "handler",
+                        },
+                    },
+                    post = {
+                        [1] = {
+                            method = "post",
+                            name = "/signin/@index.lua",
+                            type = "handler",
+                        },
+                    },
+                },
+            },
+            glob = {},
+        },
+        ['/foobar/posts/1234'] = {
+            route = {
+                file = {
+                    rpath = '/$user/posts/*id.html',
+                },
+                methods = {
+                    get = {
+                        {
+                            method = 'all',
+                            name = "/#1.block_ip.lua",
+                            type = "filter",
+                        },
+                        [2] = {
+                            method = "all",
+                            name = "/#2.check_user.lua",
+                            type = "filter",
+                        },
+                        [3] = {
+                            method = "all",
+                            name = "/$user/#1.block_user.lua",
+                            type = "filter",
+                        },
+                        [4] = {
+                            method = "all",
+                            name = "/$user/posts/#1.extract_id.lua",
+                            type = "filter",
+                        },
+                        [5] = {
+                            method = "get",
+                            name = "/$user/posts/@*id.lua",
+                            type = "handler",
+                        },
+
+                    },
+                },
+            },
+            glob = {
+                user = 'foobar',
+                id = '1234',
+            },
+        },
+    }) do
+        local route, _, glob = r:lookup(pathname)
+        assert.contains(route, v.route)
+        assert.equal(glob, v.glob)
+    end
+
+    -- test that throw an error if res.body is invalid
+    local err = assert.throws(r.lookup, r, {})
+    assert.match(err, 'pathname must be string')
+end
+
 function testcase.serve()
     local r = assert(new_router('./testdir/html'))
 

@@ -105,6 +105,15 @@ function Router:init(rootdir, opts)
     return self, route_list
 end
 
+--- lookup
+--- @param pathname string
+--- @return table route
+--- @return any err
+--- @return table glob
+function Router:lookup(pathname)
+    return self.router:lookup(pathname)
+end
+
 --- invoke_handlers
 --- @param res reflex.response
 --- @param req reflex.Request
