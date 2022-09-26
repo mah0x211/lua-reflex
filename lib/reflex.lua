@@ -317,6 +317,15 @@ function Reflex:serve(conn, msg)
     return self:write(res)
 end
 
+--- render_page
+--- @param pathname string
+--- @param data table
+--- @return string str
+--- @return any err
+function Reflex:render_page(pathname, data)
+    return self.renderer:render(data, pathname)
+end
+
 Reflex = require('metamodule').new(Reflex)
 
 return Reflex
