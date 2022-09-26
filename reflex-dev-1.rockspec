@@ -23,6 +23,7 @@ dependencies = {
     "getcwd >= 0.1.0",
     "getenv >= 0.2.1",
     "hmac >= 0.1.0",
+    "io-fopen >= 0.1.3",
     "isa >= 0.3.0",
     "kvpairs >= 0.1.0",
     "libmdbx >= 0.1.0",

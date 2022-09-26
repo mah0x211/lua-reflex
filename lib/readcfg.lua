@@ -22,9 +22,9 @@
 local pcall = pcall
 local ipairs = ipairs
 local pairs = pairs
-local open = io.open
 local format = string.format
 local assert = require('assert')
+local fopen = require('io.fopen')
 local isa = require('isa')
 local is_boolean = isa.boolean
 local is_int = isa.int
@@ -193,7 +193,7 @@ local function verify_listen(cfg)
             error(format('failed to set tls keypair files: %s', err))
         elseif dhparams then
             local f
-            f, err = open(dhparams, 'r')
+            f, err = fopen(dhparams, 'r')
             if not f then
                 error(
                     format('failed to open dhparam file %q: %s', dhparams, err))
