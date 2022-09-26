@@ -72,16 +72,16 @@ function Renderer:init(rootdir, follow_symlink, cache)
 end
 
 --- render
---- @param data table
 --- @param pathname string|nil
+--- @param data table
 --- @return string res
 --- @return string err
-function Renderer:render(data, pathname)
+function Renderer:render(pathname, data)
     data = data or {}
-    if not is_table(data) then
-        error('data must be table', 2)
-    elseif not is_string(pathname) then
+    if not is_string(pathname) then
         error('pathname must be string', 2)
+    elseif not is_table(data) then
+        error('data must be table', 2)
     end
 
     local res, err = self.rez:render(pathname, data)

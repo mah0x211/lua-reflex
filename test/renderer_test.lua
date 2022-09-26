@@ -79,9 +79,9 @@ function testcase.render()
     assert(r:add('/index.html'))
 
     -- test that returns rendered templates
-    local s = assert(r:render({
+    local s = assert(r:render('/index.html', {
         hello = 'hello world',
-    }, '/index.html'))
+    }))
     assert.equal(s, 'header\nhello world\nfooter\n')
 
     -- test that templates has been deleted after rendered
@@ -89,17 +89,18 @@ function testcase.render()
 
     -- test that returns an error
     local err
-    s, err = r:render({
+    s, err = r:render('/unknown.html', {
         hello = 'hello world',
-    }, '/unknown.html')
+    })
     assert.is_nil(s)
     assert.match(err, 'not found')
 
+    -- test that throws an error if invalid pathname argument
+    err = assert.throws(r.render, r, {})
+    assert.match(err, 'pathname must be string')
+
     -- test that throws an error if invalid data argument
-    err = assert.throws(r.render, r, true)
+    err = assert.throws(r.render, r, '/foo/bar', true)
     assert.match(err, 'data must be table')
 
-    -- test that throws an error if invalid pathname argument
-    err = assert.throws(r.render, r, {}, true)
-    assert.match(err, 'pathname must be string')
 end

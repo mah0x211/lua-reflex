@@ -160,7 +160,7 @@ end
 --- @param file table
 --- @return boolean ok
 function Reflex:write_template(res, file)
-    local str, err = self.renderer:render(res.body, file.rpath)
+    local str, err = self.renderer:render(file.rpath, res.body)
     if err then
         -- failed to render file
         log.alert('failed to render template %q: %s', file.rpath, err)
@@ -211,7 +211,7 @@ function Reflex:write_error(res)
     end
 
     -- render error page
-    local msg, err = self.renderer:render(res.body, pathname)
+    local msg, err = self.renderer:render(pathname, res.body)
     if msg then
         return self:write(res, msg)
     end
@@ -323,7 +323,7 @@ end
 --- @return string str
 --- @return any err
 function Reflex:render_page(pathname, data)
-    return self.renderer:render(data, pathname)
+    return self.renderer:render(pathname, data)
 end
 
 --- render_error_page
@@ -336,7 +336,7 @@ function Reflex:render_error_page(code, data)
     if not pathname then
         return code2message(code) .. '\n'
     end
-    return self.renderer:render(data, pathname)
+    return self.renderer:render(pathname, data)
 end
 
 Reflex = require('metamodule').new(Reflex)
