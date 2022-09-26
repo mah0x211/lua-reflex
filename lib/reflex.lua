@@ -326,6 +326,19 @@ function Reflex:render_page(pathname, data)
     return self.renderer:render(data, pathname)
 end
 
+--- render_error_page
+--- @param code integer
+--- @param data table
+--- @return string str
+--- @return any err
+function Reflex:render_error_page(code, data)
+    local pathname = self.error_pages[code]
+    if not pathname then
+        return code2message(code) .. '\n'
+    end
+    return self.renderer:render(data, pathname)
+end
+
 Reflex = require('metamodule').new(Reflex)
 
 return Reflex
