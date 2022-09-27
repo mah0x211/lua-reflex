@@ -156,10 +156,13 @@ local function verify_document(cfg)
     -- error_pages
     cfg.error_pages = checkopt(cfg.error_pages, is_table, {},
                                'document.error_pages must be table')
-    for i, v in ipairs(cfg.error_pages) do
-        cfg.error_pages[i] = checkopt(v, is_string, nil,
-                                      'document.error_pages#%d must be string',
-                                      i)
+    for code, v in pairs(cfg.error_pages) do
+        if not is_int(code) then
+            log.fatal('document.error_pages index key %q must be integer', code)
+        end
+        cfg.error_pages[code] = checkopt(v, is_string, nil,
+                                         'document.error_pages#%d must be string',
+                                         code)
     end
 
     return cfg
