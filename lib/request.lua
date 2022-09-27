@@ -20,16 +20,20 @@
 -- THE SOFTWARE.
 --
 local sub = string.sub
+local concat = table.concat
 local pairs = pairs
 local new_kvpairs = require('kvpairs').new
 local realpath = require('realpath')
+local parse_cookie = require('cookie').parse
+local log = require('reflex.log')
+local new_session = require('reflex.session').new
 
 --- @class reflex.request : net.http.message.request
 --- @field method string
 --- @field uri string
 --- @field header net.http.header
 --- @field content? net.http.content
---- @field session reflex.session
+--- @field sess reflex.session
 local Request = {}
 
 --- init
@@ -66,6 +70,29 @@ function Request:init(req)
     self.query = kvp
 
     return self
+end
+
+--- session
+--- @return reflex.session sess
+function Request:session()
+    if self.sess then
+        return self.sess
+    end
+
+    -- start session
+    local cookies = self.header:get('Cookie', true)
+    if cookies then
+        -- NOTE: ignore invalid cookie header
+        cookies = parse_cookie(concat(cookies, '; '))
+    end
+
+    local sess, err = new_session(cookies)
+    if not sess then
+        log.fatal('failed to create session: %s', err)
+    end
+
+    self.sess = sess
+    return sess
 end
 
 Request = require('metamodule').new(Request, 'net.http.message.request')
