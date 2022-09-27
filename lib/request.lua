@@ -95,6 +95,18 @@ function Request:session()
     return sess
 end
 
+--- save_session
+--- @return string? cookie
+function Request:save_session()
+    if self.sess then
+        local cookie, err = self.sess:save()
+        if not cookie then
+            log.fatal('failed to save session: %s', err)
+        end
+        return cookie
+    end
+end
+
 Request = require('metamodule').new(Request, 'net.http.message.request')
 
 return Request
