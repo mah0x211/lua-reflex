@@ -34,6 +34,7 @@ local is_table = isa.table
 local setenv = require('setenv')
 local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
+local log = require('reflex.log')
 local session = require('reflex.session')
 local errorf = require('reflex.errorf')
 
@@ -261,12 +262,17 @@ local function readcfg(pathname)
         is_loaded = true
     end
 
+    local debug = checkopt(rawcfg.debug, is_boolean, false,
+                           'debug must be boolean')
+    if debug then
+        log.setlevel('debug')
+    end
+
     local cfg = {
+        debug = debug,
         name = checkopt(rawcfg.name, is_string, 'unknown', 'name must be string'),
         version = checkopt(rawcfg.version, is_string, '0.0.0',
                            'version must be string'),
-        debug = checkopt(rawcfg.debug, is_boolean, false,
-                         'debug must be boolean'),
         response_as_json = checkopt(rawcfg.response_as_json, is_boolean, false,
                                     'response_as_json must be boolean'),
         env = verify_env(rawcfg.env),
