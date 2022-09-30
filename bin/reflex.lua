@@ -24,8 +24,6 @@
 -- module
 local act = require('act')
 require('gpoll').set_poller(act)
-local xpcall = xpcall
-local traceback = debug.traceback
 local assert = assert
 local error = error
 local ipairs = ipairs
@@ -41,6 +39,8 @@ local getopts = require('reflex.getopts')
 local fs = require('reflex.fs')
 local readcfg = require('reflex.readcfg')
 local new_reflex = require('reflex')
+local new_response = require('reflex.response')
+local new_request = require('reflex.request')
 -- constants
 local CFGFILE = 'config.lua'
 local INITFILE = 'init.lua'
@@ -53,41 +53,45 @@ local function fatal(op, ...)
 end
 
 --- handle_connection
+--- @param cfg table
 --- @param conn net.http.connection
 --- @param reflex reflex
-local function handle_connection(conn, reflex)
-    act.atexit(function()
+local function handle_connection(cfg, conn, reflex)
+    act.atexit(function(...)
         conn:close()
     end)
 
+    local response_as_json = cfg.response_as_json == true
+    local debug = cfg.debug
     repeat
-        local req, err = conn:read_request()
+        local msg, err = conn:read_request()
+        local req = msg and new_request(msg)
+        local res = new_response(reflex, conn, req, response_as_json, debug)
 
-        if not req then
+        if not msg then
             if err then
-                log.error('failed to read request:', err)
+                res:bad_request(err)
             end
             return
         end
 
-        local content = req.content
-        local ok, keepalive = xpcall(reflex.serve, traceback, reflex, conn, req)
-        if not ok then
-            log.error('failed serve content: ', keepalive)
-            return
-        end
-
+        local content = msg.content
+        local keepalive = reflex:serve(res, req)
         if keepalive and content then
             local _
             _, err = content:dispose()
             if err then
-                log.error('failed to dispose request content: ', err)
+                log.error('failed to dispose unused request content: ', err)
                 return
             end
         end
     until keepalive == false
 end
 
+--- listen_and_serve
+--- @param cfg table
+--- @param reflex reflex
+--- @param s net.http.server
 local function listen_and_serve(cfg, reflex, s)
     local _, err = s:listen(cfg.listen.backlog)
     if err then
@@ -105,12 +109,13 @@ local function listen_and_serve(cfg, reflex, s)
             if err then
                 log.alert('failed to set tcpnodlay flag: %s', err)
             else
-                act.spawn(handle_connection, conn, reflex)
+                act.spawn(handle_connection, cfg, conn, reflex)
             end
         end
     end
 end
 
+--- sigwait
 local function sigwait(...)
     -- wait a SIGINT
     assert(act.sigwait(nil, signal.SIGINT))

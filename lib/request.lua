@@ -19,11 +19,9 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local sub = string.sub
 local concat = table.concat
 local pairs = pairs
 local new_kvpairs = require('kvpairs').new
-local realpath = require('realpath')
 local parse_cookie = require('cookie').parse
 local log = require('reflex.log')
 local new_session = require('reflex.session').new
@@ -39,23 +37,7 @@ local Request = {}
 --- init
 --- @param req net.http.message.request
 --- @return reflex.request req
---- @return any error
 function Request:init(req)
-    -- path normalization
-    local path, err = realpath(req.path, nil, false)
-    if err then
-        return nil, err
-    end
-
-    req.is_normalized = req.path ~= path
-    if path == '.' then
-        req.path = '/'
-    elseif sub(path, 1, 1) == '.' then
-        req.path = '/' .. path
-    else
-        req.path = path
-    end
-
     -- wrap
     for k, v in pairs(req) do
         self[k] = v
@@ -73,8 +55,9 @@ function Request:init(req)
 end
 
 --- session
---- @return reflex.session sess
-function Request:session()
+--- @param restore_only boolean
+--- @return reflex.session? sess
+function Request:session(restore_only)
     if self.sess then
         return self.sess
     end
@@ -86,13 +69,13 @@ function Request:session()
         cookies = parse_cookie(concat(cookies, '; '))
     end
 
-    local sess, err = new_session(cookies)
-    if not sess then
+    local sess, err = new_session(cookies, restore_only)
+    if sess then
+        self.sess = sess
+        return sess
+    elseif err then
         log.fatal('failed to create session: %s', err)
     end
-
-    self.sess = sess
-    return sess
 end
 
 --- save_session
