@@ -1,7 +1,6 @@
 require('luacov')
 local testcase = require('testcase')
 local new_response = require('reflex.response')
-local code2reason = require('reflex.status').code2reason
 
 function testcase.new()
     -- test that create new Response
@@ -9,1748 +8,357 @@ function testcase.new()
     assert.match(res, '^reflex%.response: ', false)
 end
 
-function testcase.continue()
-    local res = assert(new_response())
+function testcase.response1xx2xx()
+    local msg
+    local res = new_response()
+    res.reply = function(_, code, data)
+        msg = data
+        msg.code = code
+    end
 
-    -- test that returns 100
-    assert.equal(res:continue(), 100)
-    assert.equal(res.status, 100)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:continue({
-        foo = 'bar',
-    }), 100)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:continue({
-        foo = 'bar',
-    }), 100)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:continue({
-        baz = {
-            qux = 'quux',
+    for _, v in ipairs({
+        {
+            name = 'continue',
+            code = 100,
         },
-    }, true), 100)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
+        {
+            name = 'switching_protocols',
+            code = 101,
         },
-    })
+        {
+            name = 'processing',
+            code = 102,
+        },
+        {
+            name = 'ok',
+            code = 200,
+        },
+        {
+            name = 'created',
+            code = 201,
+        },
+        {
+            name = 'accepted',
+            code = 202,
+        },
+        {
+            name = 'non_authoritative_information',
+            code = 203,
+        },
+        {
+            name = 'no_content',
+            code = 204,
+        },
+        {
+            name = 'reset_content',
+            code = 205,
+        },
+        {
+            name = 'partial_content',
+            code = 206,
+        },
+        {
+            name = 'multi_status',
+            code = 207,
+        },
+        {
+            name = 'already_reported',
+            code = 208,
+        },
+        {
+            name = 'im_used',
+            code = 226,
+        },
+        {
+            name = 'multiple_choices',
+            code = 300,
+        },
+    }) do
+        local method = res[v.name]
+        method(res)
+        assert.equal(msg, {
+            code = v.code,
+            data = {},
+        })
 
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.continue, res, 1)
-    assert.match(err, 'body must be table')
+        -- test that set body
+        method(res, {
+            foo = 'bar',
+        })
+        assert.equal(msg, {
+            code = v.code,
+            data = {
+                foo = 'bar',
+            },
+        })
+        -- test that merge body
+        res.body = {
+            hello = 'world',
+        }
+        method(res, {
+            foo = 'bar',
+        })
+        assert.equal(msg, {
+            code = v.code,
+            data = {
+                foo = 'bar',
+                hello = 'world',
+            },
+        })
+        res.body = nil
 
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.continue, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
+        -- test that throws an error if body is not table
+        local err = assert.throws(method, res, 1)
+        assert.match(err, 'body must be table')
+    end
 end
 
-function testcase.switching_protocols()
-    local res = assert(new_response())
-
-    -- test that returns 101
-    assert.equal(res:switching_protocols(), 101)
-    assert.equal(res.status, 101)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:switching_protocols({
-        foo = 'bar',
-    }), 101)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:switching_protocols({
-        foo = 'bar',
-    }), 101)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:switching_protocols({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 101)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.switching_protocols, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.switching_protocols, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.processing()
-    local res = assert(new_response())
-
-    -- test that returns 102
-    assert.equal(res:processing(), 102)
-    assert.equal(res.status, 102)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:processing({
-        foo = 'bar',
-    }), 102)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:processing({
-        foo = 'bar',
-    }), 102)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:processing({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 102)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.processing, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.processing, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.ok()
-    local res = assert(new_response())
-
-    -- test that returns 200
-    assert.equal(res:ok(), 200)
-    assert.equal(res.status, 200)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:ok({
-        foo = 'bar',
-    }), 200)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:ok({
-        foo = 'bar',
-    }), 200)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:ok({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 200)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.ok, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.ok, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.created()
-    local res = assert(new_response())
-
-    -- test that returns 201
-    assert.equal(res:created(), 201)
-    assert.equal(res.status, 201)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:created({
-        foo = 'bar',
-    }), 201)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:created({
-        foo = 'bar',
-    }), 201)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:created({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 201)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.created, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.created, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.accepted()
-    local res = assert(new_response())
-
-    -- test that returns 202
-    assert.equal(res:accepted(), 202)
-    assert.equal(res.status, 202)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:accepted({
-        foo = 'bar',
-    }), 202)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:accepted({
-        foo = 'bar',
-    }), 202)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:accepted({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 202)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.accepted, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.accepted, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.non_authoritative_information()
-    local res = assert(new_response())
-
-    -- test that returns 203
-    assert.equal(res:non_authoritative_information(), 203)
-    assert.equal(res.status, 203)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:non_authoritative_information({
-        foo = 'bar',
-    }), 203)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:non_authoritative_information({
-        foo = 'bar',
-    }), 203)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:non_authoritative_information({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 203)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.non_authoritative_information, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.non_authoritative_information, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.no_content()
-    local res = assert(new_response())
-
-    -- test that returns 204
-    assert.equal(res:no_content(), 204)
-    assert.equal(res.status, 204)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:no_content({
-        foo = 'bar',
-    }), 204)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:no_content({
-        foo = 'bar',
-    }), 204)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:no_content({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 204)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.no_content, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.no_content, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.reset_content()
-    local res = assert(new_response())
-
-    -- test that returns 205
-    assert.equal(res:reset_content(), 205)
-    assert.equal(res.status, 205)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:reset_content({
-        foo = 'bar',
-    }), 205)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:reset_content({
-        foo = 'bar',
-    }), 205)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:reset_content({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 205)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.reset_content, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.reset_content, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.partial_content()
-    local res = assert(new_response())
-
-    -- test that returns 206
-    assert.equal(res:partial_content(), 206)
-    assert.equal(res.status, 206)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:partial_content({
-        foo = 'bar',
-    }), 206)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:partial_content({
-        foo = 'bar',
-    }), 206)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:partial_content({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 206)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.partial_content, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.partial_content, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.multi_status()
-    local res = assert(new_response())
-
-    -- test that returns 207
-    assert.equal(res:multi_status(), 207)
-    assert.equal(res.status, 207)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:multi_status({
-        foo = 'bar',
-    }), 207)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:multi_status({
-        foo = 'bar',
-    }), 207)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:multi_status({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 207)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.multi_status, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.multi_status, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.already_reported()
-    local res = assert(new_response())
-
-    -- test that returns 208
-    assert.equal(res:already_reported(), 208)
-    assert.equal(res.status, 208)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:already_reported({
-        foo = 'bar',
-    }), 208)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:already_reported({
-        foo = 'bar',
-    }), 208)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:already_reported({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 208)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.already_reported, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.already_reported, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.im_used()
-    local res = assert(new_response())
-
-    -- test that returns 226
-    assert.equal(res:im_used(), 226)
-    assert.equal(res.status, 226)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:im_used({
-        foo = 'bar',
-    }), 226)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:im_used({
-        foo = 'bar',
-    }), 226)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:im_used({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 226)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.im_used, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.im_used, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.multiple_choices()
-    local res = assert(new_response())
-
-    -- test that returns 300
-    assert.equal(res:multiple_choices(), 300)
-    assert.equal(res.status, 300)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:multiple_choices({
-        foo = 'bar',
-    }), 300)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:multiple_choices({
-        foo = 'bar',
-    }), 300)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:multiple_choices({
-        baz = {
-            qux = 'quux',
-        },
-    }, true), 300)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.multiple_choices, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.multiple_choices, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.moved_permanently()
-    local res = assert(new_response())
-
-    -- test that returns 301
-    assert.equal(res:moved_permanently('/foo/bar'), 301)
-    assert.equal(res.status, 301)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-    assert.equal(res.body, {
-        redirection = {
+function testcase.response3xx()
+    local msg
+    local res = new_response()
+    res.reply = function(_, code, data)
+        msg = data
+        msg.code = code
+    end
+
+    for _, v in ipairs({
+        {
+            name = 'moved_permanently',
             code = 301,
-            location = '/foo/bar',
-            status = code2reason(301),
         },
-    })
-
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.moved_permanently, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.moved_permanently, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
-end
-
-function testcase.found()
-    local res = assert(new_response())
-
-    -- test that returns 302
-    assert.equal(res:found('/foo/bar'), 302)
-    assert.equal(res.status, 302)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-    assert.equal(res.body, {
-        redirection = {
+        {
+            name = 'found',
             code = 302,
-            location = '/foo/bar',
-            status = code2reason(302),
         },
-    })
-
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.found, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.found, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
-end
-
-function testcase.see_other()
-    local res = assert(new_response())
-
-    -- test that returns 303
-    assert.equal(res:see_other('/foo/bar'), 303)
-    assert.equal(res.status, 303)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-    assert.equal(res.body, {
-        redirection = {
+        {
+            name = 'see_other',
             code = 303,
-            location = '/foo/bar',
-            status = code2reason(303),
         },
-    })
-
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.see_other, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.see_other, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
-end
-
-function testcase.not_modified()
-    local res = assert(new_response())
-
-    -- test that returns 304
-    assert.equal(res:not_modified(), 304)
-    assert.equal(res.status, 304)
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:not_modified({
-        foo = 'bar',
-    }), 304)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that set body
-    res.body = 'foo'
-    assert.equal(res:not_modified({
-        foo = 'bar',
-    }), 304)
-    assert.equal(res.body, {
-        foo = 'bar',
-    })
-
-    -- test that merge body
-    res.body.baz = 'baa'
-    assert.equal(res:not_modified({
-        baz = {
-            qux = 'quux',
+        {
+            name = 'not_modified',
+            code = 304,
         },
-    }, true), 304)
-    assert.equal(res.body, {
-        foo = 'bar',
-        baz = {
-            qux = 'quux',
-        },
-    })
-
-    -- test that throws an error if body is not table
-    local err = assert.throws(res.not_modified, res, 1)
-    assert.match(err, 'body must be table')
-
-    -- test that throws an error if tomerge is not boolean
-    err = assert.throws(res.not_modified, res, {}, {})
-    assert.match(err, 'tomerge must be boolean')
-end
-
-function testcase.use_proxy()
-    local res = assert(new_response())
-
-    -- test that returns 305
-    assert.equal(res:use_proxy('/foo/bar'), 305)
-    assert.equal(res.status, 305)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-    assert.equal(res.body, {
-        redirection = {
+        {
+            name = 'use_proxy',
             code = 305,
-            location = '/foo/bar',
-            status = code2reason(305),
         },
-    })
-
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.use_proxy, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.use_proxy, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
-end
-
-function testcase.temporary_redirect()
-    local res = assert(new_response())
-
-    -- test that returns 307
-    assert.equal(res:temporary_redirect('/foo/bar'), 307)
-    assert.equal(res.status, 307)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-    assert.equal(res.body, {
-        redirection = {
+        {
+            name = 'temporary_redirect',
             code = 307,
-            location = '/foo/bar',
-            status = code2reason(307),
         },
-    })
+        {
+            name = 'permanent_redirect',
+            code = 308,
+        },
+    }) do
+        local method = res[v.name]
+        local uri = 'foo/bar'
+        method(res, uri)
+        assert.equal(msg, {
+            code = v.code,
+            location = uri,
+            data = {},
+        })
 
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.temporary_redirect, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.temporary_redirect, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
+        -- test that throws an error if uri is not string
+        local err = assert.throws(method, res, 1)
+        assert.match(err, 'uri must be non-empty string')
+    end
 end
 
-function testcase.permanent_redirect()
-    local res = assert(new_response())
+function testcase.response4xx5xx()
+    local msg
+    local res = new_response()
+    res.reply = function(_, code, data)
+        msg = data
+        msg.code = code
+    end
 
-    -- test that returns 308
-    assert.equal(res:permanent_redirect('/foo/bar'), 308)
-    assert.equal(res.status, 308)
-    assert.equal(res.header:get('Location'), '/foo/bar')
-
-    -- test that throws an error if uri is empty-string
-    local err = assert.throws(res.permanent_redirect, res, ' \n \t ')
-    assert.match(err, 'uri must be non-empty string with no spaces')
-
-    -- test that throws an error if uri is not string
-    err = assert.throws(res.permanent_redirect, res, 1)
-    assert.match(err, 'uri must be non-empty string with no spaces')
-end
-
-function testcase.bad_request()
-    local res = assert(new_response())
-
-    -- test that returns 400
-    assert.equal(res:bad_request(), 400)
-    assert.equal(res.status, 400)
-    assert.equal(res.body.error, {
-        code = 400,
-        status = code2reason(400),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:bad_request('hello'), 400)
-    assert.equal(res.status, 400)
-    assert.equal(res.body, {
-        error = {
+    for _, v in ipairs({
+        -- 4XX status
+        {
+            name = 'bad_request',
             code = 400,
-            status = code2reason(400),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.unauthorized()
-    local res = assert(new_response())
-
-    -- test that returns 401
-    assert.equal(res:unauthorized(), 401)
-    assert.equal(res.status, 401)
-    assert.equal(res.body.error, {
-        code = 401,
-        status = code2reason(401),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:unauthorized('hello'), 401)
-    assert.equal(res.status, 401)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'unauthorized',
             code = 401,
-            status = code2reason(401),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.payment_required()
-    local res = assert(new_response())
-
-    -- test that returns 402
-    assert.equal(res:payment_required(), 402)
-    assert.equal(res.status, 402)
-    assert.equal(res.body.error, {
-        code = 402,
-        status = code2reason(402),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:payment_required('hello'), 402)
-    assert.equal(res.status, 402)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'payment_required',
             code = 402,
-            status = code2reason(402),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.forbidden()
-    local res = assert(new_response())
-
-    -- test that returns 403
-    assert.equal(res:forbidden(), 403)
-    assert.equal(res.status, 403)
-    assert.equal(res.body.error, {
-        code = 403,
-        status = code2reason(403),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:forbidden('hello'), 403)
-    assert.equal(res.status, 403)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'forbidden',
             code = 403,
-            status = code2reason(403),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.not_found()
-    local res = assert(new_response())
-
-    -- test that returns 404
-    assert.equal(res:not_found(), 404)
-    assert.equal(res.status, 404)
-    assert.equal(res.body.error, {
-        code = 404,
-        status = code2reason(404),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:not_found('hello'), 404)
-    assert.equal(res.status, 404)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'not_found',
             code = 404,
-            status = code2reason(404),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.method_not_allowed()
-    local res = assert(new_response())
-
-    -- test that returns 405
-    assert.equal(res:method_not_allowed(), 405)
-    assert.equal(res.status, 405)
-    assert.equal(res.body.error, {
-        code = 405,
-        status = code2reason(405),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:method_not_allowed('hello'), 405)
-    assert.equal(res.status, 405)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'method_not_allowed',
             code = 405,
-            status = code2reason(405),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.not_acceptable()
-    local res = assert(new_response())
-
-    -- test that returns 406
-    assert.equal(res:not_acceptable(), 406)
-    assert.equal(res.status, 406)
-    assert.equal(res.body.error, {
-        code = 406,
-        status = code2reason(406),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:not_acceptable('hello'), 406)
-    assert.equal(res.status, 406)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'not_acceptable',
             code = 406,
-            status = code2reason(406),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.proxy_authentication_required()
-    local res = assert(new_response())
-
-    -- test that returns 407
-    assert.equal(res:proxy_authentication_required(), 407)
-    assert.equal(res.status, 407)
-    assert.equal(res.body.error, {
-        code = 407,
-        status = code2reason(407),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:proxy_authentication_required('hello'), 407)
-    assert.equal(res.status, 407)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'proxy_authentication_required',
             code = 407,
-            status = code2reason(407),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.request_timeout()
-    local res = assert(new_response())
-
-    -- test that returns 408
-    assert.equal(res:request_timeout(), 408)
-    assert.equal(res.status, 408)
-    assert.equal(res.body.error, {
-        code = 408,
-        status = code2reason(408),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:request_timeout('hello'), 408)
-    assert.equal(res.status, 408)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'request_timeout',
             code = 408,
-            status = code2reason(408),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.conflict()
-    local res = assert(new_response())
-
-    -- test that returns 409
-    assert.equal(res:conflict(), 409)
-    assert.equal(res.status, 409)
-    assert.equal(res.body.error, {
-        code = 409,
-        status = code2reason(409),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:conflict('hello'), 409)
-    assert.equal(res.status, 409)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'conflict',
             code = 409,
-            status = code2reason(409),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.gone()
-    local res = assert(new_response())
-
-    -- test that returns 410
-    assert.equal(res:gone(), 410)
-    assert.equal(res.status, 410)
-    assert.equal(res.body.error, {
-        code = 410,
-        status = code2reason(410),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:gone('hello'), 410)
-    assert.equal(res.status, 410)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'gone',
             code = 410,
-            status = code2reason(410),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.length_required()
-    local res = assert(new_response())
-
-    -- test that returns 411
-    assert.equal(res:length_required(), 411)
-    assert.equal(res.status, 411)
-    assert.equal(res.body.error, {
-        code = 411,
-        status = code2reason(411),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:length_required('hello'), 411)
-    assert.equal(res.status, 411)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'length_required',
             code = 411,
-            status = code2reason(411),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.precondition_failed()
-    local res = assert(new_response())
-
-    -- test that returns 412
-    assert.equal(res:precondition_failed(), 412)
-    assert.equal(res.status, 412)
-    assert.equal(res.body.error, {
-        code = 412,
-        status = code2reason(412),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:precondition_failed('hello'), 412)
-    assert.equal(res.status, 412)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'precondition_failed',
             code = 412,
-            status = code2reason(412),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.payload_too_large()
-    local res = assert(new_response())
-
-    -- test that returns 413
-    assert.equal(res:payload_too_large(), 413)
-    assert.equal(res.status, 413)
-    assert.equal(res.body.error, {
-        code = 413,
-        status = code2reason(413),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:payload_too_large('hello'), 413)
-    assert.equal(res.status, 413)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'payload_too_large',
             code = 413,
-            status = code2reason(413),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.request_uri_too_long()
-    local res = assert(new_response())
-
-    -- test that returns 414
-    assert.equal(res:request_uri_too_long(), 414)
-    assert.equal(res.status, 414)
-    assert.equal(res.body.error, {
-        code = 414,
-        status = code2reason(414),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:request_uri_too_long('hello'), 414)
-    assert.equal(res.status, 414)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'request_uri_too_long',
             code = 414,
-            status = code2reason(414),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.unsupported_media_type()
-    local res = assert(new_response())
-
-    -- test that returns 415
-    assert.equal(res:unsupported_media_type(), 415)
-    assert.equal(res.status, 415)
-    assert.equal(res.body.error, {
-        code = 415,
-        status = code2reason(415),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:unsupported_media_type('hello'), 415)
-    assert.equal(res.status, 415)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'unsupported_media_type',
             code = 415,
-            status = code2reason(415),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.requested_range_not_satisfiable()
-    local res = assert(new_response())
-
-    -- test that returns 416
-    assert.equal(res:requested_range_not_satisfiable(), 416)
-    assert.equal(res.status, 416)
-    assert.equal(res.body.error, {
-        code = 416,
-        status = code2reason(416),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:requested_range_not_satisfiable('hello'), 416)
-    assert.equal(res.status, 416)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'requested_range_not_satisfiable',
             code = 416,
-            status = code2reason(416),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.expectation_failed()
-    local res = assert(new_response())
-
-    -- test that returns 417
-    assert.equal(res:expectation_failed(), 417)
-    assert.equal(res.status, 417)
-    assert.equal(res.body.error, {
-        code = 417,
-        status = code2reason(417),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:expectation_failed('hello'), 417)
-    assert.equal(res.status, 417)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'expectation_failed',
             code = 417,
-            status = code2reason(417),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.unprocessable_entity()
-    local res = assert(new_response())
-
-    -- test that returns 422
-    assert.equal(res:unprocessable_entity(), 422)
-    assert.equal(res.status, 422)
-    assert.equal(res.body.error, {
-        code = 422,
-        status = code2reason(422),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:unprocessable_entity('hello'), 422)
-    assert.equal(res.status, 422)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'unprocessable_entity',
             code = 422,
-            status = code2reason(422),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.locked()
-    local res = assert(new_response())
-
-    -- test that returns 423
-    assert.equal(res:locked(), 423)
-    assert.equal(res.status, 423)
-    assert.equal(res.body.error, {
-        code = 423,
-        status = code2reason(423),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:locked('hello'), 423)
-    assert.equal(res.status, 423)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'locked',
             code = 423,
-            status = code2reason(423),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.failed_dependency()
-    local res = assert(new_response())
-
-    -- test that returns 424
-    assert.equal(res:failed_dependency(), 424)
-    assert.equal(res.status, 424)
-    assert.equal(res.body.error, {
-        code = 424,
-        status = code2reason(424),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:failed_dependency('hello'), 424)
-    assert.equal(res.status, 424)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'failed_dependency',
             code = 424,
-            status = code2reason(424),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.upgrade_required()
-    local res = assert(new_response())
-
-    -- test that returns 426
-    assert.equal(res:upgrade_required(), 426)
-    assert.equal(res.status, 426)
-    assert.equal(res.body.error, {
-        code = 426,
-        status = code2reason(426),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:upgrade_required('hello'), 426)
-    assert.equal(res.status, 426)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'upgrade_required',
             code = 426,
-            status = code2reason(426),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.precondition_required()
-    local res = assert(new_response())
-
-    -- test that returns 428
-    assert.equal(res:precondition_required(), 428)
-    assert.equal(res.status, 428)
-    assert.equal(res.body.error, {
-        code = 428,
-        status = code2reason(428),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:precondition_required('hello'), 428)
-    assert.equal(res.status, 428)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'precondition_required',
             code = 428,
-            status = code2reason(428),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.too_many_requests()
-    local res = assert(new_response())
-
-    -- test that returns 429
-    assert.equal(res:too_many_requests(), 429)
-    assert.equal(res.status, 429)
-    assert.equal(res.body.error, {
-        code = 429,
-        status = code2reason(429),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:too_many_requests('hello'), 429)
-    assert.equal(res.status, 429)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'too_many_requests',
             code = 429,
-            status = code2reason(429),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.request_header_fields_too_large()
-    local res = assert(new_response())
-
-    -- test that returns 431
-    assert.equal(res:request_header_fields_too_large(), 431)
-    assert.equal(res.status, 431)
-    assert.equal(res.body.error, {
-        code = 431,
-        status = code2reason(431),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:request_header_fields_too_large('hello'), 431)
-    assert.equal(res.status, 431)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'request_header_fields_too_large',
             code = 431,
-            status = code2reason(431),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.unavailable_for_legal_reasons()
-    local res = assert(new_response())
-
-    -- test that returns 451
-    assert.equal(res:unavailable_for_legal_reasons(), 451)
-    assert.equal(res.status, 451)
-    assert.equal(res.body.error, {
-        code = 451,
-        status = code2reason(451),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:unavailable_for_legal_reasons('hello'), 451)
-    assert.equal(res.status, 451)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'unavailable_for_legal_reasons',
             code = 451,
-            status = code2reason(451),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.internal_server_error()
-    local res = assert(new_response())
-
-    -- test that returns 500
-    assert.equal(res:internal_server_error(), 500)
-    assert.equal(res.status, 500)
-    assert.equal(res.body.error, {
-        code = 500,
-        status = code2reason(500),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:internal_server_error('hello'), 500)
-    assert.equal(res.status, 500)
-    assert.equal(res.body, {
-        error = {
+        -- 5XX status
+        {
+            name = 'internal_server_error',
             code = 500,
-            status = code2reason(500),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.not_implemented()
-    local res = assert(new_response())
-
-    -- test that returns 501
-    assert.equal(res:not_implemented(), 501)
-    assert.equal(res.status, 501)
-    assert.equal(res.body.error, {
-        code = 501,
-        status = code2reason(501),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:not_implemented('hello'), 501)
-    assert.equal(res.status, 501)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'not_implemented',
             code = 501,
-            status = code2reason(501),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.bad_gateway()
-    local res = assert(new_response())
-
-    -- test that returns 502
-    assert.equal(res:bad_gateway(), 502)
-    assert.equal(res.status, 502)
-    assert.equal(res.body.error, {
-        code = 502,
-        status = code2reason(502),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:bad_gateway('hello'), 502)
-    assert.equal(res.status, 502)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'bad_gateway',
             code = 502,
-            status = code2reason(502),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.service_unavailable()
-    local res = assert(new_response())
-
-    -- test that returns 503
-    assert.equal(res:service_unavailable(), 503)
-    assert.equal(res.status, 503)
-    assert.equal(res.body.error, {
-        code = 503,
-        status = code2reason(503),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:service_unavailable('hello'), 503)
-    assert.equal(res.status, 503)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'service_unavailable',
             code = 503,
-            status = code2reason(503),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.gateway_timeout()
-    local res = assert(new_response())
-
-    -- test that returns 504
-    assert.equal(res:gateway_timeout(), 504)
-    assert.equal(res.status, 504)
-    assert.equal(res.body.error, {
-        code = 504,
-        status = code2reason(504),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:gateway_timeout('hello'), 504)
-    assert.equal(res.status, 504)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'gateway_timeout',
             code = 504,
-            status = code2reason(504),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.http_version_not_supported()
-    local res = assert(new_response())
-
-    -- test that returns 505
-    assert.equal(res:http_version_not_supported(), 505)
-    assert.equal(res.status, 505)
-    assert.equal(res.body.error, {
-        code = 505,
-        status = code2reason(505),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:http_version_not_supported('hello'), 505)
-    assert.equal(res.status, 505)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'http_version_not_supported',
             code = 505,
-            status = code2reason(505),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.variant_also_negotiates()
-    local res = assert(new_response())
-
-    -- test that returns 506
-    assert.equal(res:variant_also_negotiates(), 506)
-    assert.equal(res.status, 506)
-    assert.equal(res.body.error, {
-        code = 506,
-        status = code2reason(506),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:variant_also_negotiates('hello'), 506)
-    assert.equal(res.status, 506)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'variant_also_negotiates',
             code = 506,
-            status = code2reason(506),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.insufficient_storage()
-    local res = assert(new_response())
-
-    -- test that returns 507
-    assert.equal(res:insufficient_storage(), 507)
-    assert.equal(res.status, 507)
-    assert.equal(res.body.error, {
-        code = 507,
-        status = code2reason(507),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:insufficient_storage('hello'), 507)
-    assert.equal(res.status, 507)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'insufficient_storage',
             code = 507,
-            status = code2reason(507),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.loop_detected()
-    local res = assert(new_response())
-
-    -- test that returns 508
-    assert.equal(res:loop_detected(), 508)
-    assert.equal(res.status, 508)
-    assert.equal(res.body.error, {
-        code = 508,
-        status = code2reason(508),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:loop_detected('hello'), 508)
-    assert.equal(res.status, 508)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'loop_detected',
             code = 508,
-            status = code2reason(508),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.not_extended()
-    local res = assert(new_response())
-
-    -- test that returns 510
-    assert.equal(res:not_extended(), 510)
-    assert.equal(res.status, 510)
-    assert.equal(res.body.error, {
-        code = 510,
-        status = code2reason(510),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:not_extended('hello'), 510)
-    assert.equal(res.status, 510)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'not_extended',
             code = 510,
-            status = code2reason(510),
-            message = 'hello',
         },
-    })
-end
-
-function testcase.network_authentication_required()
-    local res = assert(new_response())
-
-    -- test that returns 511
-    assert.equal(res:network_authentication_required(), 511)
-    assert.equal(res.status, 511)
-    assert.equal(res.body.error, {
-        code = 511,
-        status = code2reason(511),
-    })
-
-    -- test that set value to body.error field
-    res.body = 'foo'
-    assert.equal(res:network_authentication_required('hello'), 511)
-    assert.equal(res.status, 511)
-    assert.equal(res.body, {
-        error = {
+        {
+            name = 'network_authentication_required',
             code = 511,
-            status = code2reason(511),
-            message = 'hello',
         },
-    })
+    }) do
+        res.body = nil
+        local method = res[v.name]
+        method(res)
+        assert.equal(msg, {
+            code = v.code,
+        })
+
+        -- test that set body
+        method(res, {
+            foo = 'bar',
+        })
+        assert.equal(msg, {
+            code = v.code,
+            error = {
+                foo = 'bar',
+            },
+        })
+        -- test that merge body
+        res.body = {
+            hello = 'world',
+        }
+        method(res, {
+            foo = 'bar',
+        })
+        assert.equal(msg, {
+            code = v.code,
+            data = {
+                hello = 'world',
+            },
+            error = {
+                foo = 'bar',
+            },
+        })
+    end
 end
 

@@ -26,8 +26,8 @@ local format = string.format
 local gsub = string.gsub
 local match = string.match
 local sub = string.sub
-local open = io.open
 local remove = os.remove
+local fopen = require('io.fopen')
 local errorf = require('reflex.errorf')
 local exec = require('reflex.exec')
 -- constants
@@ -51,7 +51,7 @@ $DEPENDENCIES
 --- @return boolean installed
 local function install(pathname)
     local list = {}
-    local f, err = open(pathname)
+    local f, err = fopen(pathname)
     if f then
         -- list dependencies
         for line in f:lines() do
@@ -80,7 +80,7 @@ local function install(pathname)
         --
         -- TODO: install modules from the non-default repositories
         --
-        f = assert(open(pathname, 'w'))
+        f = assert(fopen(pathname, 'w'))
         assert(f:write(content))
         f:close()
         assert(exec('luarocks', {

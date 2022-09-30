@@ -22,9 +22,9 @@
 local pcall = pcall
 local ipairs = ipairs
 local pairs = pairs
-local open = io.open
 local format = string.format
 local assert = require('assert')
+local fopen = require('io.fopen')
 local isa = require('isa')
 local is_boolean = isa.boolean
 local is_int = isa.int
@@ -34,6 +34,7 @@ local is_table = isa.table
 local setenv = require('setenv')
 local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
+local log = require('reflex.log')
 local session = require('reflex.session')
 local errorf = require('reflex.errorf')
 
@@ -155,10 +156,13 @@ local function verify_document(cfg)
     -- error_pages
     cfg.error_pages = checkopt(cfg.error_pages, is_table, {},
                                'document.error_pages must be table')
-    for i, v in ipairs(cfg.error_pages) do
-        cfg.error_pages[i] = checkopt(v, is_string, nil,
-                                      'document.error_pages#%d must be string',
-                                      i)
+    for code, v in pairs(cfg.error_pages) do
+        if not is_int(code) then
+            log.fatal('document.error_pages index key %q must be integer', code)
+        end
+        cfg.error_pages[code] = checkopt(v, is_string, nil,
+                                         'document.error_pages#%d must be string',
+                                         code)
     end
 
     return cfg
@@ -193,7 +197,7 @@ local function verify_listen(cfg)
             error(format('failed to set tls keypair files: %s', err))
         elseif dhparams then
             local f
-            f, err = open(dhparams, 'r')
+            f, err = fopen(dhparams, 'r')
             if not f then
                 error(
                     format('failed to open dhparam file %q: %s', dhparams, err))
@@ -261,12 +265,17 @@ local function readcfg(pathname)
         is_loaded = true
     end
 
+    local debug = checkopt(rawcfg.debug, is_boolean, false,
+                           'debug must be boolean')
+    if debug then
+        log.setlevel('debug')
+    end
+
     local cfg = {
+        debug = debug,
         name = checkopt(rawcfg.name, is_string, 'unknown', 'name must be string'),
         version = checkopt(rawcfg.version, is_string, '0.0.0',
                            'version must be string'),
-        debug = checkopt(rawcfg.debug, is_boolean, false,
-                         'debug must be boolean'),
         response_as_json = checkopt(rawcfg.response_as_json, is_boolean, false,
                                     'response_as_json must be boolean'),
         env = verify_env(rawcfg.env),
