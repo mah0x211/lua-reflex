@@ -118,7 +118,7 @@ end
 --- sigwait
 local function sigwait(...)
     -- wait a SIGINT
-    assert(act.sigwait(nil, signal.SIGINT))
+    assert(act.sigwait(nil, ...))
 end
 
 local function updater(ctx)
@@ -140,7 +140,7 @@ local function start(cfg, reflex)
     signal.blockall()
     local ctx, cancel = new_context()
     assert(act.spawn(listen_and_serve, cfg, reflex, s))
-    assert(act.spawn(sigwait, signal.SIGINT))
+    assert(act.spawn(sigwait, signal.SIGINT, signal.SIGTERM))
     assert(act.spawn(updater, ctx))
 
     local stat = assert(act.await())
