@@ -131,7 +131,7 @@ function Reflex:serve(res, req)
             end
         end
 
-        keepalive = true
+        keepalive = res.keepalived
         if not res.replied then
             return res:ok()
         end

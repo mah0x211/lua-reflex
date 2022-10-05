@@ -85,7 +85,7 @@ local function handle_connection(cfg, conn, reflex)
                 return
             end
         end
-    until keepalive == false
+    until not keepalive
 end
 
 --- listen_and_serve
