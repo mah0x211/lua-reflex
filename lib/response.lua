@@ -40,6 +40,7 @@ local EISDIR = require('errno').EISDIR
 --- @field as_json boolean
 --- @field degug boolean
 --- @field replied boolean
+--- @field keepalived boolean
 --- @field msg net.http.message.response
 --- @field header net.http.header
 --- @field body table
@@ -60,11 +61,18 @@ function Response:init(refx, conn, req, as_json, debug)
     self.as_json = as_json == true
     self.debug = debug == true
     self.replied = false
+    self.keepalived = true
 
     self.message = new_response()
     self.header = self.message.header
     self.body = {}
     return self
+end
+
+--- keepalive
+--- @param keepalived boolean|nil
+function Response:keepalive(keepalived)
+    self.keepalived = keepalived == nil or keepalived == true
 end
 
 --- flush
