@@ -49,14 +49,24 @@ local Renderer = {}
 --- @param rootdir string
 --- @param follow_symlink boolean
 --- @param cache boolean
+--- @param env table
 --- @return reflex.renderer
-function Renderer:init(rootdir, follow_symlink, cache)
+function Renderer:init(rootdir, follow_symlink, cache, env)
+    local tmpl_env = default_helpers()
+
     if not is_string(rootdir) then
         error('rootdir must be string', 2)
     elseif follow_symlink ~= nil and not is_boolean(follow_symlink) then
         error('follow_symlink must be boolean', 2)
     elseif cache ~= nil and not is_boolean(cache) then
         error('cache must be boolean', 2)
+    elseif env ~= nil then
+        if not is_table(env) then
+            error('env must be table', 2)
+        end
+        for k, v in pairs(env) do
+            tmpl_env[k] = v
+        end
     end
 
     self.rootdir = new_basedir(rootdir, follow_symlink)
@@ -65,7 +75,7 @@ function Renderer:init(rootdir, follow_symlink, cache)
         loader = function(_, pathname)
             return self:add(pathname)
         end,
-        env = default_helpers(),
+        env = tmpl_env,
     })
 
     return self

@@ -60,7 +60,8 @@ function Reflex:init(cfg)
     self.response_as_json = cfg.response_as_json == true
     self.router = router
     self.renderer = new_renderer(cfg.document.rootdir,
-                                 cfg.document.follow_symlink, cfg.template.cache)
+                                 cfg.document.follow_symlink,
+                                 cfg.template.cache, cfg.template.env)
     self.error_pages = cfg.document.error_pages or {}
     self.template_files = cfg.template.files
 

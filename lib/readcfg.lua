@@ -94,6 +94,24 @@ local function verify_template(cfg)
     cfg.precheck = checkopt(cfg.precheck, is_boolean, false,
                             'template.precheck must be boolean')
 
+    -- template environment file
+    cfg.env = checkopt(cfg.env, is_string, nil, 'template.env must be string')
+    if cfg.env then
+        -- load file
+        local fn, err = loadfile(cfg.env, _G)
+        if err then
+            errorf('failed to evaluate template.env %q: %s', cfg.env, err)
+        end
+
+        local ok, res = pcall(fn)
+        if not ok then
+            errorf('failed to evaluate template.env %q: %s', cfg.env, res)
+        end
+
+        cfg.env = checkopt(res, is_table, nil,
+                           'template.env %q must return a table', cfg.env)
+    end
+
     return cfg
 end
 
