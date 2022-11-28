@@ -4,7 +4,7 @@ local new_renderer = require('reflex.renderer')
 
 function testcase.new()
     -- test that create a new renderer
-    assert(new_renderer('testdir/html'))
+    assert(new_renderer('testdir/html', nil, nil, {}))
 
     -- test that throws an error if invalid rootdir argument
     local err = assert.throws(new_renderer, true)
@@ -20,6 +20,10 @@ function testcase.new()
     -- test that throws an error if invalid cache argument
     err = assert.throws(new_renderer, 'unknown-dir', nil, {})
     assert.match(err, 'cache must be boolean')
+
+    -- test that throws an error if invalid env argument
+    err = assert.throws(new_renderer, 'unknown-dir', nil, nil, 'foo')
+    assert.match(err, 'env must be table')
 end
 
 function testcase.add()
