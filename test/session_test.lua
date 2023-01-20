@@ -1,6 +1,6 @@
 require('luacov')
 local testcase = require('testcase')
-local cache = require('reflex.cache')
+local cache = require('cache.inmem')
 local session = require('reflex.session')
 local parse_baked_cookie = require('cookie').parse_baked_cookie
 
@@ -8,7 +8,7 @@ local CACHE
 
 function testcase.before_each()
     -- restore default value
-    CACHE = cache.new()
+    CACHE = cache.new(10)
     session.set_store(CACHE)
     session.set_name()
     session.set_attr()

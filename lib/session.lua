@@ -32,27 +32,6 @@ local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
 local errorf = require('reflex.errorf')
 
--- use reflex.cache module as default session store
-local Store = require('reflex.cache').new()
-
---- set_store
---- @param store reflex.cache
-local function set_store(store)
-    local t = store
-    if not is_table(store) then
-        local mt = getmetatable(store)
-        t = is_table(mt) and is_table(mt.__index) and mt.__index or {}
-    end
-
-    if not is_function(t.set) or not is_function(t.get) or
-        not is_function(t.delete) then
-        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get',
-               'delete')
-    end
-
-    Store = store
-end
-
 --- session-cookie name
 local DEFAULT_NAME = 'sid'
 local NAME = DEFAULT_NAME
@@ -93,6 +72,27 @@ local function bake_attributes(newattr, attr)
     end
 
     return newattr
+end
+
+-- use cache.inmem module as default session store
+local Store = require('cache.inmem').new(ATTR.maxage)
+
+--- set_store
+--- @param store cache
+local function set_store(store)
+    local t = store
+    if not is_table(store) then
+        local mt = getmetatable(store)
+        t = is_table(mt) and is_table(mt.__index) and mt.__index or {}
+    end
+
+    if not is_function(t.set) or not is_function(t.get) or
+        not is_function(t.delete) then
+        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get',
+               'delete')
+    end
+
+    Store = store
 end
 
 --- get_name
