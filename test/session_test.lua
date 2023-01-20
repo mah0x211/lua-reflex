@@ -21,7 +21,7 @@ function testcase.set_store()
     local store = {
         set = noop,
         get = noop,
-        del = noop,
+        delete = noop,
     }
     assert(pcall(session.set_store, store))
 
@@ -157,7 +157,7 @@ local TEST_STORE = {
     get = function()
         return nil, 'test-get-error'
     end,
-    del = function()
+    delete = function()
         return nil, 'test-del-error'
     end,
 }

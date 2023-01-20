@@ -45,8 +45,9 @@ local function set_store(store)
     end
 
     if not is_function(t.set) or not is_function(t.get) or
-        not is_function(t.del) then
-        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get', 'del')
+        not is_function(t.delete) then
+        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get',
+               'delete')
     end
 
     Store = store
@@ -155,14 +156,14 @@ end
 
 --- restore
 --- @param id string
---- @return table value
+--- @return table? value
 --- @return any err
 local function restore(id)
     if not is_string(id) then
         error('id must be string', 3)
     end
 
-    local data, err = Store:get(id, true)
+    local data, err = Store:get(id, ATTR.maxage)
     if not data then
         return nil, err
     end
@@ -269,7 +270,7 @@ end
 
 --- save
 --- @param attr table|nil
---- @return string cookie
+--- @return string? cookie
 --- @return any err
 function Session:save(attr)
     if attr == nil then
@@ -288,8 +289,8 @@ end
 
 --- destroy
 --- @param attr table|nil
---- @return string void_cookie
---- @return string err
+--- @return string? void_cookie
+--- @return any err
 function Session:destroy(attr)
     if attr == nil then
         attr = {}
@@ -302,7 +303,7 @@ function Session:destroy(attr)
         return nil, err
     end
 
-    local ok, serr = Store:del(self.id)
+    local ok, serr = Store:delete(self.id)
     if not ok then
         return nil, serr
     end

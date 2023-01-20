@@ -22,7 +22,6 @@
 local time = os.time
 local find = string.find
 local isa = require('isa')
-local is_boolean = isa.boolean
 local is_string = isa.string
 local is_uint = isa.uint
 local format = require('print').format
@@ -85,10 +84,10 @@ end
 
 --- get_item
 --- @param key string
---- @param touch boolean
+--- @param ttl integer
 --- @return string|nil val
 --- @return any err
-function Cache:get_item(key, touch)
+function Cache:get_item(key, ttl)
     local item = self.data[key]
     if not item then
         return nil
@@ -97,8 +96,10 @@ function Cache:get_item(key, touch)
         if item.exp <= t then
             self.data[key] = nil
             return nil
-        elseif touch then
-            item.exp = t + item.ttl
+        elseif ttl then
+            -- update ttl
+            item.exp = t + ttl
+            item.ttl = ttl
         end
     end
 
@@ -107,18 +108,18 @@ end
 
 --- get
 --- @param key string
---- @param touch boolean
---- @return string val
+--- @param ttl integer
+--- @return string? val
 --- @return any err
-function Cache:get(key, touch)
+function Cache:get(key, ttl)
     local ok, err = is_valid_key(key)
     if not ok then
         return nil, err
-    elseif touch ~= nil and not is_boolean(touch) then
-        return nil, 'touch must be boolean'
+    elseif ttl ~= nil and not is_uint(ttl) then
+        error('ttl must be uint', 2)
     end
 
-    return self:get_item(key, touch)
+    return self:get_item(key, ttl)
 end
 
 --- del_item
@@ -133,11 +134,11 @@ function Cache:del_item(key)
     return false
 end
 
---- del
+--- delete
 --- @param key string
 --- @return boolean ok
 --- @return any err
-function Cache:del(key)
+function Cache:delete(key)
     local ok, err = is_valid_key(key)
     if not ok then
         return false, err
