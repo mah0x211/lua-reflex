@@ -16,6 +16,7 @@ dependencies = {
     "assert >= 0.3.4",
     "base64mix >= 1.0.0",
     "basedir >= 0.4.0",
+    "cache >= 1.3.0",
     "context >= 0.1.0",
     "cookie >= 1.3.0",
     "dump >= 0.1.1",
@@ -57,8 +58,6 @@ build = {
     },
     modules = {
         ["reflex"] = "lib/reflex.lua",
-        ["reflex.cache"] = "lib/cache.lua",
-        ["reflex.cache.mdbx"] = "lib/cache/mdbx.lua",
         ["reflex.date"] = "lib/date.lua",
         ["reflex.env"] = "lib/env.lua",
         ["reflex.errorf"] = "lib/errorf.lua",

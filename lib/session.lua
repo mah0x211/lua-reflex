@@ -32,26 +32,6 @@ local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
 local errorf = require('reflex.errorf')
 
--- use reflex.cache module as default session store
-local Store = require('reflex.cache').new()
-
---- set_store
---- @param store reflex.cache
-local function set_store(store)
-    local t = store
-    if not is_table(store) then
-        local mt = getmetatable(store)
-        t = is_table(mt) and is_table(mt.__index) and mt.__index or {}
-    end
-
-    if not is_function(t.set) or not is_function(t.get) or
-        not is_function(t.del) then
-        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get', 'del')
-    end
-
-    Store = store
-end
-
 --- session-cookie name
 local DEFAULT_NAME = 'sid'
 local NAME = DEFAULT_NAME
@@ -92,6 +72,27 @@ local function bake_attributes(newattr, attr)
     end
 
     return newattr
+end
+
+-- use cache.inmem module as default session store
+local Store = require('cache.inmem').new(ATTR.maxage)
+
+--- set_store
+--- @param store cache
+local function set_store(store)
+    local t = store
+    if not is_table(store) then
+        local mt = getmetatable(store)
+        t = is_table(mt) and is_table(mt.__index) and mt.__index or {}
+    end
+
+    if not is_function(t.set) or not is_function(t.get) or
+        not is_function(t.delete) then
+        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get',
+               'delete')
+    end
+
+    Store = store
 end
 
 --- get_name
@@ -155,14 +156,14 @@ end
 
 --- restore
 --- @param id string
---- @return table value
+--- @return table? value
 --- @return any err
 local function restore(id)
     if not is_string(id) then
         error('id must be string', 3)
     end
 
-    local data, err = Store:get(id, true)
+    local data, err = Store:get(id, ATTR.maxage)
     if not data then
         return nil, err
     end
@@ -269,7 +270,7 @@ end
 
 --- save
 --- @param attr table|nil
---- @return string cookie
+--- @return string? cookie
 --- @return any err
 function Session:save(attr)
     if attr == nil then
@@ -288,8 +289,8 @@ end
 
 --- destroy
 --- @param attr table|nil
---- @return string void_cookie
---- @return string err
+--- @return string? void_cookie
+--- @return any err
 function Session:destroy(attr)
     if attr == nil then
         attr = {}
@@ -302,7 +303,7 @@ function Session:destroy(attr)
         return nil, err
     end
 
-    local ok, serr = Store:del(self.id)
+    local ok, serr = Store:delete(self.id)
     if not ok then
         return nil, serr
     end
