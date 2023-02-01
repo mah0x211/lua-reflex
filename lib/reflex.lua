@@ -80,7 +80,6 @@ end
 --- @param req reflex.request
 --- @return boolean keepalive
 function Reflex:serve(res, req)
-    local keepalive = false
     local ok, n, err, timeout = xpcall(function()
         --- redirect to normalized uri without the trailing slash
         if req.rawpath ~= req.path then
@@ -105,7 +104,6 @@ function Reflex:serve(res, req)
         if not next(route.methods) then
             -- allow only the GET method for request to file
             if route.file and lower(req.method) == 'get' then
-                keepalive = true
                 return res:ok()
             end
             return res:method_not_allowed()
@@ -132,7 +130,6 @@ function Reflex:serve(res, req)
             end
         end
 
-        keepalive = res.keepalived
         if not res.replied then
             return res:ok()
         end
@@ -162,7 +159,7 @@ function Reflex:serve(res, req)
         -- connection closed
         return false
     end
-    return keepalive
+    return res.keepalived
 end
 
 --- render_page
