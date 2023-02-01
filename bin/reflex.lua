@@ -65,16 +65,15 @@ local function handle_connection(cfg, conn, reflex)
     local debug = cfg.debug
     repeat
         local msg, err = conn:read_request()
-        local req = msg and new_request(msg)
-        local res = new_response(reflex, conn, req, response_as_json, debug)
-
         if not msg then
             if err then
-                res:bad_request(err)
+                log.error(err)
             end
             return
         end
 
+        local req = new_request(msg)
+        local res = new_response(reflex, conn, req, response_as_json, debug)
         local content = msg.content
         local keepalive = reflex:serve(res, req)
         if keepalive and content then
