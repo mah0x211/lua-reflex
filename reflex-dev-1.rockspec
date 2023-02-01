@@ -31,7 +31,6 @@ dependencies = {
     "isa >= 0.3.0",
     "kvpairs >= 0.1.0",
     "libmagic >= 5.41.1",
-    "libmdbx >= 0.1.0",
     "loadchunk >= 0.1.2",
     "mediatypes >= 2.0.1",
     "metamodule >= 0.4.0",
