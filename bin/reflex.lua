@@ -176,20 +176,25 @@ local function init(cfg)
 end
 
 --- loadcfg
+--- @param pathname string
 --- @return table<string, any> cfg
 --- @return boolean loaded
-local function loadcfg()
-    log.info('load %q', CFGFILE)
-    local apath, err = fs.realpath(CFGFILE)
+local function loadcfg(pathname)
+    local cfgfile = pathname or CFGFILE
+
+    log.info('load %q', cfgfile)
+    local apath, err = fs.realpath(cfgfile)
     if err then
-        fatal('loadcfg', 'failed to load %q: %s', CFGFILE, err)
+        fatal('loadcfg', 'failed to load config file %q: %s', cfgfile, err)
+    elseif not apath and pathname then
+        fatal('loadcfg', 'failed to load config file %q: not found', cfgfile)
     end
     return readcfg(apath)
 end
 
 local function main(opts)
     -- load config.lua
-    local cfg = loadcfg()
+    local cfg = loadcfg(opts.conf)
 
     -- create required directories
     for _, v in ipairs({
@@ -271,6 +276,10 @@ do
         },
         ['--test'] = {
             desc = 'test configuration and exit',
+        },
+        ['--conf'] = {
+            desc = 'specify path to configuration file',
+            pair = 'path/to/config.lua',
         },
     })
     local ok, err = act.run(main, opts)
