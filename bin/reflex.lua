@@ -175,26 +175,9 @@ local function init(cfg)
     end
 end
 
---- loadcfg
---- @param pathname string
---- @return table<string, any> cfg
---- @return boolean loaded
-local function loadcfg(pathname)
-    local cfgfile = pathname or CFGFILE
-
-    log.info('load %q', cfgfile)
-    local apath, err = fs.realpath(cfgfile)
-    if err then
-        fatal('loadcfg', 'failed to load config file %q: %s', cfgfile, err)
-    elseif not apath and pathname then
-        fatal('loadcfg', 'failed to load config file %q: not found', cfgfile)
-    end
-    return readcfg(apath)
-end
-
 local function main(opts)
     -- load config.lua
-    local cfg = loadcfg(opts.conf)
+    local cfg = readcfg(opts.conf or CFGFILE)
 
     -- create router by a document root files
     log.info('create a routing table from %q', cfg.document.rootdir)
