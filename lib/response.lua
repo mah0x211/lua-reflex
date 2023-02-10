@@ -75,6 +75,23 @@ function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
 end
 
+--- save_session
+--- @return boolean ok
+--- @return any err
+function Response:save_session()
+    -- save session automatically
+    if not self.req then
+        return false
+    end
+
+    local sess_cookie, err = self.req:save_session()
+    if sess_cookie then
+        self.header:set('Set-Cookie', sess_cookie)
+        return true
+    end
+    return false, err
+end
+
 --- flush
 --- @return integer n
 --- @return any err
@@ -85,9 +102,9 @@ end
 
 --- openfile
 --- @param pathname string
---- @return file* f
+--- @return file*? f
 --- @return any err
---- @return string mime
+--- @return string? mime
 local function openfile(pathname)
     local f, err = fopen(pathname)
     if err then
@@ -107,7 +124,6 @@ end
 
 --- write_file
 --- @param pathname string
---- @param mime string
 --- @return integer n
 --- @return any err
 --- @return boolean timeout
@@ -134,7 +150,7 @@ function Response:write_file(pathname)
 end
 
 --- write
---- @param str string|nil
+--- @param str? string
 --- @return integer n
 --- @return any err
 --- @return boolean timeout
@@ -232,26 +248,16 @@ function Response:write_page(res, page)
     return self:write_file(page.pathname)
 end
 
---- reply
+--- write_response
 --- @param code integer
 --- @param res table
 --- @return integer n
 --- @return any err
 --- @return boolean timeout
-function Response:reply(code, res)
-    if self.replied then
-        error('cannot send a response message twice', 2)
-    end
-
+function Response:write_response(code, res)
     local ok, err = self.message:set_status(code)
     if not ok then
         error(format('failed to set status code: %s', err), 2)
-    end
-
-    -- save session automatically
-    local sess_cookie = self.req and self.req:save_session()
-    if sess_cookie then
-        self.header:set('Set-Cookie', sess_cookie)
     end
 
     res.code = code
@@ -293,6 +299,25 @@ function Response:reply(code, res)
     return self:write()
 end
 
+--- reply
+--- @param code integer
+--- @param res table
+--- @return integer n
+--- @return any err
+--- @return boolean timeout
+function Response:reply(code, res)
+    if self.replied then
+        error('cannot send a response message twice', 2)
+    end
+
+    -- save session automatically
+    if not self:save_session() then
+        code = 500
+    end
+
+    return self:write_response(code, res)
+end
+
 --- file
 --- @param pathname string
 --- @return integer n
@@ -303,14 +328,13 @@ function Response:file(pathname)
         error('cannot send a response message twice', 2)
     end
 
-    self.message:set_status(200)
     -- save session automatically
-    local sess_cookie = self.req and self.req:save_session()
-    if sess_cookie then
-        self.header:set('Set-Cookie', sess_cookie)
+    if not self:save_session() then
+        return self:internal_server_error()
     end
 
     -- file response
+    self.message:set_status(200)
     return self:write_file(pathname)
 end
 

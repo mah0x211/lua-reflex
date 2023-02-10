@@ -57,6 +57,7 @@ end
 --- session
 --- @param restore_only boolean
 --- @return reflex.session? sess
+--- @return any err
 function Request:session(restore_only)
     if self.sess then
         return self.sess
@@ -70,21 +71,24 @@ function Request:session(restore_only)
     end
 
     local sess, err = new_session(cookies, restore_only)
-    if sess then
+    if err then
+        log.error('failed to create new session:', err)
+        return nil, err
+    elseif sess then
         self.sess = sess
-        return sess
-    elseif err then
-        log.fatal('failed to create session: %s', err)
     end
+    return sess
 end
 
 --- save_session
 --- @return string? cookie
+--- @return any err
 function Request:save_session()
     if self.sess then
         local cookie, err = self.sess:save()
-        if not cookie then
-            log.fatal('failed to save session: %s', err)
+        if err then
+            log.error('failed to save session:', err)
+            return nil, err
         end
         return cookie
     end
