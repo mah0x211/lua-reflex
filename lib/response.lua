@@ -311,7 +311,8 @@ function Response:reply(code, res)
     end
 
     -- save session automatically
-    if not self:save_session() then
+    local _, err = self:save_session()
+    if err  then
         code = 500
     end
 
@@ -329,7 +330,8 @@ function Response:file(pathname)
     end
 
     -- save session automatically
-    if not self:save_session() then
+    local _, err = self:save_session()
+    if err then
         return self:internal_server_error()
     end
 
