@@ -196,16 +196,6 @@ local function main(opts)
     -- load config.lua
     local cfg = loadcfg(opts.conf)
 
-    -- create required directories
-    for _, v in ipairs({
-        '/tmp',
-        '/session',
-        '/trash',
-    }) do
-        log.info('mkdir %q', v)
-        assert(fs.mkdir(v))
-    end
-
     -- create router by a document root files
     log.info('create a routing table from %q', cfg.document.rootdir)
     local reflex, routes = new_reflex(cfg)
