@@ -20,9 +20,12 @@
 -- THE SOFTWARE.
 --
 local pcall = pcall
+local concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
+local open = io.open
 local format = string.format
+local sub = string.sub
 local assert = require('assert')
 local fopen = require('io.fopen')
 local isa = require('isa')
@@ -262,6 +265,61 @@ local function verify_env(cfg)
     return cfg
 end
 
+--- verify_log
+--- @param cfg table
+--- @param debug boolean
+local function verify_log(cfg, debug)
+    cfg = checkopt(cfg, is_table, {}, 'log must be table')
+
+    -- check level
+    local levels = {
+        'fatal',
+        'emerge',
+        'alert',
+        'crit',
+        'error',
+        'warn',
+        'notice',
+        'info',
+        'debug',
+    }
+    local valid_lv = {}
+    for _, lv in ipairs(levels) do
+        valid_lv[lv] = true
+    end
+    levels = '"' .. concat(levels, '", "') .. '"'
+    local level = checkopt(cfg.level, is_string, nil,
+                           'log.level must be one of the following %s', levels)
+    if level then
+        if not valid_lv[level] then
+            error(format('unknown log.level %q: must be %s', level, levels))
+        elseif debug then
+            log.warn('ignore log.level %q on debug mode')
+        else
+            log.setlevel(level)
+        end
+    end
+
+    -- check filename
+    local filename = checkopt(cfg.filename, is_string, nil,
+                              'log.file must be string')
+    if filename then
+        local mode = 'w+'
+        -- use append mode if filename has '+' suffix
+        if sub(filename, #filename) == '+' then
+            mode = 'a+'
+            filename = sub(filename, 1, #filename - 1)
+        end
+
+        local f, err = open(filename, mode)
+        if not f then
+            error(format('failed to open log.filename %q: %s', filename, err))
+        end
+        f:setvbuf('line')
+        log.setoutput(f)
+    end
+end
+
 --- readconf
 --- @return table<string, any> cfg
 --- @return boolean loaded
@@ -288,6 +346,7 @@ local function readcfg(pathname)
     if debug then
         log.setlevel('debug')
     end
+    verify_log(rawcfg.log, debug)
 
     local cfg = {
         debug = debug,
