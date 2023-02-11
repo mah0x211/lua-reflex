@@ -77,6 +77,5 @@ build = {
         ["reflex.session"] = "lib/session.lua",
         ["reflex.status"] = "lib/status.lua",
         ["reflex.token"] = "lib/token.lua",
-        ["reflex.which"] = "lib/which.lua",
     },
 }
