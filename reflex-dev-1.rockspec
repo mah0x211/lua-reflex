@@ -22,6 +22,7 @@ dependencies = {
     "dump >= 0.1.1",
     "error >= 0.6.2",
     "exec >= 0.2.3",
+    "exists >= 0.1.0",
     "fsrouter >= 0.5.0",
     "getcwd >= 0.2.0",
     "gpoll >= 0.2.0",

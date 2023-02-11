@@ -32,6 +32,7 @@ local sleep = require('gpoll').sleep
 local new_context = require('context').new
 local update_date = require('net.http.date').update
 local new_http_server = require('net.http.server').new
+local exists = require('exists')
 local signal = require('signal')
 local loadfile = require('loadchunk').file
 local log = require('reflex.log')
@@ -177,7 +178,23 @@ end
 
 local function main(opts)
     -- load config.lua
-    local cfg = readcfg(opts.conf or CFGFILE)
+    local cfg
+
+    if opts.conf then
+        cfg = readcfg(opts.conf)
+    else
+        local t, err = exists(CFGFILE)
+        if t then
+            if t ~= 'file' then
+                fatal('loadcfg', 'failed to load %q:%q: not a file', CFGFILE, t)
+            end
+            cfg = readcfg(CFGFILE)
+        elseif err then
+            fatal('loadcfg', 'failed to load %q: %s', CFGFILE, err)
+        else
+            cfg = readcfg()
+        end
+    end
 
     -- create router by a document root files
     log.info('create a routing table from %q', cfg.document.rootdir)
