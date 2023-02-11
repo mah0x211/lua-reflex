@@ -321,6 +321,7 @@ local function verify_log(cfg, debug)
 end
 
 --- readconf
+--- @param pathname string
 --- @return table<string, any> cfg
 --- @return boolean loaded
 local function readcfg(pathname)
