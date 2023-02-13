@@ -29,7 +29,7 @@ local new_response = require('net.http.message.response').new
 local get_mime = require('reflex.mime').get
 local code2reason = require('reflex.status').code2reason
 local code2message = require('reflex.status').code2message
-local encode2json = require('reflex.json').encode
+local encode2json = require('yyjson').encode
 --- constants
 local ENOENT = require('errno').ENOENT
 local EISDIR = require('errno').EISDIR
@@ -312,7 +312,7 @@ function Response:reply(code, res)
 
     -- save session automatically
     local _, err = self:save_session()
-    if err  then
+    if err then
         code = 500
     end
 
