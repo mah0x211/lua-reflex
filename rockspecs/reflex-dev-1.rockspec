@@ -1,4 +1,3 @@
-rockspec_format = "3.0"
 package = "reflex"
 version = "dev-1"
 source = {
