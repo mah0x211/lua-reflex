@@ -1,6 +1,6 @@
 codefromstrings = false
 runreport = true
-deletestats = false
+deletestats = true
 modules = {
     ['reflex'] = 'lib/reflex.lua',
     ['reflex.errorf'] = 'lib/errorf.lua',
@@ -10,7 +10,6 @@ modules = {
     ['reflex.header'] = 'lib/header.lua',
     ['reflex.install'] = 'lib/install.lua',
     ['reflex.log'] = 'lib/log.lua',
-    ['reflex.randstr'] = 'lib/randstr.lua',
     ['reflex.readcfg'] = 'lib/readcfg.lua',
     ['reflex.renderer'] = 'lib/renderer.lua',
     ['reflex.request'] = 'lib/request.lua',

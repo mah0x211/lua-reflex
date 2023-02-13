@@ -23,7 +23,7 @@ local error = error
 local sub = string.sub
 local is_string = require('isa').string
 local hmacsha = require('hmac').sha224
-local randstr = require('reflex.randstr')
+local randstr = require('string.random')
 -- constants
 -- N byte = 128 bit / 8 bit
 local MSG_LEN = 128 / 8
@@ -62,13 +62,12 @@ end
 --- generate
 --- @param key string
 --- @return string str
---- @return string err
 local function generate(key)
     if not is_string(key) then
         error('key must be string', 2)
     end
 
-    local msg = randstr(MSG_LEN)
+    local msg = randstr(MSG_LEN, 'urlsafe')
     return compute(msg, key) .. '.' .. msg
 end
 
