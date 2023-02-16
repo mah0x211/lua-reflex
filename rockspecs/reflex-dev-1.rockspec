@@ -65,6 +65,7 @@ build = {
         ["reflex.getopts"] = "lib/getopts.lua",
         ["reflex.header"] = "lib/header.lua",
         ["reflex.install"] = "lib/install.lua",
+        ["reflex.later"] = "lib/later.lua",
         ["reflex.log"] = "lib/log.lua",
         ["reflex.mime"] = "lib/mime.lua",
         ["reflex.readcfg"] = "lib/readcfg.lua",
