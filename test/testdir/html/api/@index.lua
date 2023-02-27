@@ -1,7 +1,9 @@
-function handler.get()
-    local foo = {} .. {}
-end
+return {
+    get = function()
+        local foo = {} .. {}
+    end,
 
-function handler.post()
-    return 999
-end
+    post = function()
+        return 999
+    end,
+}

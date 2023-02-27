@@ -1,4 +1,6 @@
--- extract id from *id parameter
-function handler.all(req, rsp)
-    rsp.body.extract_id = 'all'
-end
+return {
+    -- extract id from *id parameter
+    all = function(req, rsp)
+        rsp.body.extract_id = 'all'
+    end,
+}
