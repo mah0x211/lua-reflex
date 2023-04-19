@@ -1,11 +1,23 @@
 require('luacov')
 local testcase = require('testcase')
+local verify_token = require('reflex.token').verify
 local new_response = require('reflex.response')
 
 function testcase.new()
     -- test that create new Response
     local res = assert(new_response())
     assert.match(res, '^reflex%.response: ', false)
+end
+
+function testcase.set_csrf_cookie()
+    -- test that set csrf cookie
+    local res = new_response()
+    res:set_csrf_cookie()
+    local cookie = res.header:get('Set-Cookie')
+    assert.match(cookie, 'X%-CSRF%-Token=.*; HttpOnly', false)
+    -- confirm that csrf token is valid
+    local token = string.match(cookie, '[^=]=([^;]*);')
+    assert.is_true(verify_token('X-CSRF-Token', token))
 end
 
 function testcase.response1xx2xx()

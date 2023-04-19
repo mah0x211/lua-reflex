@@ -21,9 +21,11 @@
 --
 local concat = table.concat
 local pairs = pairs
+local sub = string.sub
 local new_kvpairs = require('kvpairs').new
 local parse_cookie = require('cookie').parse
 local log = require('reflex.log')
+local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
 
 --- @class reflex.request : net.http.message.request
@@ -32,6 +34,7 @@ local new_session = require('reflex.session').new
 --- @field header net.http.header
 --- @field content? net.http.content
 --- @field sess reflex.session
+--- @field cookies? table<string, string>
 local Request = {}
 
 --- init
@@ -40,7 +43,10 @@ local Request = {}
 function Request:init(req)
     -- wrap
     for k, v in pairs(req) do
-        self[k] = v
+        -- ignore underscore prefixed keys
+        if sub(k, 1, 1) ~= '_' then
+            self[k] = v
+        end
     end
 
     local kvp = new_kvpairs()
@@ -54,6 +60,29 @@ function Request:init(req)
     return self
 end
 
+--- parse_cookies
+function Request:parse_cookies()
+    if type(self.cookies) ~= 'table' then
+        self.cookies = {}
+        local list = self.header:get('Cookie', true)
+        if list then
+            self.cookies = parse_cookie(concat(list, '; '))
+        end
+    end
+end
+
+--- verify_csrf_cookie
+--- @return boolean ok
+function Request:verify_csrf_cookie()
+    self:parse_cookies()
+    local name = 'X-CSRF-Token'
+    local token = self.cookies[name]
+    if token then
+        return verify_token(name, token)
+    end
+    return false
+end
+
 --- session
 --- @param restore_only boolean
 --- @return reflex.session? sess
@@ -64,13 +93,8 @@ function Request:session(restore_only)
     end
 
     -- start session
-    local cookies = self.header:get('Cookie', true)
-    if cookies then
-        -- NOTE: ignore invalid cookie header
-        cookies = parse_cookie(concat(cookies, '; '))
-    end
-
-    local sess, err = new_session(cookies, restore_only)
+    self:parse_cookies()
+    local sess, err = new_session(self.cookies, restore_only)
     if err then
         log.error('failed to create new session:', err)
         return nil, err

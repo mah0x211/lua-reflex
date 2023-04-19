@@ -29,7 +29,9 @@ local new_response = require('net.http.message.response').new
 local get_mime = require('reflex.mime').get
 local code2reason = require('reflex.status').code2reason
 local code2message = require('reflex.status').code2message
+local generate_token = require('reflex.token').generate
 local encode2json = require('yyjson').encode
+local bake_cookie = require('cookie').bake
 --- constants
 local ENOENT = require('errno').ENOENT
 local EISDIR = require('errno').EISDIR
@@ -73,6 +75,24 @@ end
 --- @param keepalived boolean|nil
 function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
+end
+
+--- set_csrf_cookie
+function Response:set_csrf_cookie(httponly)
+    if httponly == nil then
+        httponly = true
+    elseif type(httponly) ~= 'boolean' then
+        error('httponly must be a boolean', 2)
+    end
+
+    local name = 'X-CSRF-Token'
+    local token = generate_token(name)
+    local cookie = bake_cookie(name, token, {
+        path = '/',
+        httponly = httponly,
+        samesite = 'strict',
+    })
+    self.header:set('Set-Cookie', cookie)
 end
 
 --- save_session
