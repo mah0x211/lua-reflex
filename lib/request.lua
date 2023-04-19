@@ -21,6 +21,7 @@
 --
 local concat = table.concat
 local pairs = pairs
+local sub = string.sub
 local new_kvpairs = require('kvpairs').new
 local parse_cookie = require('cookie').parse
 local log = require('reflex.log')
@@ -40,7 +41,10 @@ local Request = {}
 function Request:init(req)
     -- wrap
     for k, v in pairs(req) do
-        self[k] = v
+        -- ignore underscore prefixed keys
+        if sub(k, 1, 1) ~= '_' then
+            self[k] = v
+        end
     end
 
     local kvp = new_kvpairs()

@@ -7,6 +7,7 @@ function testcase.new()
     -- test that create a new request
     local req = new_http_request()
     assert(req:set_uri('.dot-file'))
-    assert(new_request(req))
+    local r = assert(new_request(req))
+    assert.match(r, '^reflex%.request: ', false)
 end
 
