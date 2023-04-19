@@ -33,6 +33,7 @@ local new_session = require('reflex.session').new
 --- @field header net.http.header
 --- @field content? net.http.content
 --- @field sess reflex.session
+--- @field cookies? table<string, string>
 local Request = {}
 
 --- init
@@ -58,6 +59,17 @@ function Request:init(req)
     return self
 end
 
+--- parse_cookies
+function Request:parse_cookies()
+    if type(self.cookies) ~= 'table' then
+        self.cookies = {}
+        local list = self.header:get('Cookie', true)
+        if list then
+            self.cookies = parse_cookie(concat(list, '; '))
+        end
+    end
+end
+
 --- session
 --- @param restore_only boolean
 --- @return reflex.session? sess
@@ -68,13 +80,8 @@ function Request:session(restore_only)
     end
 
     -- start session
-    local cookies = self.header:get('Cookie', true)
-    if cookies then
-        -- NOTE: ignore invalid cookie header
-        cookies = parse_cookie(concat(cookies, '; '))
-    end
-
-    local sess, err = new_session(cookies, restore_only)
+    self:parse_cookies()
+    local sess, err = new_session(self.cookies, restore_only)
     if err then
         log.error('failed to create new session:', err)
         return nil, err

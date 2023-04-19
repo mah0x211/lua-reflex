@@ -11,3 +11,19 @@ function testcase.new()
     assert.match(r, '^reflex%.request: ', false)
 end
 
+function testcase.parse_cookies()
+    -- test that parse cookies
+    local r = new_request(new_http_request())
+    assert(r.header:set('Cookie', 'foo=bar; baz=qux'))
+    r:parse_cookies()
+    assert.equal(r.cookies, {
+        foo = 'bar',
+        baz = 'qux',
+    })
+
+    -- test that return true even if no cookie header
+    r = new_request(new_http_request())
+    r:parse_cookies()
+    assert.equal(r.cookies, {})
+end
+
