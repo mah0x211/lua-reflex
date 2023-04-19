@@ -25,6 +25,7 @@ local sub = string.sub
 local new_kvpairs = require('kvpairs').new
 local parse_cookie = require('cookie').parse
 local log = require('reflex.log')
+local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
 
 --- @class reflex.request : net.http.message.request
@@ -68,6 +69,18 @@ function Request:parse_cookies()
             self.cookies = parse_cookie(concat(list, '; '))
         end
     end
+end
+
+--- verify_csrf_cookie
+--- @return boolean ok
+function Request:verify_csrf_cookie()
+    self:parse_cookies()
+    local name = 'X-CSRF-Token'
+    local token = self.cookies[name]
+    if token then
+        return verify_token(name, token)
+    end
+    return false
 end
 
 --- session
