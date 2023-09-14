@@ -6,7 +6,6 @@ modules = {
     ['reflex.errorf'] = 'lib/errorf.lua',
     ['reflex.exec'] = 'lib/exec.lua',
     ['reflex.fs'] = 'lib/fs.lua',
-    ['reflex.getopts'] = 'lib/getopts.lua',
     ['reflex.header'] = 'lib/header.lua',
     ['reflex.install'] = 'lib/install.lua',
     ['reflex.log'] = 'lib/log.lua',
