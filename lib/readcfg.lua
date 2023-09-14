@@ -27,6 +27,7 @@ local open = io.open
 local format = string.format
 local sub = string.sub
 local assert = require('assert')
+local exists = require('exists')
 local fopen = require('io.fopen')
 local isa = require('isa')
 local is_boolean = isa.boolean
@@ -320,6 +321,22 @@ local function verify_log(cfg, debug)
     end
 end
 
+local DEFAULT_CFGFILE = 'config.lua'
+
+--- get_default_cfgfile
+--- @return string? pathname
+--- @return any err
+local function get_default_cfgfile()
+    local ftype, err = exists(DEFAULT_CFGFILE)
+    if ftype then
+        if ftype == 'file' then
+            return DEFAULT_CFGFILE
+        end
+        return nil, format('%q is not a file: %s', DEFAULT_CFGFILE, ftype)
+    end
+    return nil, err
+end
+
 --- readconf
 --- @param pathname string
 --- @return table<string, any> cfg
@@ -327,6 +344,14 @@ end
 local function readcfg(pathname)
     local rawcfg = {}
     local is_loaded = false
+
+    if not pathname then
+        local err
+        pathname, err = get_default_cfgfile()
+        if err then
+            errorf('failed to load %q: %s', DEFAULT_CFGFILE, err)
+        end
+    end
 
     if pathname then
         -- load config file
