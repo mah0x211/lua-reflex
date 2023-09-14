@@ -80,8 +80,8 @@ jobs:
     -
       name: Install
       run: |
-        luarocks --dev install net-http
-        luarocks --dev make
+        luarocks install net-http
+        luarocks make
     -
       name: Install Tools
       run: |

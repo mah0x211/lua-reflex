@@ -36,7 +36,6 @@ local exists = require('exists')
 local signal = require('signal')
 local loadfile = require('loadchunk').file
 local log = require('reflex.log')
-local getopts = require('reflex.getopts')
 local fs = require('reflex.fs')
 local readcfg = require('reflex.readcfg')
 local new_reflex = require('reflex')
@@ -45,6 +44,20 @@ local new_request = require('reflex.request')
 -- constants
 local CFGFILE = 'config.lua'
 local INITFILE = 'init.lua'
+local OPTIONS = require('getopts')({
+    name = 'reflex',
+    summary = 'reflex - a simple web application framework',
+    desc = [[run a web application server in execution context]],
+}, {
+    conf = {
+        help = 'path to configuration file',
+        type = 'string',
+    },
+    test = {
+        help = 'test the configuration and exit',
+        is_flag = true,
+    },
+}, ...)
 
 --- fatal
 --- @param op string
@@ -259,30 +272,17 @@ local function main(opts)
 end
 
 do
-    local opts = getopts(_G.arg, {
-        ['--help'] = {
-            help = true,
-            desc = 'this help',
-        },
-        ['--test'] = {
-            desc = 'test configuration and exit',
-        },
-        ['--conf'] = {
-            desc = 'specify path to configuration file',
-            pair = 'path/to/config.lua',
-        },
-    })
-    local ok, err = act.run(main, opts)
+    local ok, err = act.run(main, OPTIONS)
     if not ok then
-        if opts.test then
+        if OPTIONS.test then
             log.error('TEST FAILURE')
         end
         log.error(err)
-    elseif opts.test then
+    elseif OPTIONS.test then
         log.info('TEST OK')
     end
 
-    if not opts.test then
+    if not OPTIONS.test then
         log.info('exit')
     end
 end
