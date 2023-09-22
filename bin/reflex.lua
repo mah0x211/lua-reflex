@@ -134,7 +134,7 @@ end
 
 local function updater(ctx)
     while not ctx:is_done() do
-        sleep(1000)
+        sleep(1)
         update_date()
     end
 end
