@@ -11,7 +11,7 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "act >= 0.11",
+    "act >= 0.15",
     "assert >= 0.3.4",
     "base64mix >= 1.0.0",
     "basedir >= 0.4.0",
