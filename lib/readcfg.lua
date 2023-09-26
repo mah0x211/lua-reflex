@@ -56,17 +56,23 @@ end
 --- @return table cfg
 local function verify_session(cfg)
     cfg = checkopt(cfg, is_table, {}, 'session must be table')
-    cfg.name = checkopt(cfg.name, is_string, nil, 'session.name must be string')
+    cfg.name = checkopt(cfg.name, is_string, session.DEFAULT_NAME,
+                        'session.name must be string')
     cfg.attr = checkopt(cfg.attr, is_table, {}, 'session.attr must be table')
-    cfg.attr.path = checkopt(cfg.attr.path, is_string, nil,
+    cfg.attr.path = checkopt(cfg.attr.path, is_string,
+                             session.DEFAULT_PATH_ATTR,
                              'session.attr.path must be string')
-    cfg.attr.maxage = checkopt(cfg.attr.maxage, is_int, nil,
+    cfg.attr.maxage = checkopt(cfg.attr.maxage, is_int,
+                               session.DEFAULT_MAXAGE_ATTR,
                                'session.attr.maxage must be integer')
-    cfg.attr.secure = checkopt(cfg.attr.secure, is_boolean, nil,
+    cfg.attr.secure = checkopt(cfg.attr.secure, is_boolean,
+                               session.DEFAULT_SECURE_ATTR,
                                'session.attr.secure must be boolean')
-    cfg.attr.httponly = checkopt(cfg.attr.httponly, is_boolean, nil,
+    cfg.attr.httponly = checkopt(cfg.attr.httponly, is_boolean,
+                                 session.DEFAULT_HTTPONLY_ATTR,
                                  'session.attr.httponly must be boolean')
-    cfg.attr.samesite = checkopt(cfg.attr.samesite, is_string, nil,
+    cfg.attr.samesite = checkopt(cfg.attr.samesite, is_string,
+                                 session.DEFAULT_SAMESITE_ATTR,
                                  'session.attr.httponly must be string')
     session.set_name(cfg.name)
     session.set_attr(cfg.attr)
