@@ -323,5 +323,12 @@ return {
     set_name = set_name,
     get_attr = get_attr,
     set_attr = set_attr,
+    -- export default config
+    DEFAULT_NAME = DEFAULT_NAME,
+    DEFAULT_PATH_ATTR = DEFAULT_PATH_ATTR,
+    DEFAULT_MAXAGE_ATTR = DEFAULT_MAXAGE_ATTR,
+    DEFAULT_SECURE_ATTR = DEFAULT_SECURE_ATTR,
+    DEFAULT_HTTPONLY_ATTR = DEFAULT_HTTPONLY_ATTR,
+    DEFAULT_SAMESITE_ATTR = DEFAULT_SAMESITE_ATTR,
 }
 
