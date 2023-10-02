@@ -28,7 +28,7 @@ local isa = require('isa')
 local is_string = isa.string
 local is_table = isa.table
 local new_fsrouter = require('fsrouter').new
-local errorf = require('reflex.errorf')
+local fatalf = require('reflex.fatalf')
 
 --- @alias fsrouter userdata
 
@@ -44,11 +44,11 @@ local Router = {}
 function Router:init(rootdir, opts)
     opts = opts or {}
     if not is_string(rootdir) then
-        errorf(2, 'rootdir must be string')
+        fatalf(2, 'rootdir must be string')
     elseif opts == nil then
         opts = {}
     elseif not is_table(opts) then
-        errorf(2, 'opts must be table')
+        fatalf(2, 'opts must be table')
     end
 
     local router, err, routes = new_fsrouter(rootdir, {

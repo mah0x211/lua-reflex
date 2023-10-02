@@ -28,7 +28,7 @@ local match = string.match
 local sub = string.sub
 local remove = os.remove
 local fopen = require('io.fopen')
-local errorf = require('reflex.errorf')
+local fatalf = require('reflex.fatalf')
 local exec = require('reflex.exec')
 -- constants
 local ROCKSPEC_TMPL = [[
@@ -62,7 +62,7 @@ local function install(pathname)
         end
         f:close()
     elseif err then
-        errorf('failed to open %q', pathname)
+        fatalf('failed to open %q', pathname)
     end
 
     -- dependencies

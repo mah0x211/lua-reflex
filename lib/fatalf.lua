@@ -22,7 +22,7 @@
 local type = type
 local format = require('print').format
 
-local function errorf(...)
+local function fatalf(...)
     local lv = ...
     if type(lv) == 'number' then
         error(format(select(2, ...)), lv + 1)
@@ -30,4 +30,4 @@ local function errorf(...)
     error(format(...), 2)
 end
 
-return errorf
+return fatalf

@@ -1,16 +1,16 @@
 require('luacov')
 local testcase = require('testcase')
-local errorf = require('reflex.errorf')
+local fatalf = require('reflex.fatalf')
 
-function testcase.errorf()
+function testcase.fatalf()
     -- test that throw an error
-    local err = assert.throws(errorf, 'hello')
+    local err = assert.throws(fatalf, 'hello')
     assert.equal(err, 'hello')
 
     -- test that change the error level witg the first argument
     err = assert.throws(function()
-        errorf(1, 'hello')
+        fatalf(1, 'hello')
     end)
-    assert.match(err, 'errorf_test.lua.+ hello', false)
+    assert.match(err, 'fatalf_test.lua.+ hello', false)
 end
 
