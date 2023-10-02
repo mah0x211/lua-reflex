@@ -19,7 +19,6 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local error = error
 local lower = string.lower
 local format = string.format
 local sub = string.sub
@@ -27,6 +26,7 @@ local traceback = debug.traceback
 local isa = require('isa')
 local is_table = isa.table
 local log = require('reflex.log')
+local fatalf = require('reflex.fatalf')
 local code2message = require('reflex.status').code2message
 local new_renderer = require('reflex.renderer')
 local new_router = require('reflex.router')
@@ -44,12 +44,12 @@ local Reflex = {}
 --- @return table routes
 function Reflex:init(cfg)
     if not is_table(cfg) then
-        error("cfg must be table")
+        fatalf("cfg must be table")
     elseif not is_table(cfg.document) then
-        error("cfg.document must be table")
+        fatalf("cfg.document must be table")
     elseif cfg.document.error_pages ~= nil and
         not is_table(cfg.document.error_pages) then
-        error("cfg.document.error_pages must be table")
+        fatalf("cfg.document.error_pages must be table")
     end
 
     -- init router

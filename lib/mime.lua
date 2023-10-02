@@ -24,6 +24,7 @@ local sub = string.sub
 local gsub = string.gsub
 local extname = require('extname')
 local mediatypes = require('mediatypes').new()
+local fatalf = require('reflex.fatalf')
 local magic
 do
     local libmagic = require('libmagic')
@@ -38,7 +39,7 @@ end
 --- @return string err
 local function get(file, filename)
     if filename ~= nil and type(filename) ~= 'string' then
-        error('filename must be string', 2)
+        fatalf('filename must be string')
     end
 
     local res, err = magic(file)

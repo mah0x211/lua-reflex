@@ -20,7 +20,6 @@
 -- THE SOFTWARE.
 --
 local find = string.find
-local format = string.format
 local next = next
 local type = type
 local fopen = require('io.fopen')
@@ -30,6 +29,7 @@ local get_mime = require('reflex.mime').get
 local code2reason = require('reflex.status').code2reason
 local code2message = require('reflex.status').code2message
 local generate_token = require('reflex.token').generate
+local fatalf = require('reflex.fatalf')
 local encode2json = require('yyjson').encode
 local bake_cookie = require('cookie').bake
 --- constants
@@ -82,7 +82,7 @@ function Response:set_csrf_cookie(httponly)
     if httponly == nil then
         httponly = true
     elseif type(httponly) ~= 'boolean' then
-        error('httponly must be a boolean', 2)
+        fatalf('httponly must be a boolean')
     end
 
     local name = 'X-CSRF-Token'
@@ -236,7 +236,7 @@ end
 function Response:write_redirection(res)
     local location = res.location
     if type(location) ~= 'string' or #location == 0 or find(location, '%s') then
-        error('res.location must be non-empty string with no spaces')
+        fatalf('res.location must be non-empty string with no spaces')
     elseif res.code == 304 then
         -- 304 Not Modified
         self.header:set('Content-Location', location)
@@ -277,7 +277,7 @@ end
 function Response:write_response(code, res)
     local ok, err = self.message:set_status(code)
     if not ok then
-        error(format('failed to set status code: %s', err), 2)
+        fatalf('failed to set status code: %s', err)
     end
 
     res.code = code
@@ -327,7 +327,7 @@ end
 --- @return boolean timeout
 function Response:reply(code, res)
     if self.replied then
-        error('cannot send a response message twice', 2)
+        fatalf('cannot send a response message twice')
     end
 
     -- save session automatically
@@ -346,13 +346,13 @@ end
 --- @return boolean timeout
 function Response:file(pathname)
     if self.replied then
-        error('cannot send a response message twice', 2)
+        fatalf('cannot send a response message twice')
     end
 
     -- save session automatically
     local _, err = self:save_session()
     if err then
-        return self:internal_server_error()
+        return self:internal_server_error(err)
     end
 
     -- file response
@@ -371,7 +371,7 @@ local function merge(dst, body)
 
     if body ~= nil then
         if type(body) ~= 'table' then
-            error('body must be table', 2)
+            fatalf('body must be table')
         end
         for k, v in pairs(body) do
             if type(v) == 'table' then
@@ -533,7 +533,7 @@ end
 --- @return boolean timeout
 local function response3xx(self, code, uri)
     if type(uri) ~= 'string' or #uri == 0 or find(uri, '%s') then
-        error('uri must be non-empty string with no spaces', 2)
+        fatalf('uri must be non-empty string with no spaces')
     end
 
     return self:reply(code, {
