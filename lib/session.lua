@@ -30,7 +30,7 @@ local is_function = isa.Function
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
-local errorf = require('reflex.errorf')
+local fatalf = require('reflex.fatalf')
 
 --- session-cookie name
 local DEFAULT_NAME = 'sid'
@@ -88,7 +88,7 @@ local function set_store(store)
 
     if not is_function(t.set) or not is_function(t.get) or
         not is_function(t.delete) then
-        errorf(2, 'store must have %q, %q and %q methods', 'set', 'get',
+        fatalf(2, 'store must have %q, %q and %q methods', 'set', 'get',
                'delete')
     end
 

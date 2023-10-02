@@ -40,7 +40,7 @@ local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
 local log = require('reflex.log')
 local session = require('reflex.session')
-local errorf = require('reflex.errorf')
+local fatalf = require('reflex.fatalf')
 
 local function checkopt(val, checkfn, defval, msg, ...)
     if val == nil then
@@ -48,7 +48,7 @@ local function checkopt(val, checkfn, defval, msg, ...)
     elseif checkfn(val) then
         return val
     end
-    errorf(3, msg, ...)
+    fatalf(3, msg, ...)
 end
 
 --- verify_session
@@ -110,12 +110,12 @@ local function verify_template(cfg)
         -- load file
         local fn, err = loadfile(cfg.env, _G)
         if err then
-            errorf('failed to evaluate template.env %q: %s', cfg.env, err)
+            fatalf('failed to evaluate template.env %q: %s', cfg.env, err)
         end
 
         local ok, res = pcall(fn)
         if not ok then
-            errorf('failed to evaluate template.env %q: %s', cfg.env, res)
+            fatalf('failed to evaluate template.env %q: %s', cfg.env, res)
         end
 
         cfg.env = checkopt(res, is_table, nil,
@@ -355,7 +355,7 @@ local function readcfg(pathname)
         local err
         pathname, err = get_default_cfgfile()
         if err then
-            errorf('failed to load %q: %s', DEFAULT_CFGFILE, err)
+            fatalf('failed to load %q: %s', DEFAULT_CFGFILE, err)
         end
     end
 
@@ -363,12 +363,12 @@ local function readcfg(pathname)
         -- load config file
         local fn, err = loadfile(pathname, rawcfg)
         if err then
-            errorf('failed to load %q: %s', pathname, err)
+            fatalf('failed to load %q: %s', pathname, err)
         end
 
         local ok, perr = pcall(fn)
         if not ok then
-            errorf('failed to evaluate %q: %s', pathname, perr)
+            fatalf('failed to evaluate %q: %s', pathname, perr)
         end
         is_loaded = true
     end
