@@ -26,6 +26,7 @@ local is_string = isa.string
 local require = require
 local new_basedir = require('basedir').new
 local new_rez = require('rez').new
+local fatalf = require('reflex.fatalf')
 
 --- default_helpers
 --- @return table env
@@ -55,14 +56,14 @@ function Renderer:init(rootdir, follow_symlink, cache, env)
     local tmpl_env = default_helpers()
 
     if not is_string(rootdir) then
-        error('rootdir must be string', 2)
+        fatalf('rootdir must be string')
     elseif follow_symlink ~= nil and not is_boolean(follow_symlink) then
-        error('follow_symlink must be boolean', 2)
+        fatalf('follow_symlink must be boolean')
     elseif cache ~= nil and not is_boolean(cache) then
-        error('cache must be boolean', 2)
+        fatalf('cache must be boolean')
     elseif env ~= nil then
         if not is_table(env) then
-            error('env must be table', 2)
+            fatalf('env must be table')
         end
         for k, v in pairs(env) do
             tmpl_env[k] = v
@@ -89,9 +90,9 @@ end
 function Renderer:render(pathname, data)
     data = data or {}
     if not is_string(pathname) then
-        error('pathname must be string', 2)
+        fatalf('pathname must be string')
     elseif not is_table(data) then
-        error('data must be table', 2)
+        fatalf('data must be table')
     end
 
     local res, err = self.rez:render(pathname, data)
@@ -108,7 +109,7 @@ end
 --- @return boolean ok
 function Renderer:exists(pathname)
     if not is_string(pathname) then
-        error('pathname must be string', 2)
+        fatalf('pathname must be string')
     end
     return self.rez:exists(pathname)
 end
@@ -118,7 +119,7 @@ end
 --- @return boolean ok
 function Renderer:del(pathname)
     if not is_string(pathname) then
-        error('pathname must be string', 2)
+        fatalf('pathname must be string')
     end
     return self.rez:del(pathname)
 end
@@ -129,7 +130,7 @@ end
 --- @return string err
 function Renderer:add(pathname)
     if not is_string(pathname) then
-        error('pathname must be string', 2)
+        fatalf('pathname must be string')
     end
 
     local content, err = self.rootdir:read(pathname)

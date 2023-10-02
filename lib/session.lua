@@ -136,7 +136,7 @@ local function set_attr(attr)
 
     new_cookie(NAME, attr)
     if attr.maxage and (not is_finite(attr.maxage) or attr.maxage < 1) then
-        error('attr.maxage must be integer greater than 0', 2)
+        fatalf('attr.maxage must be integer greater than 0')
     end
 
     ATTR.domain = attr.domain
@@ -160,7 +160,7 @@ end
 --- @return any err
 local function restore(id)
     if not is_string(id) then
-        error('id must be string', 3)
+        fatalf('id must be string')
     end
 
     local data, err = Store:get(id, ATTR.maxage)
@@ -183,9 +183,9 @@ local Session = {}
 --- @return any err
 function Session:init(cookies, restore_only)
     if cookies ~= nil and not is_table(cookies) then
-        error('cookies must be table', 2)
+        fatalf('cookies must be table')
     elseif restore_only ~= nil and not is_boolean(restore_only) then
-        error('restore_only must be boolean', 2)
+        fatalf('restore_only must be boolean')
     end
 
     if cookies then
@@ -237,7 +237,7 @@ end
 --- @param val any
 function Session:set(key, val)
     if not is_string(key) or find(key, '^%s+$') then
-        error('key must be non-empty string', 2)
+        fatalf('key must be non-empty string')
     end
     self.value[key] = val
 end
@@ -247,7 +247,7 @@ end
 --- @return any val
 function Session:delete(key)
     if not is_string(key) then
-        error('key must be string', 2)
+        fatalf('key must be string')
     end
 
     local val = self.value[key]
@@ -263,7 +263,7 @@ end
 --- @return any val
 function Session:get(key)
     if not is_string(key) then
-        error('key must be string', 2)
+        fatalf('key must be string')
     end
     return self.value[key]
 end
@@ -276,7 +276,7 @@ function Session:save(attr)
     if attr == nil then
         attr = {}
     elseif not is_table(attr) then
-        error('attr must be table', 2)
+        fatalf('attr must be table')
     end
 
     local ok, err = Store:set(self.id, self.value, ATTR.maxage)
@@ -295,7 +295,7 @@ function Session:destroy(attr)
     if attr == nil then
         attr = {}
     elseif not is_table(attr) then
-        error('attr must be table', 2)
+        fatalf('attr must be table')
     end
 
     local id, err = uuid4str()

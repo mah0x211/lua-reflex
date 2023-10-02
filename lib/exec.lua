@@ -19,11 +19,11 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local error = error
 local concat = table.concat
 local type = type
 local unpack = require('unpack')
 local execvp = require('exec').execvp
+local fatalf = require('reflex.fatalf')
 
 local function noop()
     -- do nothing
@@ -41,9 +41,9 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     stdout = stdout or noop
     stderr = stderr or noop
     if type(stdout) ~= 'function' then
-        error('stdout must be function', 2)
+        fatalf('stdout must be function')
     elseif type(stderr) ~= 'function' then
-        error('stderr must be function', 2)
+        fatalf('stderr must be function')
     end
 
     -- print command and arguments

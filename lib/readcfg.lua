@@ -186,7 +186,7 @@ local function verify_document(cfg)
                                'document.error_pages must be table')
     for code, v in pairs(cfg.error_pages) do
         if not is_int(code) then
-            log.fatal('document.error_pages index key %q must be integer', code)
+            fatalf('document.error_pages index key %q must be integer', code)
         end
         cfg.error_pages[code] = checkopt(v, is_string, nil,
                                          'document.error_pages#%d must be string',
@@ -222,20 +222,19 @@ local function verify_listen(cfg)
         local tlscfg = new_tls_config()
         local ok, err = tlscfg:set_keypair_file(pem, key)
         if not ok then
-            error(format('failed to set tls keypair files: %s', err))
+            fatalf('failed to set tls keypair files: %s', err)
         elseif dhparams then
             local f
             f, err = fopen(dhparams, 'r')
             if not f then
-                error(
-                    format('failed to open dhparam file %q: %s', dhparams, err))
+                fatalf('failed to open dhparam file %q: %s', dhparams, err)
             end
             local s = f:read('*a')
             f:close()
 
             ok, err = tlscfg:set_dheparams(s)
             if not ok then
-                error(format('failed to set tls dhparams %q: %s', dhparams, err))
+                fatalf('failed to set tls dhparams %q: %s', dhparams, err)
             end
         end
 
@@ -299,7 +298,7 @@ local function verify_log(cfg, debug)
                            'log.level must be one of the following %s', levels)
     if level then
         if not valid_lv[level] then
-            error(format('unknown log.level %q: must be %s', level, levels))
+            fatalf('unknown log.level %q: must be %s', level, levels)
         elseif debug then
             log.warn('ignore log.level %q on debug mode')
         else
@@ -320,7 +319,7 @@ local function verify_log(cfg, debug)
 
         local f, err = open(filename, mode)
         if not f then
-            error(format('failed to open log.filename %q: %s', filename, err))
+            fatalf('failed to open log.filename %q: %s', filename, err)
         end
         f:setvbuf('line')
         log.setoutput(f)

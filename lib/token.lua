@@ -19,11 +19,11 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
-local error = error
 local sub = string.sub
 local is_string = require('isa').string
 local hmacsha = require('hmac').sha224
 local randstr = require('string.random')
+local fatalf = require('reflex.fatalf')
 -- constants
 -- N byte = 128 bit / 8 bit
 local MSG_LEN = 128 / 8
@@ -48,9 +48,9 @@ end
 --- @return boolean ok
 local function verify(key, token)
     if not is_string(key) then
-        error('key must be string', 2)
+        fatalf('key must be string')
     elseif not is_string(token) then
-        error('token must be string', 2)
+        fatalf('token must be string')
     elseif #token ~= TOKEN_LEN or sub(token, SHA_LEN + 1, SHA_LEN + 1) ~= '.' then
         return false
     end
@@ -64,7 +64,7 @@ end
 --- @return string str
 local function generate(key)
     if not is_string(key) then
-        error('key must be string', 2)
+        fatalf('key must be string')
     end
 
     local msg = randstr(MSG_LEN, 'urlsafe')
