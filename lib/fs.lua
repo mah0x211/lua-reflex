@@ -21,53 +21,67 @@
 --
 local basedir = require('basedir')
 local getcwd = require('getcwd')
+local errorf = require('error').format
 local exec = require('reflex.exec')
 -- constants
 local CWD = assert(getcwd())
 local RootDir = assert(basedir.new(CWD))
 local TrashDir = './trash/'
 
---- @alias error userdata
---- @alias exec.process userdata
-
 --- realpath
 --- @param pathname string
---- @return string apath
---- @return string err
---- @return string rpath
+--- @return string? apath
+--- @return any err
+--- @return string? rpath
 local function realpath(pathname)
-    return RootDir:realpath(pathname)
+    local apath, err, rpath = RootDir:realpath(pathname)
+    if not apath then
+        return nil, errorf('failed to realpath()', err)
+    end
+    return apath, nil, rpath
 end
 
 --- mkdir
 --- @param pathname string
 --- @return boolean ok
---- @return string err
+--- @return any err
 local function mkdir(pathname)
-    return RootDir:mkdir(pathname)
+    local ok, err = RootDir:mkdir(pathname)
+    if not ok then
+        return false, errorf('failed to mkdir()', err)
+    end
+    return true
 end
 
 --- open
 --- @param pathname string
 --- @return file* f
---- @return string err
+--- @return any err
 local function open(pathname, mode)
-    return RootDir:open(pathname, mode)
+    local f, err = RootDir:open(pathname, mode)
+    if not f then
+        return nil, errorf('failed to open()', err)
+    end
+    return f
 end
 
 --- read
 --- @param pathname string
 --- @return string content
---- @return string err
+--- @return any err
 local function read(pathname)
-    return RootDir:read(pathname)
+    local content, err = RootDir:read(pathname)
+    if not content then
+        return nil, errorf('failed to read()', err)
+    end
+    return content
 end
 
 --- write
 --- @param pathname string
 --- @param content string
 --- @return boolean ok
---- @return string err
+--- @return any err
 local function write(pathname, content)
     local f, err = open(pathname, 'w')
     if not f then
@@ -78,7 +92,7 @@ local function write(pathname, content)
     _, err = f:write(content)
     f:close()
     if err then
-        return false, err
+        return false, errorf('failed to write()', err)
     end
 
     return true
@@ -88,7 +102,7 @@ end
 --- @param pathname string
 --- @param content string
 --- @return boolean ok
---- @return string err
+--- @return any err
 local function write_if_not_exist(pathname, content)
     local apath, err = realpath(pathname)
     if err then
@@ -106,17 +120,32 @@ local function getpwd()
     return CWD
 end
 
+--- chdir
+--- @param pathname string
+--- @return boolean ok
+--- @return any err
 local function chdir(pathname)
-    pathname = realpath(pathname)
+    local apath, err = realpath(pathname)
+    if not apath then
+        return false, err
+    end
+
     return exec('chdir', {
-        pathname,
+        apath,
     })
 end
 
+--- unlink
+--- @param pathname string
+--- @return boolean ok
+--- @return any err
 local function unlink(pathname)
-    pathname = realpath(pathname)
+    local apath, err = realpath(pathname)
+    if not apath then
+        return false, err
+    end
     return exec('mv', {
-        pathname,
+        apath,
         TrashDir,
     })
 end

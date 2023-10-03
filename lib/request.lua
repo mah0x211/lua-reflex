@@ -24,7 +24,7 @@ local pairs = pairs
 local sub = string.sub
 local new_kvpairs = require('kvpairs').new
 local parse_cookie = require('cookie').parse
-local log = require('reflex.log')
+local errorf = require('error').format
 local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
 
@@ -96,8 +96,7 @@ function Request:session(restore_only)
     self:parse_cookies()
     local sess, err = new_session(self.cookies, restore_only)
     if err then
-        log.error('failed to create new session:', err)
-        return nil, err
+        return nil, errorf('failed to new_session()', err)
     elseif sess then
         self.sess = sess
     end
@@ -111,8 +110,7 @@ function Request:save_session()
     if self.sess then
         local cookie, err = self.sess:save()
         if err then
-            log.error('failed to save session:', err)
-            return nil, err
+            return nil, errorf('failed to save session', err)
         end
         return cookie
     end

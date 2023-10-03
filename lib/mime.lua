@@ -22,6 +22,7 @@
 -- init for libmagic
 local sub = string.sub
 local gsub = string.gsub
+local errorf = require('error').format
 local extname = require('extname')
 local mediatypes = require('mediatypes').new()
 local fatalf = require('reflex.fatalf')
@@ -35,8 +36,8 @@ end
 
 --- get_charset
 --- @param file string|number|file*
---- @return string mime
---- @return string err
+--- @return string? mime
+--- @return any err
 local function get(file, filename)
     if filename ~= nil and type(filename) ~= 'string' then
         fatalf('filename must be string')
@@ -44,7 +45,7 @@ local function get(file, filename)
 
     local res, err = magic(file)
     if not res then
-        return nil, err
+        return nil, errorf('failed to magic()', err)
     end
 
     local ext
