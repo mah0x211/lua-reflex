@@ -1,5 +1,6 @@
 require('luacov')
 local testcase = require('testcase')
+local assert = require('assert')
 local cache = require('cache.inmem')
 local session = require('reflex.session')
 local parse_baked_cookie = require('cookie').parse_baked_cookie
@@ -213,7 +214,7 @@ function testcase.save()
     session.set_store(TEST_STORE)
     cookie, err = s:save()
     assert.is_nil(cookie)
-    assert.equal(err, 'test-set-error')
+    assert.match(err, 'test-set-error')
 
     -- test that throws an error
     err = assert.throws(s.save, s, 1)
@@ -271,13 +272,13 @@ function testcase.restore()
     session.set_store(TEST_STORE)
     ok, err = s:restore(sid)
     assert.is_false(ok)
-    assert.equal(err, 'test-get-error')
+    assert.match(err, 'test-get-error')
 
     local _, nerr = session.new({
         [c.name] = c.value,
     })
     assert.is_nil(_)
-    assert.equal(nerr, 'test-get-error')
+    assert.match(nerr, 'test-get-error')
 
     -- test that throws an error if argument is invalid
     err = assert.throws(s.restore, s, true)
@@ -325,7 +326,7 @@ function testcase.destroy()
     session.set_store(TEST_STORE)
     cookie, err = s:destroy()
     assert.is_nil(cookie)
-    assert.equal(err, 'test-del-error')
+    assert.match(err, 'test-del-error')
 
     -- test that throws an error
     err = assert.throws(s.destroy, s, true)

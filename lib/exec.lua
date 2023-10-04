@@ -23,6 +23,7 @@ local concat = table.concat
 local type = type
 local unpack = require('unpack')
 local execvp = require('exec').execvp
+local errorf = require('error').format
 local fatalf = require('reflex.fatalf')
 
 local function noop()
@@ -73,12 +74,14 @@ local function exec(pathname, argv, pwd, stdout, stderr)
 
     local res, werr = p:waitpid()
     if werr then
-        return false, werr
+        return false, errorf('failed to waitpid()', werr)
     elseif not res.exit or res.exit ~= 0 then
-        return false, #errlines > 0 and concat(errlines, '\n') or nil
+        return false, #errlines > 0 and
+                   errorf('failed to exec(): %s', concat(errlines, '\n')) or nil
     end
 
-    return true, #outlines > 0 and concat(outlines, '\n') or nil
+    return true, #outlines > 0 and
+               errorf('failed to exec(): %s', concat(outlines, '\n')) or nil
 end
 
 return exec

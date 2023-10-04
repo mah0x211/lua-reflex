@@ -23,9 +23,8 @@ local pcall = pcall
 local concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
-local open = io.open
-local format = string.format
 local sub = string.sub
+local errorf = require('error').format
 local assert = require('assert')
 local exists = require('exists')
 local fopen = require('io.fopen')
@@ -293,12 +292,13 @@ local function verify_log(cfg, debug)
     for _, lv in ipairs(levels) do
         valid_lv[lv] = true
     end
-    levels = '"' .. concat(levels, '", "') .. '"'
+    local supported_levels = '"' .. concat(levels, '", "') .. '"'
     local level = checkopt(cfg.level, is_string, nil,
-                           'log.level must be one of the following %s', levels)
+                           'log.level must be one of the following %s',
+                           supported_levels)
     if level then
         if not valid_lv[level] then
-            fatalf('unknown log.level %q: must be %s', level, levels)
+            fatalf('unknown log.level %q: must be %s', level, supported_levels)
         elseif debug then
             log.warn('ignore log.level %q on debug mode')
         else
@@ -317,7 +317,7 @@ local function verify_log(cfg, debug)
             filename = sub(filename, 1, #filename - 1)
         end
 
-        local f, err = open(filename, mode)
+        local f, err = fopen(filename, mode)
         if not f then
             fatalf('failed to open log.filename %q: %s', filename, err)
         end
@@ -337,7 +337,7 @@ local function get_default_cfgfile()
         if ftype == 'file' then
             return DEFAULT_CFGFILE
         end
-        return nil, format('%q is not a file: %s', DEFAULT_CFGFILE, ftype)
+        return nil, errorf('%q is not a file: %s', DEFAULT_CFGFILE, ftype)
     end
     return nil, err
 end

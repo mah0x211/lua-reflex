@@ -21,6 +21,7 @@
 --
 local find = string.find
 local getmetatable = debug.getmetatable
+local errorf = require('error').format
 local isa = require('isa')
 local is_finite = isa.finite
 local is_boolean = isa.boolean
@@ -164,8 +165,8 @@ local function restore(id)
     end
 
     local data, err = Store:get(id, ATTR.maxage)
-    if not data then
-        return nil, err
+    if err then
+        return nil, errorf('failed to Store:get()', err)
     end
 
     return data
@@ -193,7 +194,7 @@ function Session:init(cookies, restore_only)
         if id ~= nil then
             local value, err = restore(id)
             if err then
-                return nil, err
+                return nil, errorf('failed to restore()', err)
             elseif value then
                 self.id = id
                 self.value = value
@@ -208,7 +209,7 @@ function Session:init(cookies, restore_only)
 
     local newid, err = uuid4str()
     if not newid then
-        return nil, err
+        return nil, errorf('failed to uuid4str()', err)
     end
 
     self.id = newid
@@ -222,14 +223,15 @@ end
 --- @return any err
 function Session:restore(id)
     local value, err = restore(id)
-
-    if value then
-        self.id = id
-        self.value = value
-        return true
+    if err then
+        return false, errorf('failed to restore()', err)
+    elseif not value then
+        return false
     end
 
-    return false, err
+    self.id = id
+    self.value = value
+    return true
 end
 
 --- set
@@ -281,7 +283,7 @@ function Session:save(attr)
 
     local ok, err = Store:set(self.id, self.value, ATTR.maxage)
     if not ok then
-        return nil, err
+        return nil, errorf('failed to Store:set()', err)
     end
 
     return bake_cookie(NAME, self.id, bake_attributes({}, attr))
@@ -300,12 +302,13 @@ function Session:destroy(attr)
 
     local id, err = uuid4str()
     if not id then
-        return nil, err
+        return nil, errorf('failed to uuid4str()', err)
     end
 
-    local ok, serr = Store:delete(self.id)
+    local ok
+    ok, err = Store:delete(self.id)
     if not ok then
-        return nil, serr
+        return nil, errorf('failed to Store:delete()', err)
     end
 
     -- clear

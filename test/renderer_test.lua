@@ -1,5 +1,6 @@
 require('luacov')
 local testcase = require('testcase')
+local assert = require('assert')
 local new_renderer = require('reflex.renderer')
 
 function testcase.new()
@@ -35,7 +36,7 @@ function testcase.add()
     -- test that return false if pathname is not found
     local ok, err = r:add('/unknown_file.html')
     assert.is_false(ok)
-    assert.is_nil(err)
+    assert.match(err, 'ENOENT')
 
     -- test that return an error if invalid template
     ok, err = r:add('/.layout/invalid.html')
@@ -97,7 +98,7 @@ function testcase.render()
         hello = 'hello world',
     })
     assert.is_nil(s)
-    assert.match(err, 'not found')
+    assert.match(err, 'ENOENT')
 
     -- test that throws an error if invalid pathname argument
     err = assert.throws(r.render, r, {})

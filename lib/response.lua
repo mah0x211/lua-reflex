@@ -33,6 +33,7 @@ local fatalf = require('reflex.fatalf')
 local encode2json = require('yyjson').encode
 local bake_cookie = require('cookie').bake
 --- constants
+local errorf = require('error').format
 local ENOENT = require('errno').ENOENT
 local EISDIR = require('errno').EISDIR
 
@@ -105,11 +106,12 @@ function Response:save_session()
     end
 
     local sess_cookie, err = self.req:save_session()
-    if sess_cookie then
-        self.header:set('Set-Cookie', sess_cookie)
-        return true
+    if not sess_cookie then
+        return false, errorf('failed to save session', err)
     end
-    return false, err
+
+    self.header:set('Set-Cookie', sess_cookie)
+    return true
 end
 
 --- flush
@@ -117,7 +119,11 @@ end
 --- @return any err
 --- @return boolean timeout
 function Response:flush()
-    return self.conn:flush()
+    local n, err, timeout = self.conn:flush()
+    if err then
+        err = errorf('failed to flush()', err)
+    end
+    return n, err, timeout
 end
 
 --- openfile
@@ -127,16 +133,16 @@ end
 --- @return string? mime
 local function openfile(pathname)
     local f, err = fopen(pathname)
-    if err then
+    if not f then
         -- failed to open file
-        return nil, err
+        return nil, errorf('failed to fopen()', err)
     end
 
     local mime
     mime, err = get_mime(f, pathname)
     if not mime then
         f:close()
-        return nil, err
+        return nil, errorf('failed to get_mime()', err)
     end
 
     return f, nil, mime
@@ -163,8 +169,10 @@ function Response:write_file(pathname)
     self.replied = true
     local n, err, timeout = self.message:write_file(self.conn, f)
     f:close()
-    if err or timeout then
-        return n, err, timeout
+    if err then
+        return n, errorf('failed to write_file()', err), timeout
+    elseif timeout then
+        return n, nil, timeout
     end
     return self:flush()
 end
@@ -177,8 +185,10 @@ end
 function Response:write(str)
     self.replied = true
     local n, err, timeout = self.message:write(self.conn, str)
-    if err or timeout then
-        return n, err, timeout
+    if err then
+        return n, errorf('failed to write()', err), timeout
+    elseif timeout then
+        return n, nil, timeout
     end
     return self:flush()
 end
@@ -334,6 +344,9 @@ function Response:reply(code, res)
     local _, err = self:save_session()
     if err then
         code = 500
+        res = {
+            error = errorf('failed to save_session()', err),
+        }
     end
 
     return self:write_response(code, res)

@@ -26,7 +26,9 @@ local is_string = isa.string
 local require = require
 local new_basedir = require('basedir').new
 local new_rez = require('rez').new
+local errorf = require('error').format
 local fatalf = require('reflex.fatalf')
+local ENOENT = require('errno').ENOENT
 
 --- default_helpers
 --- @return table env
@@ -86,7 +88,7 @@ end
 --- @param pathname string|nil
 --- @param data table
 --- @return string res
---- @return string err
+--- @return any err
 function Renderer:render(pathname, data)
     data = data or {}
     if not is_string(pathname) then
@@ -101,7 +103,10 @@ function Renderer:render(pathname, data)
         self.rez:clear()
     end
 
-    return res, err
+    if not res then
+        return nil, errorf('failed to render()', err)
+    end
+    return res
 end
 
 --- exists
@@ -127,18 +132,25 @@ end
 --- add
 --- @param pathname string
 --- @return boolean ok
---- @return string err
+--- @return any err
 function Renderer:add(pathname)
     if not is_string(pathname) then
         fatalf('pathname must be string')
     end
 
     local content, err = self.rootdir:read(pathname)
-    if not content then
-        return false, err
+    if err then
+        return false, errorf('failed to read()', err)
+    elseif not content then
+        return false, ENOENT:new()
     end
 
-    return self.rez:add(pathname, content)
+    local ok
+    ok, err = self.rez:add(pathname, content)
+    if not ok then
+        return false, errorf('failed to add()', err)
+    end
+    return true
 end
 
 Renderer = require('metamodule').new(Renderer)

@@ -1,6 +1,7 @@
 require('luacov')
 local concat = table.concat
 local testcase = require('testcase')
+local assert = require('assert')
 local exec = require('reflex.exec')
 
 function testcase.exec()
@@ -10,7 +11,7 @@ function testcase.exec()
         [[io.stdout:write('hello')]],
     })
     assert(ok, res)
-    assert.equal(res, 'hello')
+    assert.match(res, 'hello')
 
     -- test that return error with invalid syntax
     ok, res = exec('lua', {
@@ -74,5 +75,5 @@ function testcase.exec_with_stdio()
         errlines[#errlines + 1] = line
     end)
     assert.is_false(ok)
-    assert.equal(res, concat(errlines, '\n'))
+    assert.match(res, concat(errlines, '\n'))
 end
