@@ -24,7 +24,8 @@ local concat = table.concat
 local ipairs = ipairs
 local pairs = pairs
 local sub = string.sub
-local errorf = require('error').format
+local error = require('error')
+local errorf = error.format
 local assert = require('assert')
 local exists = require('exists')
 local fopen = require('io.fopen')
@@ -376,6 +377,8 @@ local function readcfg(pathname)
                            'debug must be boolean')
     if debug then
         log.setlevel('debug')
+        log.setdebug(true)
+        error.debug(true)
     end
     verify_log(rawcfg.log, debug)
 
