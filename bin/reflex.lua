@@ -25,9 +25,9 @@
 local act = require('act')
 require('gpoll').set_poller(act)
 local assert = assert
-local error = error
 local ipairs = ipairs
 local upper = string.upper
+local error = require('error')
 local sleep = require('gpoll').sleep
 local new_context = require('context').new
 local update_date = require('net.http.date').update
@@ -61,7 +61,7 @@ local OPTIONS = require('getopts')({
 --- @param op string
 --- @param ... any
 local function fatal(op, ...)
-    error(log.format('fatal error in %q: ', op) .. log.format(...), 2)
+    error.fatalf(2, 'fatal error in %q:', op, ...)
 end
 
 --- handle_connection
@@ -78,7 +78,7 @@ local function handle_connection(cfg, conn, reflex)
     repeat
         local msg, err = conn:read_request()
         if not msg then
-            if err then
+            if err and not error.is(err, 'EMSG') then
                 log.error(err)
             end
             return
@@ -187,6 +187,55 @@ local function init(cfg)
     end
 end
 
+--- print_routes
+--- @param cfg table
+--- @param routes table
+--- @param renderer reflex.renderer
+local function print_routes(cfg, routes, renderer)
+    -- print routing table
+    local nroute = #routes
+    local rtree = {}
+
+    for i = 1, nroute do
+        local v = routes[i]
+
+        -- precheck templates
+        if v.file and cfg.template.precheck and cfg.template.files[v.file.ext] then
+            log.info('precheck template %q', v.file.rpath)
+            local ok, err = renderer:add(v.file.rpath)
+            if not ok then
+                log.error('invalid template %q: %s', v.file.rpath, err)
+                fatal('main', 'failed to precheck %q', v.file.rpath)
+            end
+        end
+
+        -- print route
+        local fmt = i < nroute and '├── ' or '└── '
+        rtree[#rtree + 1] = log.format(fmt .. '%s %q', upper(v.method), v.rpath)
+
+        -- print route handlers
+        local nhandler = #v.handlers
+        for j = 1, nhandler do
+            local handler = v.handlers[j]
+            fmt = (i < nroute and '│' or ' ') .. '       '
+            if j < nhandler then
+                fmt = fmt .. '├── '
+            else
+                fmt = fmt .. '└── '
+            end
+            rtree[#rtree + 1] = log.format(fmt .. '%d. %s %s', j,
+                                           handler.method, handler.name)
+        end
+    end
+
+    log.info('%q', cfg.document.rootdir)
+    for _, line in ipairs(rtree) do
+        log.info(line)
+    end
+end
+
+--- main
+--- @param opts table
 local function main(opts)
     -- load config.lua
     local cfg = readcfg(opts.conf)
@@ -199,57 +248,15 @@ local function main(opts)
     if opts.test then
         cfg.template.precheck = true
     end
-
-    -- print routing table
-    do
-        local nroute = #routes
-        local rtree = {}
-
-        for i = 1, nroute do
-            local v = routes[i]
-
-            -- precheck templates
-            if v.file and cfg.template.precheck and
-                cfg.template.files[v.file.ext] then
-                log.info('precheck template %q', v.file.rpath)
-                local ok, err = reflex.renderer:add(v.file.rpath)
-                if not ok then
-                    log.error('invalid template %q: %s', v.file.rpath, err)
-                    fatal('main', 'failed to precheck %q', v.file.rpath)
-                end
-            end
-
-            -- print route
-            local fmt = i < nroute and '├── ' or '└── '
-            rtree[#rtree + 1] = log.format(fmt .. '%s %q', upper(v.method),
-                                           v.rpath)
-
-            -- print route handlers
-            local nhandler = #v.handlers
-            for j = 1, nhandler do
-                local handler = v.handlers[j]
-                fmt = (i < nroute and '│' or ' ') .. '       '
-                if j < nhandler then
-                    fmt = fmt .. '├── '
-                else
-                    fmt = fmt .. '└── '
-                end
-                rtree[#rtree + 1] = log.format(fmt .. '%d. %s %s', j,
-                                               handler.method, handler.name)
-            end
-        end
-
-        log.info('%q', cfg.document.rootdir)
-        for _, line in ipairs(rtree) do
-            log.info(line)
-        end
-    end
+    print_routes(cfg, routes, reflex.renderer)
 
     -- run custom initializer
     init(cfg)
     if opts.test then
+        -- test ok
         return
     end
+
     start(cfg, reflex)
 end
 

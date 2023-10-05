@@ -33,8 +33,8 @@ local new_router = require('reflex.router')
 
 --- @class reflex
 --- @field debug boolean
---- @field router Router
---- @field renderer Renderer
+--- @field router reflex.router
+--- @field renderer reflex.renderer
 --- @field error_pages table<integer, string>
 local Reflex = {}
 

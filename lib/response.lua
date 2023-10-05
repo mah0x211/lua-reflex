@@ -106,12 +106,13 @@ function Response:save_session()
     end
 
     local sess_cookie, err = self.req:save_session()
-    if not sess_cookie then
+    if sess_cookie then
+        self.header:set('Set-Cookie', sess_cookie)
+        return true
+    elseif err then
         return false, errorf('failed to save session', err)
     end
-
-    self.header:set('Set-Cookie', sess_cookie)
-    return true
+    return false
 end
 
 --- flush

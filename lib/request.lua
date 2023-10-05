@@ -29,10 +29,6 @@ local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
 
 --- @class reflex.request : net.http.message.request
---- @field method string
---- @field uri string
---- @field header net.http.header
---- @field content? net.http.content
 --- @field sess reflex.session
 --- @field cookies? table<string, string>
 local Request = {}
@@ -103,7 +99,7 @@ function Request:session(restore_only)
     return sess
 end
 
---- save_session
+--- save_session if session is nil then return nil without error
 --- @return string? cookie
 --- @return any err
 function Request:save_session()
