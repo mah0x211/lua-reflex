@@ -25,9 +25,9 @@
 local act = require('act')
 require('gpoll').set_poller(act)
 local assert = assert
-local error = error
 local ipairs = ipairs
 local upper = string.upper
+local error = require('error')
 local sleep = require('gpoll').sleep
 local new_context = require('context').new
 local update_date = require('net.http.date').update
@@ -61,7 +61,7 @@ local OPTIONS = require('getopts')({
 --- @param op string
 --- @param ... any
 local function fatal(op, ...)
-    error(log.format('fatal error in %q: ', op) .. log.format(...), 2)
+    error.fatalf(2, 'fatal error in %q:', op, ...)
 end
 
 --- handle_connection
@@ -78,7 +78,7 @@ local function handle_connection(cfg, conn, reflex)
     repeat
         local msg, err = conn:read_request()
         if not msg then
-            if err then
+            if err and not error.is(err, 'EMSG') then
                 log.error(err)
             end
             return
