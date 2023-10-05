@@ -29,10 +29,6 @@ local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
 
 --- @class reflex.request : net.http.message.request
---- @field method string
---- @field uri string
---- @field header net.http.header
---- @field content? net.http.content
 --- @field sess reflex.session
 --- @field cookies? table<string, string>
 local Request = {}
