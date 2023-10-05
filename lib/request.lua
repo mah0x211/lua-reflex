@@ -99,7 +99,7 @@ function Request:session(restore_only)
     return sess
 end
 
---- save_session
+--- save_session if session is nil then return nil without error
 --- @return string? cookie
 --- @return any err
 function Request:save_session()
