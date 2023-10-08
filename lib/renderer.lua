@@ -27,7 +27,7 @@ local require = require
 local new_basedir = require('basedir').new
 local new_rez = require('rez').new
 local errorf = require('error').format
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 local ENOENT = require('errno').ENOENT
 
 --- default_helpers

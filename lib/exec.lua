@@ -24,7 +24,7 @@ local type = type
 local unpack = require('unpack')
 local execvp = require('exec').execvp
 local errorf = require('error').format
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 
 local function noop()
     -- do nothing

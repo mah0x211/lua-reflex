@@ -28,7 +28,7 @@ local match = string.match
 local sub = string.sub
 local remove = os.remove
 local fopen = require('io.fopen')
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 local exec = require('reflex.exec')
 -- constants
 local ROCKSPEC_TMPL = [[

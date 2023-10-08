@@ -31,7 +31,7 @@ local is_function = isa.Function
 local new_cookie = require('cookie').new
 local bake_cookie = require('cookie').bake
 local uuid4str = require('ossp-uuid').gen4str
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 
 --- session-cookie name
 local DEFAULT_NAME = 'sid'

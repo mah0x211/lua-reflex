@@ -40,7 +40,7 @@ local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
 local log = require('reflex.log')
 local session = require('reflex.session')
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 
 local function checkopt(val, checkfn, defval, msg, ...)
     if val == nil then

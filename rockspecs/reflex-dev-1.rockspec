@@ -60,7 +60,6 @@ build = {
     modules = {
         ["reflex"] = "lib/reflex.lua",
         ["reflex.date"] = "lib/date.lua",
-        ["reflex.fatalf"] = "lib/fatalf.lua",
         ["reflex.exec"] = "lib/exec.lua",
         ["reflex.fetch"] = "lib/fetch.lua",
         ["reflex.fs"] = "lib/fs.lua",
