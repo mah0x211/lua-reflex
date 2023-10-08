@@ -85,7 +85,7 @@ function Renderer:init(rootdir, follow_symlink, cache, env)
 end
 
 --- render
---- @param pathname string|nil
+--- @param pathname string
 --- @param data table
 --- @return string res
 --- @return any err
