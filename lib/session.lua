@@ -271,7 +271,7 @@ function Session:get(key)
 end
 
 --- save
---- @param attr table|nil
+--- @param attr table?
 --- @return string? cookie
 --- @return any err
 function Session:save(attr)
@@ -290,7 +290,7 @@ function Session:save(attr)
 end
 
 --- destroy
---- @param attr table|nil
+--- @param attr table?
 --- @return string? void_cookie
 --- @return any err
 function Session:destroy(attr)

@@ -73,7 +73,7 @@ function Response:init(refx, conn, req, as_json, debug)
 end
 
 --- keepalive
---- @param keepalived boolean|nil
+--- @param keepalived boolean?
 function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
 end
@@ -116,15 +116,17 @@ function Response:save_session()
 end
 
 --- flush
---- @return integer n
+--- @return integer? n
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:flush()
     local n, err, timeout = self.conn:flush()
     if err then
-        err = errorf('failed to flush()', err)
+        return nil, errorf('failed to flush()', err)
+    elseif not n then
+        return nil, nil, timeout
     end
-    return n, err, timeout
+    return n
 end
 
 --- openfile
@@ -151,9 +153,9 @@ end
 
 --- write_file
 --- @param pathname string
---- @return integer n
+--- @return integer n?
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_file(pathname)
     local f, ferr, mime = openfile(pathname)
     if ferr then
@@ -171,25 +173,25 @@ function Response:write_file(pathname)
     local n, err, timeout = self.message:write_file(self.conn, f)
     f:close()
     if err then
-        return n, errorf('failed to write_file()', err), timeout
-    elseif timeout then
-        return n, nil, timeout
+        return nil, errorf('failed to write_file()', err), timeout
+    elseif not n then
+        return nil, nil, timeout
     end
     return self:flush()
 end
 
 --- write
 --- @param str? string
---- @return integer n
+--- @return integer? n
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write(str)
     self.replied = true
     local n, err, timeout = self.message:write(self.conn, str)
     if err then
-        return n, errorf('failed to write()', err), timeout
-    elseif timeout then
-        return n, nil, timeout
+        return nil, errorf('failed to write()', err), timeout
+    elseif not n then
+        return nil, nil, timeout
     end
     return self:flush()
 end
@@ -330,32 +332,9 @@ function Response:write_response(code, res)
     return self:write()
 end
 
---- reply
---- @param code integer
---- @param res table
---- @return integer n
---- @return any err
---- @return boolean timeout
-function Response:reply(code, res)
-    if self.replied then
-        fatalf('cannot send a response message twice')
-    end
-
-    -- save session automatically
-    local _, err = self:save_session()
-    if err then
-        code = 500
-        res = {
-            error = errorf('failed to save_session()', err),
-        }
-    end
-
-    return self:write_response(code, res)
-end
-
 --- file
 --- @param pathname string
---- @return integer n
+--- @return integer? n
 --- @return any err
 --- @return boolean timeout
 function Response:file(pathname)
@@ -372,6 +351,29 @@ function Response:file(pathname)
     -- file response
     self.message:set_status(200)
     return self:write_file(pathname)
+end
+
+--- reply
+--- @param code integer
+--- @param res table
+--- @return integer? n
+--- @return any err
+--- @return boolean? timeout
+function Response:reply(code, res)
+    if self.replied then
+        fatalf('cannot send a response message twice')
+    end
+
+    -- save session automatically
+    local _, err = self:save_session()
+    if err then
+        code = 500
+        res = {
+            error = errorf('failed to save_session()', err),
+        }
+    end
+
+    return self:write_response(code, res)
 end
 
 --- merge

@@ -53,7 +53,7 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     -- execute
     local p, err = execvp(pathname, argv, pwd)
     if err then
-        return false, err
+        return false, errorf('failed to execvp()', err)
     end
 
     -- print stdout

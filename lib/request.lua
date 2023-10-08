@@ -31,6 +31,8 @@ local new_session = require('reflex.session').new
 --- @class reflex.request : net.http.message.request
 --- @field sess reflex.session
 --- @field cookies? table<string, string>
+--- @field params? table
+--- @field route_uri? string
 local Request = {}
 
 --- init
