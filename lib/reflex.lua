@@ -23,6 +23,7 @@ local lower = string.lower
 local format = string.format
 local sub = string.sub
 local traceback = debug.traceback
+local xpcall = require('xpcall')
 local isa = require('isa')
 local is_table = isa.table
 local log = require('reflex.log')
@@ -80,60 +81,8 @@ end
 --- @param req reflex.request
 --- @return boolean keepalive
 function Reflex:serve(res, req)
-    local ok, n, err, timeout = xpcall(function()
-        --- redirect to normalized uri without the trailing slash
-        if req.rawpath ~= req.path then
-            if req.path ~= '/' and sub(req.path, -1) == '/' then
-                req.path = sub(req.path, 1, #req.path - 1)
-            end
-            return res:moved_permanently(req.path)
-        end
-
-        -- get route
-        local route, err, glob = self.router:lookup(req.path)
-        if err then
-            return res:internal_server_error(err)
-        elseif not route then
-            return res:not_found(format('%q not found', req.path))
-        end
-        req.params = glob
-        req.route_uri = route.rpath
-        res.page = route.file
-
-        -- no handler
-        if not next(route.methods) then
-            -- allow only the GET method for request to file
-            if route.file and lower(req.method) == 'get' then
-                return res:ok()
-            end
-            return res:method_not_allowed()
-        end
-
-        -- no handler for request method
-        local mlist = route.methods[lower(req.method)] or route.methods.any
-        if not mlist then
-            return res:method_not_allowed()
-        end
-
-        -- invoke handlers
-        local nmehtod = #mlist
-        for i = 1, nmehtod do
-            local imp = mlist[i]
-            local n, timeout
-
-            n, err, timeout = imp.fn(req, res)
-            if n or err or timeout then
-                if i < nmehtod then
-                    log.debug('method chain stopped at #%d: %s', i, imp.name)
-                end
-                return n, err, timeout
-            end
-        end
-
-        if not res.replied then
-            return res:ok()
-        end
-    end, traceback)
+    local ok, n, err, timeout = xpcall(self.request2response, traceback, self,
+                                       res, req)
 
     if not ok then
         log.error('failed run handlers: ', n)
@@ -160,6 +109,69 @@ function Reflex:serve(res, req)
         return false
     end
     return res.keepalived
+end
+
+--- request2response
+--- run handlers for the request and write response to the client.
+--- @param res reflex.response
+--- @param req reflex.request
+--- @return integer? n
+--- @return any err
+--- @return boolean? timeout
+function Reflex:request2response(res, req)
+    --- redirect to normalized uri without the trailing slash
+    if req.rawpath ~= req.path then
+        if req.path ~= '/' and sub(req.path, -1) == '/' then
+            req.path = sub(req.path, 1, #req.path - 1)
+        end
+        return res:moved_permanently(req.path)
+    end
+
+    -- get route
+    local route, err, glob = self.router:lookup(req.path)
+    if err then
+        return res:internal_server_error(err)
+    elseif not route then
+        return res:not_found(format('%q not found', req.path))
+    end
+    req.params = glob
+    req.route_uri = route.rpath
+    res.page = route.file
+
+    -- no handler
+    if not next(route.methods) then
+        -- allow only the GET method for request to file
+        if route.file and lower(req.method) == 'get' then
+            return res:ok()
+        end
+        return res:method_not_allowed()
+    end
+
+    -- no handler for request method
+    local mlist = route.methods[lower(req.method)] or route.methods.any
+    if not mlist then
+        return res:method_not_allowed()
+    end
+
+    -- invoke handlers
+    local nmehtod = #mlist
+    for i = 1, nmehtod do
+        local imp = mlist[i]
+        local n, timeout
+
+        n, err, timeout = imp.fn(req, res)
+        if n or err or timeout then
+            -- stop method chain if the handler returns a values
+            if i < nmehtod then
+                log.debug('method chain stopped at #%d: %s', i, imp.name)
+            end
+            return n, err, timeout
+        end
+    end
+
+    if not res.replied then
+        return res:ok()
+    end
 end
 
 --- render_page
