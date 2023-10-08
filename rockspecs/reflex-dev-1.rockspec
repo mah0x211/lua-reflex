@@ -48,6 +48,7 @@ dependencies = {
     "string-trim >= 0.2.0",
     "unpack >= 0.1.0",
     "url >= 2.1.0",
+    "xpcall >= 0.2.0",
     "yyjson >= 0.5.0",
 }
 build = {
