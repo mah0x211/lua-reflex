@@ -29,7 +29,7 @@ local get_mime = require('reflex.mime').get
 local code2reason = require('reflex.status').code2reason
 local code2message = require('reflex.status').code2message
 local generate_token = require('reflex.token').generate
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 local encode2json = require('yyjson').encode
 local bake_cookie = require('cookie').bake
 --- constants

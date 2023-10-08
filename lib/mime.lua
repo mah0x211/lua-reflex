@@ -25,7 +25,7 @@ local gsub = string.gsub
 local errorf = require('error').format
 local extname = require('extname')
 local mediatypes = require('mediatypes').new()
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 local magic
 do
     local libmagic = require('libmagic')

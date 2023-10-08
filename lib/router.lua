@@ -28,7 +28,7 @@ local isa = require('isa')
 local is_string = isa.string
 local is_table = isa.table
 local new_fsrouter = require('fsrouter').new
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 
 --- @alias fsrouter userdata
 

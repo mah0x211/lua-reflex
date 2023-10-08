@@ -23,7 +23,7 @@ local sub = string.sub
 local is_string = require('isa').string
 local hmacsha = require('hmac').sha224
 local randstr = require('string.random')
-local fatalf = require('reflex.fatalf')
+local fatalf = require('error').fatalf
 -- constants
 -- N byte = 128 bit / 8 bit
 local MSG_LEN = 128 / 8
