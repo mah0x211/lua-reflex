@@ -81,30 +81,30 @@ end
 --- @param req reflex.request
 --- @return boolean keepalive
 function Reflex:serve(res, req)
-    local ok, n, err, timeout = xpcall(self.request2response, traceback, self,
-                                       res, req)
+    local call_ok, ok, err = xpcall(self.request2response, traceback, self, res,
+                                    req)
 
-    if not ok then
-        log.error('failed run handlers: ', n)
+    if not call_ok then
+        log.error('failed run handlers:', ok)
         if not res.replied then
-            -- luacheck: ignore n
-            n, err = res:internal_server_error()
+            local _
+            _, err = res:internal_server_error()
             if err then
                 log.error('failed to reply error: %s', err)
             end
         end
         return false
     elseif err then
-        log.debug('failed to serve content: %s', req.path, err)
+        log.debug('failed to serve content %q', req.route_uri, err)
         if not res.replied then
-            -- luacheck: ignore n
-            n, err = res:internal_server_error()
+            local _
+            _, err = res:internal_server_error()
             if err then
                 log.error('failed to reply error: %s', err)
             end
         end
         return false
-    elseif timeout then
+    elseif not ok then
         -- connection closed
         return false
     end
@@ -157,15 +157,15 @@ function Reflex:request2response(res, req)
     local nmehtod = #mlist
     for i = 1, nmehtod do
         local imp = mlist[i]
-        local n, timeout
+        local ok, timeout
 
-        n, err, timeout = imp.fn(req, res)
-        if n or err or timeout then
+        ok, err, timeout = imp.fn(req, res)
+        if ok or err or timeout then
             -- stop method chain if the handler returns a values
             if i < nmehtod then
                 log.debug('method chain stopped at #%d: %s', i, imp.name)
             end
-            return n, err, timeout
+            return ok, err, timeout
         end
     end
 

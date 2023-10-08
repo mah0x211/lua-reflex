@@ -116,17 +116,17 @@ function Response:save_session()
 end
 
 --- flush
---- @return integer? n
+--- @return boolean ok
 --- @return any err
 --- @return boolean? timeout
 function Response:flush()
     local n, err, timeout = self.conn:flush()
     if err then
-        return nil, errorf('failed to flush()', err)
+        return false, errorf('failed to flush()', err)
     elseif not n then
-        return nil, nil, timeout
+        return false, nil, timeout
     end
-    return n
+    return true
 end
 
 --- openfile
@@ -153,7 +153,7 @@ end
 
 --- write_file
 --- @param pathname string
---- @return integer n?
+--- @return boolean ok
 --- @return any err
 --- @return boolean? timeout
 function Response:write_file(pathname)
@@ -173,34 +173,34 @@ function Response:write_file(pathname)
     local n, err, timeout = self.message:write_file(self.conn, f)
     f:close()
     if err then
-        return nil, errorf('failed to write_file()', err), timeout
+        return false, errorf('failed to write_file()', err), timeout
     elseif not n then
-        return nil, nil, timeout
+        return false, nil, timeout
     end
     return self:flush()
 end
 
 --- write
 --- @param str? string
---- @return integer? n
+--- @return boolean ok
 --- @return any err
 --- @return boolean? timeout
 function Response:write(str)
     self.replied = true
     local n, err, timeout = self.message:write(self.conn, str)
     if err then
-        return nil, errorf('failed to write()', err), timeout
+        return false, errorf('failed to write()', err), timeout
     elseif not n then
-        return nil, nil, timeout
+        return false, nil, timeout
     end
     return self:flush()
 end
 
 --- write_json
 --- @param res table
---- @return integer n
+--- @return boolean ok
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_json(res)
     self.header:set('Content-Type', 'application/json')
     if not next(res) then
@@ -223,9 +223,9 @@ end
 
 --- write_error
 --- @param res table
---- @return integer n
+--- @return boolean ok
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_error(res)
     if self.as_json then
         return self:write_json(res)
@@ -243,9 +243,9 @@ end
 
 --- write_redirection
 --- @param res table
---- @return integer n
+--- @return boolean ok
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_redirection(res)
     local location = res.location
     if type(location) ~= 'string' or #location == 0 or find(location, '%s') then
@@ -262,9 +262,9 @@ end
 --- write_page
 --- @param res table
 --- @param page table
---- @return integer n
+--- @return boolean ok
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_page(res, page)
     if self.refx:is_template(page.ext) then
         local str, err = self.refx:render_page(page.rpath, res)
@@ -284,9 +284,9 @@ end
 --- write_response
 --- @param code integer
 --- @param res table
---- @return integer n
+--- @return boolean ok
 --- @return any err
---- @return boolean timeout
+--- @return boolean? timeout
 function Response:write_response(code, res)
     local ok, err = self.message:set_status(code)
     if not ok then
@@ -334,7 +334,7 @@ end
 
 --- file
 --- @param pathname string
---- @return integer? n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:file(pathname)
@@ -356,7 +356,7 @@ end
 --- reply
 --- @param code integer
 --- @param res table
---- @return integer? n
+--- @return boolean ok
 --- @return any err
 --- @return boolean? timeout
 function Response:reply(code, res)
@@ -405,7 +405,7 @@ end
 --- @param self reflex.response
 --- @param code integer
 --- @param data table
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 local function response1xx2xx(self, code, data)
@@ -415,8 +415,8 @@ local function response1xx2xx(self, code, data)
 end
 
 --- continue
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:continue(body)
@@ -424,8 +424,8 @@ function Response:continue(body)
 end
 
 --- switching_protocols
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:switching_protocols(body)
@@ -433,8 +433,8 @@ function Response:switching_protocols(body)
 end
 
 --- processing
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:processing(body)
@@ -442,8 +442,8 @@ function Response:processing(body)
 end
 
 --- ok
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:ok(body)
@@ -451,8 +451,8 @@ function Response:ok(body)
 end
 
 --- created
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:created(body)
@@ -460,8 +460,8 @@ function Response:created(body)
 end
 
 --- accepted
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:accepted(body)
@@ -469,8 +469,8 @@ function Response:accepted(body)
 end
 
 --- non_authoritative_information
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:non_authoritative_information(body)
@@ -478,8 +478,7 @@ function Response:non_authoritative_information(body)
 end
 
 --- no_content
---- @param body table
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:no_content(body)
@@ -487,8 +486,8 @@ function Response:no_content(body)
 end
 
 --- reset_content
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:reset_content(body)
@@ -497,7 +496,7 @@ end
 
 --- partial_content
 --- @param body table
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:partial_content(body)
@@ -506,7 +505,7 @@ end
 
 --- multi_status
 --- @param body table
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:multi_status(body)
@@ -514,8 +513,8 @@ function Response:multi_status(body)
 end
 
 --- already_reported
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:already_reported(body)
@@ -523,8 +522,8 @@ function Response:already_reported(body)
 end
 
 --- im_used
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:im_used(body)
@@ -532,8 +531,8 @@ function Response:im_used(body)
 end
 
 --- multiple_choices
---- @param body table
---- @return integer n
+--- @param body table?
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:multiple_choices(body)
@@ -544,7 +543,7 @@ end
 --- @param self reflex.response
 --- @param code integer
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 local function response3xx(self, code, uri)
@@ -560,7 +559,7 @@ end
 
 --- moved_permanently
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:moved_permanently(uri)
@@ -569,7 +568,7 @@ end
 
 --- found
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:found(uri)
@@ -578,7 +577,7 @@ end
 
 --- see_other
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:see_other(uri)
@@ -587,7 +586,7 @@ end
 
 --- not_modified
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:not_modified(uri)
@@ -596,7 +595,7 @@ end
 
 --- use_proxy
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:use_proxy(uri)
@@ -605,7 +604,7 @@ end
 
 --- temporary_redirect
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:temporary_redirect(uri)
@@ -614,7 +613,7 @@ end
 
 --- permanent_redirect
 --- @param uri string
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:permanent_redirect(uri)
@@ -625,7 +624,7 @@ end
 --- @param self reflex.response
 --- @param code integer
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 local function response4xx5xx(self, code, err)
@@ -637,7 +636,7 @@ end
 
 --- bad_request
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:bad_request(err)
@@ -646,7 +645,7 @@ end
 
 --- unauthorized
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:unauthorized(err)
@@ -655,7 +654,7 @@ end
 
 --- payment_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:payment_required(err)
@@ -664,7 +663,7 @@ end
 
 --- forbidden
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:forbidden(err)
@@ -673,7 +672,7 @@ end
 
 --- not_found
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:not_found(err)
@@ -682,7 +681,7 @@ end
 
 --- method_not_allowed
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:method_not_allowed(err)
@@ -691,7 +690,7 @@ end
 
 --- not_acceptable
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:not_acceptable(err)
@@ -700,7 +699,7 @@ end
 
 --- proxy_authentication_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:proxy_authentication_required(err)
@@ -709,7 +708,7 @@ end
 
 --- request_timeout
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:request_timeout(err)
@@ -718,7 +717,7 @@ end
 
 --- conflict
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:conflict(err)
@@ -727,7 +726,7 @@ end
 
 --- gone
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:gone(err)
@@ -736,7 +735,7 @@ end
 
 --- length_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:length_required(err)
@@ -745,7 +744,7 @@ end
 
 --- precondition_failed
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:precondition_failed(err)
@@ -754,7 +753,7 @@ end
 
 --- payload_too_large
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:payload_too_large(err)
@@ -763,7 +762,7 @@ end
 
 --- request_uri_too_long
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:request_uri_too_long(err)
@@ -772,7 +771,7 @@ end
 
 --- unsupported_media_type
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:unsupported_media_type(err)
@@ -781,7 +780,7 @@ end
 
 --- requested_range_not_satisfiable
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:requested_range_not_satisfiable(err)
@@ -790,7 +789,7 @@ end
 
 --- expectation_failed
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:expectation_failed(err)
@@ -799,7 +798,7 @@ end
 
 --- unprocessable_entity
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:unprocessable_entity(err)
@@ -808,7 +807,7 @@ end
 
 --- locked
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:locked(err)
@@ -817,7 +816,7 @@ end
 
 --- failed_dependency
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:failed_dependency(err)
@@ -826,7 +825,7 @@ end
 
 --- upgrade_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:upgrade_required(err)
@@ -835,7 +834,7 @@ end
 
 --- precondition_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:precondition_required(err)
@@ -844,7 +843,7 @@ end
 
 --- too_many_requests
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:too_many_requests(err)
@@ -853,7 +852,7 @@ end
 
 --- request_header_fields_too_large
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:request_header_fields_too_large(err)
@@ -862,7 +861,7 @@ end
 
 --- unavailable_for_legal_reasons
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:unavailable_for_legal_reasons(err)
@@ -871,7 +870,7 @@ end
 
 --- internal_server_error
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:internal_server_error(err)
@@ -880,7 +879,7 @@ end
 
 --- not_implemented
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:not_implemented(err)
@@ -889,7 +888,7 @@ end
 
 --- bad_gateway
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:bad_gateway(err)
@@ -898,7 +897,7 @@ end
 
 --- service_unavailable
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:service_unavailable(err)
@@ -907,7 +906,7 @@ end
 
 --- gateway_timeout
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:gateway_timeout(err)
@@ -916,7 +915,7 @@ end
 
 --- http_version_not_supported
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:http_version_not_supported(err)
@@ -925,7 +924,7 @@ end
 
 --- variant_also_negotiates
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:variant_also_negotiates(err)
@@ -934,7 +933,7 @@ end
 
 --- insufficient_storage
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:insufficient_storage(err)
@@ -943,7 +942,7 @@ end
 
 --- loop_detected
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:loop_detected(err)
@@ -952,7 +951,7 @@ end
 
 --- not_extended
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:not_extended(err)
@@ -961,7 +960,7 @@ end
 
 --- network_authentication_required
 --- @param err any
---- @return integer n
+--- @return boolean ok
 --- @return any err
 --- @return boolean timeout
 function Response:network_authentication_required(err)
