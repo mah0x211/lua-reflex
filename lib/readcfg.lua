@@ -378,7 +378,6 @@ local function readcfg(pathname)
     if debug then
         log.setlevel('debug')
         log.setdebug(true)
-        error.debug(true)
     end
     verify_log(rawcfg.log, debug)
 
