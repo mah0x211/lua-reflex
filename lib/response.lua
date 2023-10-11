@@ -39,8 +39,8 @@ local EISDIR = require('errno').EISDIR
 
 --- @class reflex.response
 --- @field refx reflex
---- @field conn net.http.connection
---- @field as_json boolean
+--- @field protected conn net.http.connection
+--- @field protected as_json boolean
 --- @field degug boolean
 --- @field replied boolean
 --- @field keepalived boolean
@@ -76,6 +76,13 @@ end
 --- @param keepalived boolean?
 function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
+end
+
+--- json enable json response
+--- @return reflex.response
+function Response:json()
+    self.as_json = true
+    return self
 end
 
 --- set_csrf_cookie
