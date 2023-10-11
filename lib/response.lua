@@ -72,12 +72,6 @@ function Response:init(refx, conn, req, as_json, debug)
     return self
 end
 
---- keepalive
---- @param keepalived boolean?
-function Response:keepalive(keepalived)
-    self.keepalived = keepalived == nil or keepalived == true
-end
-
 --- is_keepalive
 --- @return boolean
 function Response:is_keepalive()
