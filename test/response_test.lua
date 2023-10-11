@@ -9,6 +9,25 @@ function testcase.new()
     assert.match(res, '^reflex%.response: ', false)
 end
 
+function testcase.no_keepalive()
+    local res = new_response()
+    assert.is_true(res:is_keepalive())
+    assert.not_contains(res.header:get('Connection', true) or {}, 'close')
+
+    -- test that set no keepalive response
+    res:no_keepalive()
+    assert.is_false(res:is_keepalive())
+    assert.contains(res.header:get('Connection', true), 'close')
+end
+
+function testcase.json()
+    -- test that set enable json response
+    local res = new_response()
+    assert.is_false(res:is_json())
+    assert.equal(res:json(), res)
+    assert.is_true(res:is_json())
+end
+
 function testcase.set_csrf_cookie()
     -- test that set csrf cookie
     local res = new_response()
@@ -18,6 +37,10 @@ function testcase.set_csrf_cookie()
     -- confirm that csrf token is valid
     local token = string.match(cookie, '[^=]=([^;]*);')
     assert.is_true(verify_token('X-CSRF-Token', token))
+
+    -- test that throws an error if httponly argument is not boolean
+    local err = assert.throws(res.set_csrf_cookie, res, 'foo')
+    assert.match(err, 'httponly must be boolean')
 end
 
 function testcase.response1xx2xx()

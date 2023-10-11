@@ -104,7 +104,7 @@ function Response:set_csrf_cookie(httponly)
     if httponly == nil then
         httponly = true
     elseif type(httponly) ~= 'boolean' then
-        fatalf('httponly must be a boolean')
+        fatalf('httponly must be boolean')
     end
 
     local name = 'X-CSRF-Token'
