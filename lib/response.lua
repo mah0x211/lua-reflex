@@ -78,6 +78,12 @@ function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
 end
 
+--- is_keepalive
+--- @return boolean
+function Response:is_keepalive()
+    return self.keepalived
+end
+
 --- no_keepalive disable keepalive response
 function Response:no_keepalive()
     if self.keepalived then
