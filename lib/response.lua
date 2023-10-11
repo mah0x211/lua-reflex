@@ -41,9 +41,9 @@ local EISDIR = require('errno').EISDIR
 --- @field refx reflex
 --- @field protected conn net.http.connection
 --- @field protected as_json boolean
+--- @field protected keepalived boolean
 --- @field degug boolean
 --- @field replied boolean
---- @field keepalived boolean
 --- @field msg net.http.message.response
 --- @field header net.http.header
 --- @field body table
@@ -76,6 +76,14 @@ end
 --- @param keepalived boolean?
 function Response:keepalive(keepalived)
     self.keepalived = keepalived == nil or keepalived == true
+end
+
+--- no_keepalive disable keepalive response
+function Response:no_keepalive()
+    if self.keepalived then
+        self.keepalived = false
+        self.header:add('Connection', 'close')
+    end
 end
 
 --- json enable json response
