@@ -295,12 +295,6 @@ function Response:write_response(code, res)
 
     res.code = code
     res.status = code2reason(code)
-    -- data field must be table
-    if res.data and type(res.data) ~= 'table' then
-        res.data = {
-            res.data,
-        }
-    end
     if self.debug then
         local form = self.req:read_form()
         local sess = self.req:session(true)
@@ -377,14 +371,10 @@ function Response:reply(code, res)
 end
 
 --- merge
---- @param dst any
+--- @param dst table
 --- @param body table
 --- @return table
 local function merge(dst, body)
-    if type(dst) ~= 'table' then
-        dst = {}
-    end
-
     if body ~= nil then
         if type(body) ~= 'table' then
             fatalf('body must be table')
@@ -409,9 +399,12 @@ end
 --- @return any err
 --- @return boolean timeout
 local function response1xx2xx(self, code, data)
-    return self:reply(code, {
-        data = merge(self.body, data),
-    })
+    if self.body == nil then
+        self.body = {}
+    elseif type(self.body) ~= 'table' then
+        fatalf('body must be table')
+    end
+    return self:reply(code, merge(self.body, data))
 end
 
 --- continue
@@ -549,12 +542,14 @@ end
 local function response3xx(self, code, uri)
     if type(uri) ~= 'string' or #uri == 0 or find(uri, '%s') then
         fatalf('uri must be non-empty string with no spaces')
+    elseif self.body == nil then
+        self.body = {}
+    elseif type(self.body) ~= 'table' then
+        fatalf('body must be table')
     end
 
-    return self:reply(code, {
-        location = uri,
-        data = self.body,
-    })
+    self.body.location = uri
+    return self:reply(code, self.body)
 end
 
 --- moved_permanently
@@ -628,10 +623,13 @@ end
 --- @return any err
 --- @return boolean timeout
 local function response4xx5xx(self, code, err)
-    return self:reply(code, {
-        data = self.body,
-        error = err,
-    })
+    if self.body == nil then
+        self.body = {}
+    elseif type(self.body) ~= 'table' then
+        fatalf('body must be table')
+    end
+    self.body.error = err
+    return self:reply(code, self.body)
 end
 
 --- bad_request

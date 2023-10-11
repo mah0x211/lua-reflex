@@ -90,7 +90,6 @@ function testcase.response1xx2xx()
         method(res)
         assert.equal(msg, {
             code = v.code,
-            data = {},
         })
 
         -- test that set body
@@ -99,9 +98,7 @@ function testcase.response1xx2xx()
         })
         assert.equal(msg, {
             code = v.code,
-            data = {
-                foo = 'bar',
-            },
+            foo = 'bar',
         })
         -- test that merge body
         res.body = {
@@ -112,10 +109,8 @@ function testcase.response1xx2xx()
         })
         assert.equal(msg, {
             code = v.code,
-            data = {
-                foo = 'bar',
-                hello = 'world',
-            },
+            foo = 'bar',
+            hello = 'world',
         })
         res.body = nil
 
@@ -169,7 +164,6 @@ function testcase.response3xx()
         assert.equal(msg, {
             code = v.code,
             location = uri,
-            data = {},
         })
 
         -- test that throws an error if uri is not string
@@ -364,9 +358,7 @@ function testcase.response4xx5xx()
         })
         assert.equal(msg, {
             code = v.code,
-            data = {
-                hello = 'world',
-            },
+            hello = 'world',
             error = {
                 foo = 'bar',
             },
