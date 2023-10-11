@@ -41,9 +41,9 @@ local EISDIR = require('errno').EISDIR
 --- @field refx reflex
 --- @field protected conn net.http.connection
 --- @field protected as_json boolean
+--- @field protected keepalived boolean
 --- @field degug boolean
 --- @field replied boolean
---- @field keepalived boolean
 --- @field msg net.http.message.response
 --- @field header net.http.header
 --- @field body table
@@ -72,10 +72,24 @@ function Response:init(refx, conn, req, as_json, debug)
     return self
 end
 
---- keepalive
---- @param keepalived boolean?
-function Response:keepalive(keepalived)
-    self.keepalived = keepalived == nil or keepalived == true
+--- is_keepalive
+--- @return boolean
+function Response:is_keepalive()
+    return self.keepalived
+end
+
+--- no_keepalive disable keepalive response
+function Response:no_keepalive()
+    if self.keepalived then
+        self.keepalived = false
+        self.header:add('Connection', 'close')
+    end
+end
+
+--- is_json
+--- @return boolean
+function Response:is_json()
+    return self.as_json
 end
 
 --- json enable json response
@@ -90,7 +104,7 @@ function Response:set_csrf_cookie(httponly)
     if httponly == nil then
         httponly = true
     elseif type(httponly) ~= 'boolean' then
-        fatalf('httponly must be a boolean')
+        fatalf('httponly must be boolean')
     end
 
     local name = 'X-CSRF-Token'
