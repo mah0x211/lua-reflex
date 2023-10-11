@@ -92,6 +92,12 @@ function Response:no_keepalive()
     end
 end
 
+--- is_json
+--- @return boolean
+function Response:is_json()
+    return self.as_json
+end
+
 --- json enable json response
 --- @return reflex.response
 function Response:json()
