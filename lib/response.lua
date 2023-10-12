@@ -396,19 +396,21 @@ end
 --- @param body table
 --- @return table
 local function merge(dst, body)
-    if body ~= nil then
-        if type(body) ~= 'table' then
-            fatalf('body must be table')
-        end
-        for k, v in pairs(body) do
-            if type(v) == 'table' then
-                dst[k] = merge(dst[k], v)
-            else
-                dst[k] = v
-            end
-        end
+    if body == nil then
+        return dst
+    elseif type(body) ~= 'table' then
+        fatalf('body must be table')
+    elseif type(dst) ~= 'table' then
+        dst = {}
     end
 
+    for k, v in pairs(body) do
+        if type(v) == 'table' then
+            dst[k] = merge(dst[k], v)
+        else
+            dst[k] = v
+        end
+    end
     return dst
 end
 
