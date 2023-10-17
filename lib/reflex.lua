@@ -108,7 +108,8 @@ function Reflex:serve(res, req)
         -- connection closed
         return false
     end
-    return res.keepalived
+
+    return res:is_keepalive()
 end
 
 --- request2response
