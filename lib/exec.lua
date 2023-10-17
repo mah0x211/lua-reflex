@@ -22,9 +22,11 @@
 local concat = table.concat
 local type = type
 local unpack = require('unpack')
+local fileno = require('io.fileno')
 local execvp = require('exec').execvp
 local errorf = require('error').format
 local fatalf = require('error').fatalf
+local poll_wait_readable = require('gpoll').wait_readable
 
 local function noop()
     -- do nothing
@@ -57,19 +59,50 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     end
 
     -- print stdout
+    local outfd = fileno(p.stdout)
+    local errfd = fileno(p.stderr)
     local outlines = {}
-    for line in p.stdout:lines() do
-        stdout(line)
-        if stdout == noop then
-            outlines[#outlines + 1] = line
-        end
-    end
-
-    -- print stderr
     local errlines = {}
-    for line in p.stderr:lines() do
-        stderr(line)
-        errlines[#errlines + 1] = line
+    local fd2file = {
+        [outfd] = {
+            readin = p.stdout,
+            writeout = stdout ~= noop and stdout or function(line)
+                outlines[#outlines + 1] = line
+                stdout(line)
+            end,
+        },
+        [errfd] = {
+            readin = p.stderr,
+            writeout = function(line)
+                errlines[#errlines + 1] = line
+                stderr(line)
+            end,
+        },
+    }
+
+    while true do
+        local fd, _, _, hup = poll_wait_readable(outfd, nil, errfd)
+        if fd then
+            local stdio = fd2file[fd]
+            local line = stdio.readin:read('*l')
+            while line do
+                stdio.writeout(line)
+                line = stdio.readin:read('*l')
+            end
+        end
+
+        if hup then
+            fd2file[fd] = nil
+            if fd == outfd then
+                outfd = nil
+            else
+                errfd = nil
+            end
+
+            if not next(fd2file) then
+                break
+            end
+        end
     end
 
     local res, werr = p:waitpid()

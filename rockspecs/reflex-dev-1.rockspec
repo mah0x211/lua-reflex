@@ -28,6 +28,7 @@ dependencies = {
     "getopts >= 0.1.0",
     "gpoll >= 0.8.0",
     "hmac >= 0.1.0",
+    "io-fileno >= 0.1.0",
     "io-fopen >= 0.1.3",
     "isa >= 0.3.0",
     "kvpairs >= 0.1.0",
