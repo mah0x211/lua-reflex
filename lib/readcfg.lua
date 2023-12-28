@@ -36,7 +36,6 @@ local is_finite = isa.int
 local is_string = isa.string
 local is_table = isa.table
 local setenv = require('setenv')
-local new_tls_config = require('net.tls.config').new
 local loadfile = require('loadchunk').file
 local log = require('reflex.log')
 local session = require('reflex.session')
@@ -216,29 +215,11 @@ local function verify_listen(cfg)
                          'listen.cert_key must be string')
     local pem = checkopt(cfg.cert_pem, is_string, nil,
                          'listen.cert_pem must be string')
-    local dhparams = checkopt(cfg.cert_dhparams, is_string, nil,
-                              'listen.cert_dhparams must be string')
     if key and pem then
-        local tlscfg = new_tls_config()
-        local ok, err = tlscfg:set_keypair_file(pem, key)
-        if not ok then
-            fatalf('failed to set tls keypair files: %s', err)
-        elseif dhparams then
-            local f
-            f, err = fopen(dhparams, 'r')
-            if not f then
-                fatalf('failed to open dhparam file %q: %s', dhparams, err)
-            end
-            local s = f:read('*a')
-            f:close()
-
-            ok, err = tlscfg:set_dheparams(s)
-            if not ok then
-                fatalf('failed to set tls dhparams %q: %s', dhparams, err)
-            end
-        end
-
-        cfg.tlscfg = tlscfg
+        cfg.tlscfg = {
+            cert = pem,
+            key = key,
+        }
     end
 
     return cfg
