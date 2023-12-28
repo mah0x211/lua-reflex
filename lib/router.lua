@@ -61,7 +61,9 @@ function Router:init(rootdir, opts)
             return _G
         end,
     })
-    assert(router, err)
+    if not router then
+        fatalf(2, 'failed to traverse rootdir: %s', err)
+    end
 
     -- build the routing table for print
     local route_list = {}
