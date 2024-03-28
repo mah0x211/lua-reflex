@@ -1,6 +1,10 @@
 name: test
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
 
 jobs:
   luacheck:
@@ -80,7 +84,7 @@ jobs:
         testcase --coverage ./test/
     -
       name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         flags: unittests
 
