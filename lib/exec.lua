@@ -22,11 +22,9 @@
 local concat = table.concat
 local type = type
 local unpack = require('unpack')
-local fileno = require('io.fileno')
 local execvp = require('exec').execvp
 local errorf = require('error').format
 local fatalf = require('error').fatalf
-local poll_wait_readable = require('gpoll').wait_readable
 
 local function noop()
     -- do nothing
@@ -59,53 +57,42 @@ local function exec(pathname, argv, pwd, stdout, stderr)
     end
 
     -- print stdout
-    local outfd = fileno(p.stdout)
-    local errfd = fileno(p.stderr)
+    p.stdout:set_timeout(0)
+    p.stderr:set_timeout(0)
     local outlines = {}
     local errlines = {}
-    local fd2file = {
-        [outfd] = {
-            readin = p.stdout,
-            writeout = stdout ~= noop and stdout or function(line)
+    local std2out = {
+        [p.stdout] = {
+            write = stdout ~= noop and stdout or function(line)
                 outlines[#outlines + 1] = line
                 stdout(line)
             end,
         },
-        [errfd] = {
-            readin = p.stderr,
-            writeout = function(line)
+        [p.stderr] = {
+            write = function(line)
                 errlines[#errlines + 1] = line
                 stderr(line)
             end,
         },
     }
 
-    while true do
-        local fd, _, _, hup = poll_wait_readable(outfd, nil, errfd)
-        if fd then
-            local stdio = fd2file[fd]
-            local line = stdio.readin:read('*l')
+    while next(std2out) do
+        local f, _, _, hup = p:wait_readable()
+        if f then
+            local file = std2out[f]
+            local line = f:read()
             while line do
-                stdio.writeout(line)
-                line = stdio.readin:read('*l')
+                file.write(line)
+                line = f:read()
             end
         end
 
         if hup then
-            fd2file[fd] = nil
-            if fd == outfd then
-                outfd = nil
-            else
-                errfd = nil
-            end
-
-            if not next(fd2file) then
-                break
-            end
+            std2out[f] = nil
         end
     end
 
-    local res, werr = p:waitpid()
+    local res, werr = p:close()
     if werr then
         return false, errorf('failed to waitpid()', werr)
     elseif not res.exit or res.exit ~= 0 then

@@ -8,7 +8,7 @@ function testcase.exec()
     -- test that return true
     local ok, res = exec('lua', {
         '-e',
-        [[io.stdout:write('hello')]],
+        [[io.stdout:write('hello\n')]],
     })
     assert(ok, res)
     assert.match(res, 'hello')
@@ -48,7 +48,7 @@ function testcase.exec_with_stdio()
     -- test that return true
     local ok, res = exec('lua', {
         '-e',
-        [[io.stdout:write('hello'); io.stderr:write('world')]],
+        [[io.stdout:write('hello\n'); io.stderr:write('world\n')]],
     }, nil, function(...)
         outlines[#outlines + 1] = concat({
             ...,
@@ -59,7 +59,7 @@ function testcase.exec_with_stdio()
     assert(ok, res)
     assert.is_nil(res)
     assert.equal(outlines, {
-        [[lua -e io.stdout:write('hello'); io.stderr:write('world')]],
+        [[lua -e io.stdout:write('hello\n'); io.stderr:write('world\n')]],
         'hello',
     })
     assert.equal(errlines, {

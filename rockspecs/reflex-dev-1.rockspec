@@ -13,7 +13,7 @@ dependencies = {
     "lua >= 5.1",
     -- asynchronous runtime
     "act ~> 0.16",
-    "gpoll ~> 0.8",
+    "gpoll ~> 0.9",
     -- compatibility
     "unpack >= 0.1.0",
     "xpcall >= 0.2.0",
@@ -35,8 +35,7 @@ dependencies = {
     -- filesystem
     "basedir >= 0.5.1",
     "exists >= 0.1.0",
-    "exec >= 0.2.3",
-    "io-fileno >= 0.1.0",
+    "exec >= 0.5.1",
     "io-fopen >= 0.1.3",
     "mediatypes >= 2.0.1",
     "libmagic >= 5.41.1",
