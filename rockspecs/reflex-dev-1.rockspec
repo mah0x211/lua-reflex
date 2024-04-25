@@ -65,7 +65,7 @@ dependencies = {
     -- web framework base library
     "context >= 0.2.0",
     "fsrouter >= 0.7.1",
-    "net-http ~> 0.6",
+    "net-http ~> 0.7",
 }
 build = {
     type = "builtin",
