@@ -131,7 +131,9 @@ function Response:save_session()
         self.header:set('Set-Cookie', sess_cookie)
         return true
     elseif err then
-        return false, errorf('failed to save session', err)
+        err = errorf('failed to save session', err)
+        log.error(err)
+        return false, err
     end
     return false
 end

@@ -131,6 +131,7 @@ function Reflex:request2response(res, req)
     -- get route
     local route, err, glob = self.router:lookup(req.path)
     if err then
+        log.error('failed to lookup route: %s', err)
         return res:internal_server_error(err)
     elseif not route then
         return res:not_found(format('%q not found', req.path))
