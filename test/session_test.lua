@@ -121,7 +121,7 @@ function testcase.new()
     assert.match(err, 'cookies must be table')
 end
 
-function testcase.set_get_delete()
+function testcase.set_get_delete_consume()
     local s = assert(session.new())
 
     -- test that set a value to session
@@ -129,6 +129,11 @@ function testcase.set_get_delete()
     s:set('qux', 'quux')
     assert.equal(s:get('foo'), 'bar')
     assert.equal(s:get('qux'), 'quux')
+
+    -- test that consume a session value
+    s:set('hello', 'world')
+    assert.equal(s:consume('hello'), 'world')
+    assert.is_nil(s:get('hello'))
 
     -- test that set a nil to delete key
     s:set('foo')

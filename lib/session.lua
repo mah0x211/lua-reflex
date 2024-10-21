@@ -270,6 +270,23 @@ function Session:get(key)
     return self.value[key]
 end
 
+--- consume
+--- @param key string
+--- @return any val
+function Session:consume(key)
+    if not is_string(key) then
+        fatalf('key must be string')
+    end
+
+    local val = self.value[key]
+    if val then
+        -- delete value after get it
+        self.value[key] = nil
+    end
+
+    return val
+end
+
 --- save
 --- @param attr table?
 --- @return string? cookie
