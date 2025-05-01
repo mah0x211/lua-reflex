@@ -26,9 +26,9 @@ local randstr = require('string.random')
 local fatalf = require('error').fatalf
 -- constants
 -- N byte = 128 bit / 8 bit
-local MSG_LEN = 128 / 8
+local MSG_LEN = math.floor(128 / 8)
 -- N byte = SHA-224(224 bit) / 8 bit * 2(HEX)
-local SHA_LEN = 224 / 8 * 2
+local SHA_LEN = math.floor(224 / 8 * 2)
 -- SHA_LEN + DELIMITER('.') + MSG_LEM
 local TOKEN_LEN = SHA_LEN + 1 + MSG_LEN
 
