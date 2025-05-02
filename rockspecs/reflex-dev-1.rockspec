@@ -37,8 +37,7 @@ dependencies = {
     "exists >= 0.1.0",
     "exec >= 0.5.1",
     "io-fopen >= 0.1.3",
-    "mediatypes >= 2.0.1",
-    "libmagic >= 5.41.1",
+    "mime >= 0.1.0",
     -- OOP library
     "metamodule ~> 0.5",
     -- parser
@@ -84,7 +83,6 @@ build = {
         ["reflex.install"] = "lib/install.lua",
         ["reflex.later"] = "lib/later.lua",
         ["reflex.log"] = "lib/log.lua",
-        ["reflex.mime"] = "lib/mime.lua",
         ["reflex.readcfg"] = "lib/readcfg.lua",
         ["reflex.renderer"] = "lib/renderer.lua",
         ["reflex.request"] = "lib/request.lua",
