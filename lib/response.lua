@@ -25,13 +25,13 @@ local type = type
 local fopen = require('io.fopen')
 local log = require('reflex.log')
 local new_response = require('net.http.message.response').new
-local get_mime = require('reflex.mime').get
 local code2reason = require('reflex.status').code2reason
 local code2message = require('reflex.status').code2message
 local generate_token = require('reflex.token').generate
 local fatalf = require('error').fatalf
 local encode2json = require('yyjson').encode
 local bake_cookie = require('cookie').bake
+local getmime = require('mime').getmime
 --- constants
 local errorf = require('error').format
 local ENOENT = require('errno').ENOENT
@@ -164,11 +164,10 @@ local function openfile(pathname)
         return nil, errorf('failed to fopen()', err)
     end
 
-    local mime
-    mime, err = get_mime(f, pathname)
+    local mime = getmime(pathname, true)
     if not mime then
-        f:close()
-        return nil, errorf('failed to get_mime()', err)
+        -- set 'application/octet-stream' as default if mime is not found
+        mime = 'application/octet-stream'
     end
 
     return f, nil, mime
