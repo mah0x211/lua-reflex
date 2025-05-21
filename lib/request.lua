@@ -27,9 +27,11 @@ local parse_cookie = require('cookie').parse
 local errorf = require('error').format
 local verify_token = require('reflex.token').verify
 local new_session = require('reflex.session').new
+local get_cookie_config = require('reflex.session').get_cookie_config
+local restore_session = require('reflex.session').restore
 
 --- @class reflex.request : net.http.message.request
---- @field sess reflex.session
+--- @field sess session.Session?
 --- @field cookies? table<string, string>
 --- @field params? table
 --- @field route_uri? string
@@ -83,22 +85,36 @@ end
 
 --- session
 --- @param restore_only boolean
---- @return reflex.session? sess
+--- @return session.Session? sess
 --- @return any err
 function Request:session(restore_only)
+    assert(restore_only == nil or type(restore_only) == 'boolean',
+           'restore_only must be boolean')
+
     if self.sess then
         return self.sess
     end
 
     -- start session
     self:parse_cookies()
-    local sess, err = new_session(self.cookies, restore_only)
-    if err then
-        return nil, errorf('failed to new_session()', err)
-    elseif sess then
-        self.sess = sess
+    local sid = self.cookies and self.cookies[get_cookie_config('name')]
+    if sid then
+        local sess, err, timeout = restore_session(sid)
+        if err then
+            return nil, errorf('failed to restore session', err)
+        elseif timeout then
+            return nil, errorf('failed to restore session: request timed out')
+        elseif sess then
+            self.sess = sess
+            return sess
+        end
     end
-    return sess
+
+    if not restore_only then
+        -- create new session
+        self.sess = new_session()
+        return self.sess
+    end
 end
 
 --- save_session if session is nil then return nil without error
@@ -106,9 +122,11 @@ end
 --- @return any err
 function Request:save_session()
     if self.sess then
-        local cookie, err = self.sess:save()
+        local cookie, err, timeout = self.sess:save()
         if err then
             return nil, errorf('failed to save session', err)
+        elseif timeout then
+            return nil, errorf('failed to save session: request timed out')
         end
         return cookie
     end

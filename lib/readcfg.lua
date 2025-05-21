@@ -73,8 +73,14 @@ local function verify_session(cfg)
     cfg.attr.samesite = checkopt(cfg.attr.samesite, is_string,
                                  session.DEFAULT_SAMESITE_ATTR,
                                  'session.attr.httponly must be string')
-    session.set_name(cfg.name)
-    session.set_attr(cfg.attr)
+    session.set_cookie_config({
+        name = cfg.name,
+        path = cfg.attr.path,
+        maxage = cfg.attr.maxage,
+        secure = cfg.attr.secure,
+        httponly = cfg.attr.httponly,
+        samesite = cfg.attr.samesite,
+    })
     return cfg
 end
 
