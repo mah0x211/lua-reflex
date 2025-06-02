@@ -62,6 +62,19 @@ function testcase.set_get_cookie_config()
         samesite = 'lax',
     })
 
+    -- test that get specified attribute
+    for attr, exp in pairs({
+        name = 'sid',
+        domain = 'example.com',
+        maxage = 30,
+        secure = false,
+        httponly = false,
+        path = 'hello/world',
+        samesite = 'lax',
+    }) do
+        assert.equal(session.get_cookie_config(attr), exp)
+    end
+
     -- test that revert to module default attribute
     session.set_cookie_config()
     assert.equal(session.get_cookie_config(), {
