@@ -71,9 +71,10 @@ local function set_cookie_config(cfg)
 end
 
 --- get cookie configuration
+--- @param attr string?
 --- @return table
-local function get_cookie_config()
-    return Manager.cookie:get_config()
+local function get_cookie_config(attr)
+    return Manager.cookie:get_config(attr)
 end
 
 --- @class session.Session
