@@ -48,7 +48,6 @@ dependencies = {
     -- posix
     "signal >= 1.5.0",
     -- random string generator
-    "ossp-uuid >= 1.6.2",
     "string-random >= 0.1.0",
     -- session
     "session >= 1.4.0",
